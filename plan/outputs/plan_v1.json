@@ -1,0 +1,21 @@
+{
+  "project_context": {
+    "codebase_status": "아무것도 준비되지 않았고 네 도움을 받을꺼야.. 리포지토리에는 생성 전이야.",
+    "project_goal": "경기기록/운영 정보를 실시간 입력하고 누적, 조회하는 서비스. 축구판 Strava",
+    "target_users": "축구 경기 기록/운영 정보 입력 및 조회 사용자",
+    "tech_stack": {
+      "frontend": "React",
+      "backend": "Node/Express",
+      "database": "Postgres (가정)"
+    },
+    "deadlines": {
+      "internal_demo": "3주내",
+      "mvp_launch": "내부 데모 2주 뒤"
+    },
+    "team_size": {
+      "mvp_phase": "1명",
+      "post_mvp": "충원 예정"
+    },
+    "today_date": "2025년 9월 21일 일요일"
+  }
+}

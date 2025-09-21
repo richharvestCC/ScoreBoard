@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "supergemini": {
+      "command": "/Users/victor9yun/.nvm/versions/node/v24.8.0/bin/gemini",
+      "args": [
+        "--stdio"
+      ]
+    }
+  }
+}

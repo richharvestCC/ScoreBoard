@@ -1,0 +1,16 @@
+Return EXACTLY one (1) JSON object and NOTHING ELSE.
+
+Input (project context for the model to use):
+- Codebase: 아무것도 준비되지 않았고 네 도움을 받을꺼야.. 리포지토리에는 생성 전이야.
+- Users & problem: 경기기록/운영 정보를 실시간 입력하고 누적, 조회하는 서비스. 축구판 Strava
+- Tech stack: 프론트 React, 백엔드 Node/Express, DB Postgres(가정). 배포는 추후 결정.
+- Deadlines/constraints: 1차 내부 데모를 3주내, MVP 런칭은 그 2주 뒤. 그 이후는 미정
+- Today’s date & team size: <오늘 날짜 기입/예: 2025-09-21>, 팀은 MVP까지는 1명, 이후 충원 예정
+
+---
+Input (project context for the model to use):
+- Codebase: 아무것도 준비되지 않았고 네 도움을 받을꺼야.. 리포지토리에는 생성 전이야.
+- Users & problem: 경기기록/운영 정보를 실시간 입력하고 누적, 조회하는 서비스. 축구판 Strava
+- Tech stack: 프론트 React, 백엔드 Node/Express, DB Postgres(가정). 배포는 추후 결정.
+- Deadlines/constraints: 1차 내부 데모를 3주내, MVP 런칭은 그 2주 뒤. 그 이후는 미정 
+- Today’s date & team size: <오늘 날짜 기입/예: 2025-09-21>, 팀은 MVP까지는 1명, 이후 충원 예정
