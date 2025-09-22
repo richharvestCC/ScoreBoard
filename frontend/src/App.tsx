@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
@@ -22,21 +22,24 @@ import TournamentDetail from './pages/TournamentDetail';
 // Hooks
 import useAuthStore from './stores/authStore';
 
-// Navigation handler component to handle API redirects
-function NavigationHandler() {
-  const navigate = useNavigate();
+// Contexts
+import { NavigationProvider, useNavigation, setGlobalNavigationCallbacks } from './contexts/NavigationContext';
+
+// Navigation setup component to initialize global navigation callbacks
+function NavigationSetup() {
+  const navigation = useNavigation();
 
   useEffect(() => {
-    const handleForceNavigate = (event: CustomEvent) => {
-      navigate(event.detail.path);
-    };
-
-    window.addEventListener('forceNavigate', handleForceNavigate as EventListener);
-
-    return () => {
-      window.removeEventListener('forceNavigate', handleForceNavigate as EventListener);
-    };
-  }, [navigate]);
+    // Set up global navigation callbacks for use in API interceptors and other non-React contexts
+    setGlobalNavigationCallbacks({
+      navigateToAuth: navigation.navigateToAuth,
+      navigateToHome: navigation.navigateToHome,
+      navigateWithReplace: navigation.navigateWithReplace,
+      navigateWithOptions: navigation.navigateWithOptions,
+      navigateBack: navigation.navigateBack,
+      navigateForward: navigation.navigateForward,
+    });
+  }, [navigation]);
 
   return null;
 }
@@ -75,8 +78,9 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <NavigationHandler />
-          <Box sx={{ flexGrow: 1 }}>
+          <NavigationProvider>
+            <NavigationSetup />
+            <Box sx={{ flexGrow: 1 }}>
             <Header />
             <Routes>
               {/* Public routes */}
@@ -156,7 +160,8 @@ function App() {
               {/* Catch-all redirect */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </Box>
+            </Box>
+          </NavigationProvider>
         </Router>
       </ThemeProvider>
     </QueryClientProvider>
