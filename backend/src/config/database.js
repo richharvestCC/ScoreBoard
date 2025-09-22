@@ -21,12 +21,62 @@ const sequelize = new Sequelize({
 
 // Test database connection
 const testConnection = async () => {
+  const { log } = require('./logger');
   try {
     await sequelize.authenticate();
-    console.log('✅ Database connection established successfully');
+    log.info('✅ Database connection established successfully');
   } catch (error) {
-    console.error('❌ Unable to connect to database:', error.message);
+    log.error('❌ Unable to connect to database', {
+      error: error.message,
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME
+    });
+    log.error('Database connection failed. Server cannot start without database.');
+    throw error; // Re-throw to prevent server startup
+  }
+};
+
+// Configuration for Sequelize CLI
+const config = {
+  development: {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || 'scoreboard',
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || '',
+    dialect: 'postgres',
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  },
+  test: {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME_TEST || 'scoreboard_test',
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || '',
+    dialect: 'postgres',
+    logging: false,
+  },
+  production: {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    dialect: 'postgres',
+    logging: false,
+    pool: {
+      max: 10,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
   }
 };
 
 module.exports = { sequelize, testConnection };
+
+// Export for Sequelize CLI
+module.exports[process.env.NODE_ENV || 'development'] = config[process.env.NODE_ENV || 'development'];
+module.exports.development = config.development;
+module.exports.test = config.test;
+module.exports.production = config.production;

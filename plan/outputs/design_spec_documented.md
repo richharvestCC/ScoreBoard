@@ -1,4 +1,14 @@
+<!--
+문서 상태: DEPRECATED (2025-01-22)
+이유: design_specification.md로 통합 및 Gemini 피드백 반영 완료
+
+최신 업데이트된 설계 명세서는 design_specification.md를 참조하세요.
+-->
+
 # 기술 문서: 축구 경기 기록/운영 서비스 설계 명세서
+
+**⚠️ 이 문서는 더 이상 업데이트되지 않습니다.**
+**최신 설계 명세서는 [design_specification.md](./design_specification.md)를 참조하세요.**
 
 ## 1. 시작하며
 

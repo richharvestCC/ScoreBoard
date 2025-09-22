@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -19,6 +20,7 @@ import { useAuth } from '../hooks/useAuth';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const dashboardCards = [
     {
@@ -68,7 +70,7 @@ const Dashboard = () => {
                   boxShadow: 3,
                 },
               }}
-              onClick={() => window.location.href = card.href}
+              onClick={() => navigate(card.href)}
             >
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -98,14 +100,14 @@ const Dashboard = () => {
             <Button
               variant="contained"
               startIcon={<Add />}
-              onClick={() => window.location.href = '/clubs/create'}
+              onClick={() => navigate('/clubs/create')}
             >
               클럽 만들기
             </Button>
             <Button
               variant="outlined"
               startIcon={<Sports />}
-              onClick={() => window.location.href = '/matches/create'}
+              onClick={() => navigate('/matches/create')}
             >
               경기 만들기
             </Button>

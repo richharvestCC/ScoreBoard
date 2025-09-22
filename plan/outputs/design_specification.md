@@ -103,4 +103,166 @@ src/
 └── App.js
 ```
 
+<!--
+기존 내용 주석처리 (2025-01-22)
+이유: Gemini Code Assist 피드백 반영 및 프로덕션 준비성 강화
+
+원본 설계 문서의 핵심 아키텍처와 기능 설계는 유지하되,
+실제 구현 과정에서 발견된 보안 및 품질 이슈를 반영하여 업데이트
+-->
+
 이 문서는 살아있는 문서(Living Document)로, 프로젝트가 진행됨에 따라 지속적으로 업데이트되어야 합니다.
+
+---
+
+## 5. 프로덕션 준비성 개선사항 (Production Readiness - 2025-01-22 추가)
+
+### 5.1. Critical Issues (즉시 수정 필요)
+
+#### 5.1.1. 데이터베이스 연결 에러 처리
+**문제:** 현재 `testConnection()` 함수가 DB 연결 실패 시에도 서버가 계속 실행됨
+```javascript
+// 현재 (문제)
+async function testConnection() {
+  try {
+    await sequelize.authenticate();
+    console.log('Database connected successfully');
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    // 에러를 다시 throw하지 않아 서버가 계속 실행됨
+  }
+}
+```
+
+**해결방안:**
+```javascript
+// 개선 필요
+async function testConnection() {
+  try {
+    await sequelize.authenticate();
+    console.log('Database connected successfully');
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    throw error; // 서버 시작을 중단시켜야 함
+  }
+}
+```
+
+#### 5.1.2. 데이터베이스 동기화 전략
+**문제:** `sequelize.sync({ alter: true })`는 프로덕션에서 데이터 손실 위험
+**해결방안:** Sequelize CLI 마이그레이션 시스템 도입
+```bash
+# 마이그레이션 설정
+npx sequelize-cli init
+npx sequelize-cli migration:generate --name create-users-table
+```
+
+### 5.2. Important Issues (우선순위 높음)
+
+#### 5.2.1. React Navigation 최적화
+**문제:** `window.location.href` 사용으로 인한 페이지 전체 리로드
+```javascript
+// 현재 (비효율적)
+window.location.href = '/dashboard';
+
+// 개선 필요
+const navigate = useNavigate();
+navigate('/dashboard');
+```
+
+#### 5.2.2. 구조화된 로깅 시스템
+**문제:** `console.error` 의존으로 인한 로그 관리 어려움
+**해결방안:** Winston 또는 Pino 도입
+```javascript
+// Winston 설정 예시
+const winston = require('winston');
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' })
+  ]
+});
+```
+
+### 5.3. Enhancement Issues (점진적 개선)
+
+#### 5.3.1. 테스트 커버리지 확장
+**현재 상태:** 기본 placeholder 테스트만 존재
+**개선계획:**
+- React Testing Library 설정
+- 컴포넌트 단위 테스트 작성
+- API 엔드포인트 통합 테스트
+- E2E 테스트 시나리오 구축
+
+#### 5.3.2. TypeScript 엄격 모드
+```json
+// tsconfig.json 개선
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true
+  }
+}
+```
+
+### 5.4. 보안 강화 방안
+
+#### 5.4.1. 환경별 설정 분리
+```env
+# .env.development
+NODE_ENV=development
+LOG_LEVEL=debug
+
+# .env.production
+NODE_ENV=production
+LOG_LEVEL=error
+JWT_SECRET=${STRONG_SECRET_FROM_ENV}
+```
+
+#### 5.4.2. API 에러 바운더리
+```javascript
+// 글로벌 에러 핸들러
+app.use((error, req, res, next) => {
+  logger.error('Unhandled error:', { error: error.message, stack: error.stack });
+  res.status(500).json({ error: 'Internal server error' });
+});
+```
+
+### 5.5. 개선 우선순위 및 일정
+
+**Phase 1 (즉시 - 1주 내):**
+1. 데이터베이스 연결 에러 처리 수정
+2. Sequelize 마이그레이션 시스템 도입
+3. React Navigation 개선
+
+**Phase 2 (1-2주):**
+1. Winston 로깅 시스템 구축
+2. 기본 테스트 suite 설정
+3. TypeScript strict 모드 활성화
+
+**Phase 3 (1개월 내):**
+1. 포괄적인 테스트 커버리지
+2. 성능 모니터링 시스템
+3. CI/CD 파이프라인 구축
+
+---
+
+## 6. 기술 부채 관리 계획 (Technical Debt Management)
+
+### 6.1. 코드 품질 지표
+- **테스트 커버리지:** 최소 80% 목표
+- **TypeScript 엄격성:** strict 모드 활성화
+- **ESLint 규칙:** Airbnb 스타일 가이드 적용
+- **성능 지표:** Core Web Vitals 기준 충족
+
+### 6.2. 정기 리뷰 사이클
+- **주간 코드 리뷰:** 새로운 기능 및 버그 수정
+- **월간 아키텍처 리뷰:** 시스템 설계 및 확장성 점검
+- **분기별 기술 부채 정리:** 누적된 기술 부채 우선순위 정리

@@ -1,4 +1,4 @@
-const { sequelize } = require('../config/database');
+const { sequelize, testConnection } = require('../config/database');
 const User = require('./User');
 const Club = require('./Club');
 const ClubMember = require('./ClubMember');
@@ -26,19 +26,30 @@ MatchEvent.belongsTo(User, { foreignKey: 'player_id', as: 'player' });
 User.hasMany(MatchEvent, { foreignKey: 'created_by', as: 'recordedEvents' });
 MatchEvent.belongsTo(User, { foreignKey: 'created_by', as: 'recorder' });
 
-// Sync database
+// Database operations
 const syncDatabase = async () => {
+  const { log } = require('../config/logger');
   try {
-    await sequelize.sync({ alter: true });
-    console.log('✅ Database synchronized successfully');
+    // In development, we can still use sync for convenience
+    // In production, migrations should be run separately
+    if (process.env.NODE_ENV === 'development') {
+      await sequelize.sync({ alter: true });
+      log.info('✅ Database synchronized successfully (development mode)');
+    } else {
+      // In production, just verify connection and models
+      await sequelize.authenticate();
+      log.info('✅ Database connection verified (production mode)');
+      log.warn('⚠️  Run migrations separately in production: npm run migrate');
+    }
   } catch (error) {
-    console.error('❌ Database synchronization failed:', error.message);
+    log.error('❌ Database operation failed', { error: error.message });
     throw error;
   }
 };
 
 module.exports = {
   sequelize,
+  testConnection,
   User,
   Club,
   ClubMember,

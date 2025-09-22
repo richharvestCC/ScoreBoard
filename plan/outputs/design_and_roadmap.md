@@ -1,4 +1,22 @@
+<!--
+문서 상태: DEPRECATED (2025-01-22)
+이유: 내용이 다음 개별 문서들로 분리되어 더 상세하게 관리됨
+
+최신 정보는 아래 문서들을 참조하세요:
+- 설계 명세서: design_specification.md
+- MVP 로드맵: mvp_roadmap_documented.md
+- 프로젝트 현황: ../README.md
+
+이 문서는 역사적 참조용으로 보존되지만 더 이상 업데이트되지 않습니다.
+-->
+
 # 축구 경기 기록/운영 서비스: 설계 명세서 및 MVP 로드맵
+
+**⚠️ 이 문서는 더 이상 업데이트되지 않습니다.**
+**최신 정보는 다음 문서들을 참조하세요:**
+- **[설계 명세서](./design_specification.md)** - 시스템 아키텍처 및 기능 설계
+- **[MVP 로드맵](./mvp_roadmap_documented.md)** - 개발 계획 및 현재 진행상황
+- **[프로젝트 README](../README.md)** - 전체 프로젝트 개요 및 설치 가이드
 
 ## 1. 설계 명세서 (Design Specification)
 

@@ -12,6 +12,7 @@ dotenv.config();
 // Import modules
 const { testConnection, syncDatabase } = require('./models');
 const routes = require('./routes');
+const { logger, log } = require('./config/logger');
 
 const app = express();
 const server = http.createServer(app);
@@ -61,7 +62,12 @@ app.get('/', (req, res) => {
 
 // Global error handler
 app.use((error, req, res, next) => {
-  console.error('Global error handler:', error);
+  log.error('Global error handler', {
+    message: error.message,
+    stack: error.stack,
+    url: req.originalUrl,
+    method: req.method
+  });
 
   res.status(error.status || 500).json({
     success: false,
@@ -74,22 +80,22 @@ app.use((error, req, res, next) => {
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
-  console.log(`🔌 User connected: ${socket.id}`);
+  log.socket('user_connected', socket.id);
 
   // Join match room
   socket.on('join-match', (matchId) => {
     socket.join(`match-${matchId}`);
-    console.log(`👥 User ${socket.id} joined match ${matchId}`);
+    log.socket('join_match', socket.id, { matchId });
   });
 
   // Leave match room
   socket.on('leave-match', (matchId) => {
     socket.leave(`match-${matchId}`);
-    console.log(`👋 User ${socket.id} left match ${matchId}`);
+    log.socket('leave_match', socket.id, { matchId });
   });
 
   socket.on('disconnect', () => {
-    console.log(`🔌 User disconnected: ${socket.id}`);
+    log.socket('user_disconnected', socket.id);
   });
 });
 
@@ -106,30 +112,30 @@ const startServer = async () => {
 
     // Start server
     server.listen(PORT, () => {
-      console.log(`🚀 ScoreBoard API Server running on port ${PORT}`);
-      console.log(`📍 Server URL: http://localhost:${PORT}`);
-      console.log(`🔗 API Docs: http://localhost:${PORT}/api/v1/health`);
-      console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      log.info(`🚀 ScoreBoard API Server running on port ${PORT}`);
+      log.info(`📍 Server URL: http://localhost:${PORT}`);
+      log.info(`🔗 API Docs: http://localhost:${PORT}/api/v1/health`);
+      log.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error.message);
+    log.error('❌ Failed to start server', { error: error.message, stack: error.stack });
     process.exit(1);
   }
 };
 
 // Handle graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('🛑 SIGTERM received, shutting down gracefully');
+  log.info('🛑 SIGTERM received, shutting down gracefully');
   server.close(() => {
-    console.log('✅ Server closed');
+    log.info('✅ Server closed');
     process.exit(0);
   });
 });
 
 process.on('SIGINT', () => {
-  console.log('🛑 SIGINT received, shutting down gracefully');
+  log.info('🛑 SIGINT received, shutting down gracefully');
   server.close(() => {
-    console.log('✅ Server closed');
+    log.info('✅ Server closed');
     process.exit(0);
   });
 });
