@@ -11,7 +11,7 @@ const xssProtection = {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        styleSrc: ["'self'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https:"],
@@ -76,7 +76,8 @@ const xssProtection = {
       if (buf && buf.length > 0) {
         const bodyStr = buf.toString(encoding || 'utf8');
         // Check for suspicious patterns
-        if (bodyStr.includes('<script') || bodyStr.includes('javascript:') || bodyStr.includes('vbscript:')) {
+        const lowerBodyStr = bodyStr.toLowerCase();
+        if (lowerBodyStr.includes('<script') || lowerBodyStr.includes('javascript:') || lowerBodyStr.includes('vbscript:')) {
           const error = new Error('Suspicious content detected');
           error.status = 400;
           throw error;
@@ -87,8 +88,7 @@ const xssProtection = {
 
   // Headers to prevent XSS and other attacks
   securityHeaders: (req, res, next) => {
-    // Prevent XSS attacks
-    res.setHeader('X-XSS-Protection', '1; mode=block');
+    // Note: X-XSS-Protection header is deprecated and removed for security
 
     // Prevent content type sniffing
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -122,7 +122,7 @@ const xssProtection = {
     const suspiciousHeaders = ['x-forwarded-proto', 'x-real-ip'];
     for (const header of suspiciousHeaders) {
       const value = req.get(header);
-      if (value && (value.includes('<') || value.includes('script'))) {
+      if (value && (value.toLowerCase().includes('<') || value.toLowerCase().includes('script'))) {
         return res.status(400).json({
           success: false,
           message: 'Suspicious header detected'
