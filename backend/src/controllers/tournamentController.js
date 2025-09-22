@@ -1,5 +1,6 @@
 const tournamentService = require('../services/tournamentService');
 const tournamentBracketService = require('../services/tournamentBracketService');
+const { log } = require('../config/logger');
 
 const tournamentController = {
   // Create a new tournament
@@ -16,7 +17,7 @@ const tournamentController = {
         data: tournament
       });
     } catch (error) {
-      console.error('Create tournament error:', error);
+      log.error('Create tournament error:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to create tournament',
@@ -44,7 +45,7 @@ const tournamentController = {
         data: result
       });
     } catch (error) {
-      console.error('Get tournaments error:', error);
+      log.error('Get tournaments error:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournaments',
@@ -73,7 +74,7 @@ const tournamentController = {
         data: tournament
       });
     } catch (error) {
-      console.error('Get tournament error:', error);
+      log.error('Get tournament error:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournament',
@@ -96,7 +97,7 @@ const tournamentController = {
         data: tournament
       });
     } catch (error) {
-      console.error('Update tournament error:', error);
+      log.error('Update tournament error:', error);
       if (error.message === 'Tournament not found') {
         return res.status(404).json({
           success: false,
@@ -130,7 +131,7 @@ const tournamentController = {
         message: 'Tournament deleted successfully'
       });
     } catch (error) {
-      console.error('Delete tournament error:', error);
+      log.error('Delete tournament error:', error);
       if (error.message === 'Tournament not found') {
         return res.status(404).json({
           success: false,
@@ -166,7 +167,7 @@ const tournamentController = {
         data: participation
       });
     } catch (error) {
-      console.error('Join tournament error:', error);
+      log.error('Join tournament error:', error);
       if (error.message === 'Tournament not found') {
         return res.status(404).json({
           success: false,
@@ -200,7 +201,7 @@ const tournamentController = {
         message: 'Successfully left tournament'
       });
     } catch (error) {
-      console.error('Leave tournament error:', error);
+      log.error('Leave tournament error:', error);
       if (error.message === 'Tournament not found' || error.message === 'Not participating in this tournament') {
         return res.status(404).json({
           success: false,
@@ -227,7 +228,7 @@ const tournamentController = {
         data: participants
       });
     } catch (error) {
-      console.error('Get tournament participants error:', error);
+      log.error('Get tournament participants error:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournament participants',
@@ -248,7 +249,7 @@ const tournamentController = {
         data: matches
       });
     } catch (error) {
-      console.error('Get tournament matches error:', error);
+      log.error('Get tournament matches error:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournament matches',
@@ -274,15 +275,21 @@ const tournamentController = {
         }
       });
     } catch (error) {
-      console.error('Generate bracket error:', error);
+      log.error('Generate bracket error:', error);
       if (error.name === 'NotFoundError') {
         return res.status(404).json({
           success: false,
           message: error.message
         });
       }
-      if (error.name === 'ValidationError' || error.name === 'UnauthorizedError') {
+      if (error.name === 'ValidationError') {
         return res.status(400).json({
+          success: false,
+          message: error.message
+        });
+      }
+      if (error.name === 'UnauthorizedError') {
+        return res.status(403).json({
           success: false,
           message: error.message
         });
@@ -307,7 +314,7 @@ const tournamentController = {
         data: bracket
       });
     } catch (error) {
-      console.error('Get bracket error:', error);
+      log.error('Get bracket error:', error);
       if (error.name === 'NotFoundError') {
         return res.status(404).json({
           success: false,
@@ -339,7 +346,7 @@ const tournamentController = {
         }
       });
     } catch (error) {
-      console.error('Update bracket match error:', error);
+      log.error('Update bracket match error:', error);
       if (error.name === 'NotFoundError') {
         return res.status(404).json({
           success: false,

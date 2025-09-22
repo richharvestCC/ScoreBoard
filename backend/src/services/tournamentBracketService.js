@@ -1,6 +1,7 @@
 const { Tournament, TournamentBracket, TournamentParticipant, Match, sequelize } = require('../models');
 const { Op } = require('sequelize');
-const { NotFoundError, ValidationError } = require('../utils/errors');
+const { NotFoundError, ValidationError, UnauthorizedError } = require('../utils/errors');
+const { log } = require('../config/logger');
 
 class TournamentBracketService {
   // Generate knockout bracket for tournament
@@ -26,7 +27,7 @@ class TournamentBracketService {
 
       // Check if user is admin
       if (tournament.admin_user_id !== userId) {
-        throw new ValidationError('Only tournament admin can generate bracket');
+        throw new UnauthorizedError('Only tournament admin can generate bracket');
       }
 
       // Check if bracket already exists
@@ -62,6 +63,8 @@ class TournamentBracketService {
       // Generate bracket matches
       const brackets = [];
       const matches = [];
+      const matchMap = new Map(); // For O(1) lookup performance
+      const byeWinners = []; // Track participants who advance via bye
 
       // Create first round matches
       const firstRoundMatches = Math.floor(participantCount / 2);
@@ -71,9 +74,24 @@ class TournamentBracketService {
         const homeIndex = i;
         const awayIndex = totalSlots - 1 - i;
 
-        // Check if this is a bye match
-        if (homeIndex >= participantCount || awayIndex >= participantCount) {
-          continue; // Skip bye matches for now
+        // Handle bye matches - participant advances automatically
+        if (homeIndex < participantCount && awayIndex >= participantCount) {
+          // Home participant gets a bye
+          byeWinners.push({
+            participant: participants[homeIndex],
+            advancesToPosition: Math.floor(i / 2)
+          });
+          continue;
+        } else if (awayIndex < participantCount && homeIndex >= participantCount) {
+          // Away participant gets a bye
+          byeWinners.push({
+            participant: participants[awayIndex],
+            advancesToPosition: Math.floor(i / 2)
+          });
+          continue;
+        } else if (homeIndex >= participantCount || awayIndex >= participantCount) {
+          // Both positions empty, skip
+          continue;
         }
 
         const homeParticipant = participants[homeIndex];
@@ -93,6 +111,7 @@ class TournamentBracketService {
         }, { transaction });
 
         matches.push(match);
+        matchMap.set(match.id, match);
 
         // Create bracket entry
         brackets.push({
@@ -137,11 +156,13 @@ class TournamentBracketService {
           });
 
           // Update previous round matches to point to this match
+          // Using index calculation for bracket position determination
           if (previousRoundMatches.length > i * 2) {
             const match1Index = i * 2;
             const match2Index = i * 2 + 1;
 
             if (match1Index < brackets.length) {
+              // Find bracket by position for better performance
               const bracket1 = brackets.find(b => b.match_id === previousRoundMatches[match1Index].id);
               if (bracket1) bracket1.next_match_id = match.id;
             }
@@ -151,6 +172,19 @@ class TournamentBracketService {
               if (bracket2) bracket2.next_match_id = match.id;
             }
           }
+
+          // Handle bye winners advancing to this round
+          byeWinners.forEach(bye => {
+            if (bye.advancesToPosition === i) {
+              // Determine if bye winner goes to home or away side
+              const isHomeSide = i % 2 === 0;
+              if (isHomeSide && !match.home_club_id) {
+                match.home_club_id = bye.participant.participant_type === 'club' ? bye.participant.participant_id : null;
+              } else if (!isHomeSide && !match.away_club_id) {
+                match.away_club_id = bye.participant.participant_type === 'club' ? bye.participant.participant_id : null;
+              }
+            }
+          });
         }
 
         previousRoundMatches = roundMatches;
@@ -192,6 +226,7 @@ class TournamentBracketService {
       };
     } catch (error) {
       await transaction.rollback();
+      log.error('Failed to generate tournament bracket', { tournamentId, error: error.message });
       throw error;
     }
   }
@@ -359,6 +394,7 @@ class TournamentBracketService {
       };
     } catch (error) {
       await transaction.rollback();
+      log.error('Failed to update bracket match', { matchId, error: error.message });
       throw error;
     }
   }

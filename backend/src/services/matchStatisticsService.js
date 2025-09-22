@@ -1,6 +1,12 @@
 const { Match, MatchStatistics, MatchEvent, Club, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { NotFoundError, ValidationError, UnauthorizedError } = require('../utils/errors');
+const { log } = require('../config/logger');
+
+// Constants for default values
+const DEFAULT_POSSESSION_PERCENTAGE = 50;
+const DEFAULT_PASS_ACCURACY = 0;
+const DEFAULT_STATS_VALUE = 0;
 
 class MatchStatisticsService {
   // Create or update match statistics
@@ -68,28 +74,28 @@ class MatchStatisticsService {
       // Return empty statistics if none exist
       return {
         match_id: matchId,
-        home_possession: 50,
-        away_possession: 50,
-        home_shots: 0,
-        away_shots: 0,
-        home_shots_on_target: 0,
-        away_shots_on_target: 0,
-        home_passes: 0,
-        away_passes: 0,
-        home_pass_accuracy: 0,
-        away_pass_accuracy: 0,
-        home_fouls: 0,
-        away_fouls: 0,
-        home_yellow_cards: 0,
-        away_yellow_cards: 0,
-        home_red_cards: 0,
-        away_red_cards: 0,
-        home_corners: 0,
-        away_corners: 0,
-        home_offsides: 0,
-        away_offsides: 0,
-        home_saves: 0,
-        away_saves: 0,
+        home_possession: DEFAULT_POSSESSION_PERCENTAGE,
+        away_possession: DEFAULT_POSSESSION_PERCENTAGE,
+        home_shots: DEFAULT_STATS_VALUE,
+        away_shots: DEFAULT_STATS_VALUE,
+        home_shots_on_target: DEFAULT_STATS_VALUE,
+        away_shots_on_target: DEFAULT_STATS_VALUE,
+        home_passes: DEFAULT_STATS_VALUE,
+        away_passes: DEFAULT_STATS_VALUE,
+        home_pass_accuracy: DEFAULT_PASS_ACCURACY,
+        away_pass_accuracy: DEFAULT_PASS_ACCURACY,
+        home_fouls: DEFAULT_STATS_VALUE,
+        away_fouls: DEFAULT_STATS_VALUE,
+        home_yellow_cards: DEFAULT_STATS_VALUE,
+        away_yellow_cards: DEFAULT_STATS_VALUE,
+        home_red_cards: DEFAULT_STATS_VALUE,
+        away_red_cards: DEFAULT_STATS_VALUE,
+        home_corners: DEFAULT_STATS_VALUE,
+        away_corners: DEFAULT_STATS_VALUE,
+        home_offsides: DEFAULT_STATS_VALUE,
+        away_offsides: DEFAULT_STATS_VALUE,
+        home_saves: DEFAULT_STATS_VALUE,
+        away_saves: DEFAULT_STATS_VALUE,
         notes: null
       };
     }
@@ -260,10 +266,10 @@ class MatchStatisticsService {
         aggregatedStats.averages.away_shots += stat.away_shots || 0;
         aggregatedStats.averages.home_shots_on_target += stat.home_shots_on_target || 0;
         aggregatedStats.averages.away_shots_on_target += stat.away_shots_on_target || 0;
-        aggregatedStats.averages.home_possession += stat.home_possession || 50;
-        aggregatedStats.averages.away_possession += stat.away_possession || 50;
-        aggregatedStats.averages.home_pass_accuracy += parseFloat(stat.home_pass_accuracy) || 0;
-        aggregatedStats.averages.away_pass_accuracy += parseFloat(stat.away_pass_accuracy) || 0;
+        aggregatedStats.averages.home_possession += stat.home_possession || DEFAULT_POSSESSION_PERCENTAGE;
+        aggregatedStats.averages.away_possession += stat.away_possession || DEFAULT_POSSESSION_PERCENTAGE;
+        aggregatedStats.averages.home_pass_accuracy += stat.home_pass_accuracy || DEFAULT_PASS_ACCURACY;
+        aggregatedStats.averages.away_pass_accuracy += stat.away_pass_accuracy || DEFAULT_PASS_ACCURACY;
         aggregatedStats.averages.home_fouls += stat.home_fouls || 0;
         aggregatedStats.averages.away_fouls += stat.away_fouls || 0;
         aggregatedStats.averages.home_corners += stat.home_corners || 0;
@@ -302,30 +308,23 @@ class MatchStatisticsService {
         status: 'completed'
       },
       order: [['match_date', 'DESC']],
-      limit: parseInt(limit)
+      limit: parseInt(limit),
+      include: [
+        {
+          model: MatchStatistics,
+          as: 'statistics',
+          required: false // Include matches even without statistics
+        }
+      ]
     });
 
-    const matchIds = matches.map(m => m.id);
-
-    if (matchIds.length === 0) {
+    if (matches.length === 0) {
       return {
         club_id: clubId,
         total_matches: 0,
         statistics: null
       };
     }
-
-    const statistics = await MatchStatistics.findAll({
-      where: {
-        match_id: matchIds
-      },
-      include: [
-        {
-          model: Match,
-          as: 'match'
-        }
-      ]
-    });
 
     // Calculate team-specific statistics
     const teamStats = {
@@ -345,8 +344,9 @@ class MatchStatisticsService {
 
     let possessionCount = 0;
 
-    statistics.forEach(stat => {
-      const match = stat.match;
+    // Iterate through matches instead of statistics for consistent calculation
+    matches.forEach(match => {
+      const stat = match.statistics;
       const isHome = match.home_club_id === clubId;
 
       // Win/Draw/Loss calculation
@@ -358,16 +358,18 @@ class MatchStatisticsService {
         else if (match.home_score === match.away_score) teamStats.draws++;
         else teamStats.losses++;
 
-        // Statistics
-        teamStats.total_shots += stat.home_shots || 0;
-        teamStats.total_shots_on_target += stat.home_shots_on_target || 0;
-        teamStats.total_fouls += stat.home_fouls || 0;
-        teamStats.total_yellow_cards += stat.home_yellow_cards || 0;
-        teamStats.total_red_cards += stat.home_red_cards || 0;
+        // Statistics (only if stats exist)
+        if (stat) {
+          teamStats.total_shots += stat.home_shots || DEFAULT_STATS_VALUE;
+          teamStats.total_shots_on_target += stat.home_shots_on_target || DEFAULT_STATS_VALUE;
+          teamStats.total_fouls += stat.home_fouls || DEFAULT_STATS_VALUE;
+          teamStats.total_yellow_cards += stat.home_yellow_cards || DEFAULT_STATS_VALUE;
+          teamStats.total_red_cards += stat.home_red_cards || DEFAULT_STATS_VALUE;
 
-        if (stat.home_possession) {
-          teamStats.average_possession += stat.home_possession;
-          possessionCount++;
+          if (stat.home_possession) {
+            teamStats.average_possession += stat.home_possession;
+            possessionCount++;
+          }
         }
       } else {
         teamStats.goals_for += match.away_score || 0;
@@ -377,16 +379,18 @@ class MatchStatisticsService {
         else if (match.away_score === match.home_score) teamStats.draws++;
         else teamStats.losses++;
 
-        // Statistics
-        teamStats.total_shots += stat.away_shots || 0;
-        teamStats.total_shots_on_target += stat.away_shots_on_target || 0;
-        teamStats.total_fouls += stat.away_fouls || 0;
-        teamStats.total_yellow_cards += stat.away_yellow_cards || 0;
-        teamStats.total_red_cards += stat.away_red_cards || 0;
+        // Statistics (only if stats exist)
+        if (stat) {
+          teamStats.total_shots += stat.away_shots || DEFAULT_STATS_VALUE;
+          teamStats.total_shots_on_target += stat.away_shots_on_target || DEFAULT_STATS_VALUE;
+          teamStats.total_fouls += stat.away_fouls || DEFAULT_STATS_VALUE;
+          teamStats.total_yellow_cards += stat.away_yellow_cards || DEFAULT_STATS_VALUE;
+          teamStats.total_red_cards += stat.away_red_cards || DEFAULT_STATS_VALUE;
 
-        if (stat.away_possession) {
-          teamStats.average_possession += stat.away_possession;
-          possessionCount++;
+          if (stat.away_possession) {
+            teamStats.average_possession += stat.away_possession;
+            possessionCount++;
+          }
         }
       }
     });
