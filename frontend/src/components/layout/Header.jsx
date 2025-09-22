@@ -10,11 +10,13 @@ import {
   MenuItem,
   IconButton,
 } from '@mui/material';
-import { AccountCircle, Sports, ExitToApp } from '@mui/icons-material';
+import { AccountCircle, Sports, ExitToApp, Groups } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenu = (event) => {
@@ -40,6 +42,15 @@ const Header = () => {
 
         {isAuthenticated ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Button
+              color="inherit"
+              startIcon={<Groups />}
+              onClick={() => navigate('/clubs')}
+              sx={{ mr: 2 }}
+            >
+              클럽
+            </Button>
+
             <Typography variant="body1" sx={{ mr: 2 }}>
               안녕하세요, {user?.name || user?.user_id}님!
             </Typography>

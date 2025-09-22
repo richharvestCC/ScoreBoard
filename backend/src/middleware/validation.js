@@ -38,11 +38,47 @@ const loginSchema = Joi.object({
 // Club validation schemas
 const createClubSchema = Joi.object({
   name: Joi.string().min(1).max(100).required(),
+  club_type: Joi.string().valid('general', 'pro', 'youth', 'national').optional().default('general'),
   description: Joi.string().optional(),
-  founded_date: Joi.date().iso().optional(),
-  location: Joi.string().max(255).optional(),
+  location: Joi.string().min(1).max(200).optional(),
+  founded_year: Joi.number().integer().min(1800).max(new Date().getFullYear()).optional(),
+  logo_url: Joi.string().uri().optional(),
   contact_email: Joi.string().email().optional(),
-  contact_phone: Joi.string().max(20).optional()
+  contact_phone: Joi.string().pattern(/^[\+]?[0-9\-\s]+$/).optional()
+});
+
+const updateClubSchema = Joi.object({
+  name: Joi.string().min(1).max(100).optional(),
+  club_type: Joi.string().valid('general', 'pro', 'youth', 'national').optional(),
+  description: Joi.string().optional(),
+  location: Joi.string().min(1).max(200).optional(),
+  founded_year: Joi.number().integer().min(1800).max(new Date().getFullYear()).optional(),
+  logo_url: Joi.string().uri().optional(),
+  contact_email: Joi.string().email().optional(),
+  contact_phone: Joi.string().pattern(/^[\+]?[0-9\-\s]+$/).optional()
+});
+
+const joinClubSchema = Joi.object({
+  role: Joi.string().valid('admin', 'player', 'coach', 'staff').optional(),
+  jersey_number: Joi.number().integer().min(1).max(99).optional(),
+  position: Joi.string().valid(
+    'goalkeeper', 'defender', 'midfielder', 'forward',
+    'center_back', 'left_back', 'right_back', 'defensive_midfielder',
+    'central_midfielder', 'attacking_midfielder', 'left_winger',
+    'right_winger', 'striker', 'center_forward'
+  ).optional()
+});
+
+const updateMemberSchema = Joi.object({
+  role: Joi.string().valid('admin', 'player', 'coach', 'staff').optional(),
+  jersey_number: Joi.number().integer().min(1).max(99).optional(),
+  position: Joi.string().valid(
+    'goalkeeper', 'defender', 'midfielder', 'forward',
+    'center_back', 'left_back', 'right_back', 'defensive_midfielder',
+    'central_midfielder', 'attacking_midfielder', 'left_winger',
+    'right_winger', 'striker', 'center_forward'
+  ).optional(),
+  status: Joi.string().valid('active', 'inactive', 'suspended', 'injured').optional()
 });
 
 // Match validation schemas
@@ -75,9 +111,28 @@ const createMatchEventSchema = Joi.object({
 
 module.exports = {
   validate,
+
+  // Auth validation functions
+  validateRegister: validate(registerSchema),
+  validateLogin: validate(loginSchema),
+
+  // Club validation functions
+  validateClubCreation: validate(createClubSchema),
+  validateClubUpdate: validate(updateClubSchema),
+  validateClubJoin: validate(joinClubSchema),
+  validateMemberUpdate: validate(updateMemberSchema),
+
+  // Match validation functions
+  validateMatchCreation: validate(createMatchSchema),
+  validateMatchEventCreation: validate(createMatchEventSchema),
+
+  // Export schemas for direct use
   registerSchema,
   loginSchema,
   createClubSchema,
+  updateClubSchema,
+  joinClubSchema,
+  updateMemberSchema,
   createMatchSchema,
   createMatchEventSchema
 };
