@@ -44,6 +44,7 @@ import {
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clubAPI } from '../services/api';
+import { getClubTypeLabel } from '../constants/clubTypes';
 
 const ClubDetail = () => {
   const { id } = useParams();
@@ -165,12 +166,6 @@ const ClubDetail = () => {
     staff: '스태프'
   };
 
-  const clubTypeLabels = {
-    general: '일반',
-    pro: '프로',
-    youth: '유스',
-    national: '국가대표'
-  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -189,7 +184,7 @@ const ClubDetail = () => {
               </Typography>
               <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
                 <Chip
-                  label={clubTypeLabels[club.club_type]}
+                  label={getClubTypeLabel(club.club_type)}
                   color="primary"
                   variant="outlined"
                 />

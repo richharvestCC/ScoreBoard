@@ -27,6 +27,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { clubAPI } from '../services/api';
 import CreateClubDialog from '../components/clubs/CreateClubDialog';
+import { getClubTypeLabel, getClubTypeColor } from '../constants/clubTypes';
 
 const ClubList = () => {
   const navigate = useNavigate();
@@ -174,18 +175,9 @@ const ClubList = () => {
                   <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
                     {club.club_type && (
                       <Chip
-                        label={
-                          club.club_type === 'general' ? '일반' :
-                          club.club_type === 'pro' ? '프로' :
-                          club.club_type === 'youth' ? '유스' :
-                          club.club_type === 'national' ? '국가대표' : club.club_type
-                        }
+                        label={getClubTypeLabel(club.club_type)}
                         size="small"
-                        color={
-                          club.club_type === 'pro' ? 'primary' :
-                          club.club_type === 'national' ? 'secondary' :
-                          club.club_type === 'youth' ? 'success' : 'default'
-                        }
+                        color={getClubTypeColor(club.club_type)}
                       />
                     )}
                     {club.location && (
