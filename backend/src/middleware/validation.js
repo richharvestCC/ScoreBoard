@@ -87,7 +87,7 @@ const createMatchSchema = Joi.object({
   away_club_id: Joi.string().uuid().required(),
   match_date: Joi.date().iso().required(),
   venue: Joi.string().max(255).optional(),
-  match_type: Joi.string().valid('FRIENDLY', 'LEAGUE', 'TOURNAMENT', 'TRAINING').optional(),
+  match_type: Joi.string().valid('practice', 'casual', 'friendly', 'tournament', 'a_friendly', 'a_tournament').optional().default('casual'),
   duration_minutes: Joi.number().integer().min(1).max(200).optional(),
   referee_name: Joi.string().max(100).optional(),
   weather: Joi.string().max(100).optional(),

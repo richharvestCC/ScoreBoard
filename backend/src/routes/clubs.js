@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const clubController = require('../controllers/clubController');
 const { authenticateToken } = require('../middleware/auth');
-const { validateClubCreation, validateClubUpdate, validateMemberUpdate } = require('../middleware/validation');
+const { validateClubCreation, validateClubUpdate, validateClubJoin, validateMemberUpdate } = require('../middleware/validation');
 
 // All club routes require authentication
 router.use(authenticateToken);
@@ -15,7 +15,7 @@ router.put('/:id', validateClubUpdate, clubController.updateClub);
 router.delete('/:id', clubController.deleteClub);
 
 // Club membership operations
-router.post('/:id/join', clubController.joinClub);
+router.post('/:id/join', validateClubJoin, clubController.joinClub);
 router.post('/:id/leave', clubController.leaveClub);
 router.get('/:id/members', clubController.getClubMembers);
 

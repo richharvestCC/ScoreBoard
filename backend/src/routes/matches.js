@@ -1,11 +1,11 @@
 const express = require('express');
 const matchController = require('../controllers/matchController');
-const { auth } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 const { validateMatchCreation, validateMatchEventCreation } = require('../middleware/validation');
 
 const router = express.Router();
 
-router.use(auth);
+router.use(authenticateToken);
 
 router.post('/', validateMatchCreation, matchController.createMatch);
 router.get('/', matchController.getAllMatches);
