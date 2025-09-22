@@ -54,7 +54,18 @@ db.testConnection = async () => {
 
 db.syncDatabase = async () => {
   try {
-    await sequelize.sync({ alter: true });
+    // Only use sync in development environment
+    // Production should use migrations
+    const env = process.env.NODE_ENV || 'development';
+
+    if (env === 'production') {
+      console.log('⚠️ In production mode - skipping automatic sync. Please use migrations.');
+      return true;
+    }
+
+    // In development, use alter: false to prevent automatic schema changes
+    // Use migrations for schema changes even in development
+    await sequelize.sync({ alter: false });
     console.log('✅ Database synchronized successfully.');
     return true;
   } catch (error) {

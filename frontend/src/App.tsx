@@ -15,6 +15,7 @@ import ClubList from './pages/ClubList';
 import ClubDetail from './pages/ClubDetail';
 import MatchList from './pages/MatchList';
 import MatchDetail from './pages/MatchDetail';
+import LiveScoring from './pages/LiveScoring';
 import TournamentList from './pages/TournamentList';
 import TournamentDetail from './pages/TournamentDetail';
 
@@ -124,6 +125,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <MatchDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/matches/:id/live"
+                element={
+                  <ProtectedRoute>
+                    <LiveScoring />
                   </ProtectedRoute>
                 }
               />

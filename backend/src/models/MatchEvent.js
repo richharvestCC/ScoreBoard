@@ -103,26 +103,21 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     indexes: [
       {
-        fields: ['match_id']
+        // Unique constraint to prevent duplicate sequence numbers per match
+        unique: true,
+        fields: ['match_id', 'sequence_number']
       },
       {
-        fields: ['event_type']
+        // Composite index for common queries
+        fields: ['match_id', 'event_type']
       },
       {
+        // Index for player queries
         fields: ['player_id']
       },
       {
-        fields: ['minute']
-      },
-      {
-        fields: ['sequence_number']
-      },
-      {
-        fields: ['recorded_by']
-      },
-      {
-        unique: false,
-        fields: ['match_id', 'sequence_number']
+        // Index for time-based queries
+        fields: ['match_id', 'minute']
       }
     ]
   });

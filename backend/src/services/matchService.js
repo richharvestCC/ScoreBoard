@@ -1,4 +1,4 @@
-const { Match, MatchEvent, Club, User, Tournament, ClubMember } = require('../models');
+const { Match, MatchEvent, Club, User, Tournament, ClubMember, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { log } = require('../config/logger');
 
@@ -11,6 +11,11 @@ const matchService = {
 
       if (!homeClub || !awayClub) {
         throw new Error('One or both clubs not found');
+      }
+
+      // Validate home and away clubs are different
+      if (matchData.home_club_id === matchData.away_club_id) {
+        throw new Error('Home and away clubs must be different');
       }
 
       // Check if user is member of at least one club
@@ -95,6 +100,9 @@ const matchService = {
         }
       ];
 
+      // Store club filter separately to combine with permission filter
+      let clubFilter = null;
+
       // Apply filters
       if (filters.status) {
         whereClause.status = filters.status;
@@ -103,7 +111,7 @@ const matchService = {
         whereClause.match_type = filters.match_type;
       }
       if (filters.club_id) {
-        whereClause[Op.or] = [
+        clubFilter = [
           { home_club_id: filters.club_id },
           { away_club_id: filters.club_id }
         ];
@@ -124,16 +132,23 @@ const matchService = {
       });
       const userClubIds = userClubs.map(membership => membership.club_id);
 
-      // Only show matches where user is member of one of the clubs
-      if (userClubIds.length > 0) {
-        whereClause[Op.or] = [
-          { home_club_id: { [Op.in]: userClubIds } },
-          { away_club_id: { [Op.in]: userClubIds } },
-          { created_by: userId }
+      // Combine permission filter with club filter
+      const permissionFilter = userClubIds.length > 0
+        ? [
+            { home_club_id: { [Op.in]: userClubIds } },
+            { away_club_id: { [Op.in]: userClubIds } },
+            { created_by: userId }
+          ]
+        : [{ created_by: userId }];
+
+      // If both filters exist, combine them with AND logic
+      if (clubFilter) {
+        whereClause[Op.and] = [
+          { [Op.or]: permissionFilter },
+          { [Op.or]: clubFilter }
         ];
       } else {
-        // If user has no club memberships, only show matches they created
-        whereClause.created_by = userId;
+        whereClause[Op.or] = permissionFilter;
       }
 
       const { count, rows } = await Match.findAndCountAll({
@@ -309,10 +324,13 @@ const matchService = {
   },
 
   async addMatchEvent(matchId, eventData, userId) {
+    const transaction = await sequelize.transaction();
+
     try {
-      const match = await Match.findByPk(matchId);
+      const match = await Match.findByPk(matchId, { transaction, lock: true });
 
       if (!match) {
+        await transaction.rollback();
         throw new Error('Match not found');
       }
 
@@ -323,17 +341,21 @@ const matchService = {
           club_id: {
             [Op.in]: [match.home_club_id, match.away_club_id]
           }
-        }
+        },
+        transaction
       });
 
       if (!membershipCheck && match.created_by !== userId) {
+        await transaction.rollback();
         throw new Error('You do not have permission to add events to this match');
       }
 
-      // Get next sequence number
+      // Get next sequence number with lock to prevent race condition
       const lastEvent = await MatchEvent.findOne({
         where: { match_id: matchId },
-        order: [['sequence_number', 'DESC']]
+        order: [['sequence_number', 'DESC']],
+        transaction,
+        lock: true
       });
 
       const sequenceNumber = lastEvent ? lastEvent.sequence_number + 1 : 1;
@@ -344,7 +366,7 @@ const matchService = {
         ...eventData,
         sequence_number: sequenceNumber,
         recorded_by: userId
-      });
+      }, { transaction });
 
       // Update match score if event is a goal
       if (eventData.event_type === 'GOAL') {
@@ -354,8 +376,10 @@ const matchService = {
         } else if (eventData.team_side === 'away') {
           scoreUpdate.away_score = match.away_score + 1;
         }
-        await match.update(scoreUpdate);
+        await match.update(scoreUpdate, { transaction });
       }
+
+      await transaction.commit();
 
       // Return event with associations
       return await MatchEvent.findByPk(event.id, {
@@ -380,6 +404,7 @@ const matchService = {
         ]
       });
     } catch (error) {
+      if (transaction) await transaction.rollback();
       if (error.name === 'SequelizeValidationError') {
         throw new Error(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
       }

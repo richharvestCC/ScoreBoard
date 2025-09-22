@@ -312,6 +312,16 @@ const MatchDetail = () => {
                     경기 종료
                   </Button>
                 )}
+                {(match.status === 'scheduled' || match.status === 'in_progress') && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<PlayIcon />}
+                    onClick={() => navigate(`/matches/${id}/live`)}
+                  >
+                    라이브 스코어링
+                  </Button>
+                )}
                 <Button
                   variant="outlined"
                   startIcon={<EditIcon />}
