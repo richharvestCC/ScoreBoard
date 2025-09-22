@@ -1,4 +1,5 @@
 const AuthService = require('../services/authService');
+const { log } = require('../config/logger');
 
 class AuthController {
   static async register(req, res) {
@@ -11,7 +12,7 @@ class AuthController {
         data: result
       });
     } catch (error) {
-      console.error('Register error:', error);
+      log.error('Register error:', { error: error.message, stack: error.stack });
 
       // Handle specific errors
       if (error.message.includes('already exists')) {
@@ -50,7 +51,7 @@ class AuthController {
         data: result
       });
     } catch (error) {
-      console.error('Login error:', error);
+      log.error('Login error:', { error: error.message, stack: error.stack });
 
       if (error.message.includes('Invalid email or password')) {
         return res.status(401).json({
@@ -85,7 +86,7 @@ class AuthController {
         data: result
       });
     } catch (error) {
-      console.error('Refresh token error:', error);
+      log.error('Refresh token error:', { error: error.message, stack: error.stack });
 
       return res.status(401).json({
         success: false,
@@ -103,7 +104,7 @@ class AuthController {
         data: { user }
       });
     } catch (error) {
-      console.error('Get profile error:', error);
+      log.error('Get profile error:', { error: error.message, stack: error.stack });
 
       res.status(500).json({
         success: false,

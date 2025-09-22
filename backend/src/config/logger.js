@@ -116,10 +116,14 @@ function getCurrentContext() {
 }
 
 // Set context for current async execution
-function setContext(context) {
+function setContext(context, callback) {
   const currentContext = getCurrentContext();
   const newContext = { ...currentContext, ...context };
-  contextStorage.enterWith(newContext);
+  if (callback) {
+    return contextStorage.run(newContext, callback);
+  } else {
+    contextStorage.enterWith(newContext);
+  }
 }
 
 // Enhanced helper functions with context support
