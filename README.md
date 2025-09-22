@@ -77,23 +77,36 @@ npm start
 - [x] 기본 프로젝트 구조 설정
 - [x] 사용자 인증 시스템 (회원가입, 로그인)
 - [x] JWT 토큰 기반 보안 미들웨어
-- [x] 데이터베이스 모델 설계 (User, Club, Match, MatchEvent)
+- [x] 데이터베이스 모델 설계 (User, Club, Match, MatchEvent → Competition)
+- [x] **Competition 시스템 구축** (2025-09-22)
+  - [x] Tournament → Competition 스키마 마이그레이션
+  - [x] 리그/토너먼트/컵/유스 대회 타입 지원
+  - [x] 조별예선+결승토너먼트 혼합 형식 지원
+  - [x] 5개 사전 구축 템플릿 (리그, 토너먼트, 월드컵형, FA컵형, 유스)
+- [x] **데이터 인프라 완성**
+  - [x] WK리그 2025 실제 데이터 (8팀, 112경기)
+  - [x] Club 타입 시스템 (pro, youth, univ, org)
+  - [x] 역할 기반 더미 사용자 14개 계정
+  - [x] 한국여자축구연맹 조직 데이터
 - [x] 기본 API 엔드포인트
 - [x] React 프론트엔드 기본 구조
 - [x] Socket.io 실시간 통신 설정
 
-### 🔄 진행 중 (2025-01-22 업데이트)
-- [x] **코드 품질 개선 및 최적화**
+### 🔄 최근 업데이트 (2025-09-22)
+- [x] **대회 시스템 인프라 구축**
+  - [x] Tournament → Competition 스키마 개선 및 마이그레이션
+  - [x] 5개 사전 구축된 대회 템플릿 시스템 구현
+  - [x] Club 타입 시스템 확장 (pro, youth, univ, org)
+  - [x] WK리그 2025 실제 데이터 통합 (8팀, 112경기)
+  - [x] 역할 기반 더미 사용자 시스템 (14개 계정)
+- [x] **이전 인프라 개선 완료**
   - [x] 데이터베이스 연결 복원력 개선 (Circuit Breaker, 지수 백오프)
   - [x] React Navigation 최적화 (useCallback, useMemo, React Router 통합)
   - [x] 구조화된 로깅 시스템 구축 (Winston, 상관관계 ID, AsyncLocalStorage)
   - [x] Sequelize Migration 시스템 도입 (Umzug, 건강 모니터링, CLI 도구)
-  - [ ] 테스트 커버리지 확장
-- [x] **PR 리뷰 피드백 처리 완료**
-  - [x] PR #11: Database Connection 복원력 ([#11](https://github.com/richharvestCC/ScoreBoard/pull/11))
-  - [x] PR #12: Sequelize Migration 시스템 ([#12](https://github.com/richharvestCC/ScoreBoard/pull/12))
-  - [x] PR #13: Navigation 시스템 개선 ([#13](https://github.com/richharvestCC/ScoreBoard/pull/13))
-  - [x] PR #14: 구조화된 로깅 시스템 ([#14](https://github.com/richharvestCC/ScoreBoard/pull/14))
+- [x] **최신 PR 처리 완료**
+  - [x] PR #20: Competition System & Template Infrastructure ([#20](https://github.com/richharvestCC/ScoreBoard/pull/20))
+  - [x] PR #11-14: 기술 인프라 개선 시리즈
 
 ### 📋 계획된 기능
 - [ ] 라이브 스코어링 시스템
@@ -155,10 +168,23 @@ JWT_REFRESH_SECRET=your_refresh_token_secret
 
 ### 📋 향후 개선 계획 (2025-01-22 추가)
 
-#### 🎯 단기 개선사항 (1-2주)
-- [ ] **토너먼트 기능 통합**: PR #8의 토너먼트 브라켓 시스템을 최신 인프라에 맞게 리베이스 및 병합
-- [ ] **프론트엔드 로깅**: 클라이언트 사이드 에러 추적 및 사용자 행동 분석 시스템 구축
+#### 🎯 다음 개발 우선순위 (2025-09-22 업데이트)
+
+##### 🔥 즉시 우선순위 (1-2주)
+- [ ] **Competition API 구현**: 새로운 Competition 스키마 기반 REST API 엔드포인트 개발
+- [ ] **템플릿 관리 UI**: 5개 대회 템플릿 선택/수정/생성 프론트엔드 인터페이스
+- [ ] **사용자 역할 시스템**: 클럽/조직/대회 관리자별 권한 및 대시보드 구현
+- [ ] **경기 스케줄링**: Competition 기반 자동 경기 일정 생성 및 관리 시스템
+
+##### 🚀 고우선순위 (2-4주)
+- [ ] **실시간 라이브 스코어링**: Socket.io 기반 실시간 경기 기록 및 브로드캐스팅
+- [ ] **WK리그 대시보드**: 실제 데이터 기반 리그 순위표, 경기 결과, 통계 표시
+- [ ] **Competition 참가 시스템**: 팀 등록, 승인, 대진표 생성 워크플로우
+- [ ] **모바일 최적화**: 터치 친화적 라이브 스코어링 인터페이스
+
+##### ⚖️ 보통 우선순위 (1-2개월)
 - [ ] **API 문서화**: Swagger/OpenAPI 스펙 작성 및 자동 문서 생성 시스템 도입
+- [ ] **프론트엔드 로깅**: 클라이언트 사이드 에러 추적 및 사용자 행동 분석 시스템 구축
 - [ ] **환경 변수 관리**: 개발/스테이징/프로덕션 환경별 설정 분리 및 검증 로직 추가
 
 #### 🏗️ 중기 개선사항 (1-2개월)
