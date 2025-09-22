@@ -11,9 +11,12 @@
     "migrate:reset": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate",
     "migrate:status": "npx sequelize-cli db:migrate:status",
     "migrate:create": "npx sequelize-cli migration:generate --name",
+    "migrate:health": "node scripts/migration-tools.js health",
+    "migrate:tools": "node scripts/migration-tools.js",
     "seed": "npx sequelize-cli db:seed:all",
     "seed:undo": "npx sequelize-cli db:seed:undo:all",
-    "db:reset": "npm run migrate:reset && npm run seed"
+    "db:reset": "npm run migrate:reset && npm run seed",
+    "db:health": "node scripts/migration-tools.js health"
   },
   "keywords": [],
   "author": "",
