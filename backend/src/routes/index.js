@@ -6,14 +6,37 @@ const tournamentRoutes = require('./tournaments');
 
 const router = express.Router();
 
-// Health check endpoint
-router.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'ScoreBoard API is running',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  });
+// Enhanced health check endpoint with database status
+router.get('/health', async (req, res) => {
+  const { checkConnectionHealth } = require('../models');
+
+  try {
+    const dbHealth = await checkConnectionHealth();
+    const status = dbHealth.healthy ? 'healthy' : 'degraded';
+    const httpCode = dbHealth.healthy ? 200 : 503;
+
+    res.status(httpCode).json({
+      success: true,
+      status: status,
+      message: 'ScoreBoard API Health Check',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+      services: {
+        api: 'healthy',
+        database: dbHealth.healthy ? 'healthy' : 'unhealthy',
+        ...(dbHealth.error && { database_error: dbHealth.error })
+      },
+      uptime: process.uptime()
+    });
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      status: 'unhealthy',
+      message: 'Health check failed',
+      timestamp: new Date().toISOString(),
+      error: error.message
+    });
+  }
 });
 
 // API routes
