@@ -18,6 +18,8 @@ import MatchDetail from './pages/MatchDetail';
 import LiveScoring from './pages/LiveScoring';
 import TournamentList from './pages/TournamentList';
 import TournamentDetail from './pages/TournamentDetail';
+import LiveMatchView from './pages/LiveMatchView';
+import LiveMatchesPage from './pages/LiveMatchesPage';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -136,7 +138,7 @@ function App() {
                 path="/matches/:id/live"
                 element={
                   <ProtectedRoute>
-                    <LiveScoring />
+                    <LiveMatchView />
                   </ProtectedRoute>
                 }
               />
@@ -153,6 +155,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <TournamentDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/live"
+                element={
+                  <ProtectedRoute>
+                    <LiveMatchesPage />
                   </ProtectedRoute>
                 }
               />

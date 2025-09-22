@@ -10,7 +10,7 @@ import {
   MenuItem,
   IconButton,
 } from '@mui/material';
-import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents } from '@mui/icons-material';
+import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, LiveTv } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -67,6 +67,15 @@ const Header = () => {
               sx={{ mr: 2 }}
             >
               토너먼트
+            </Button>
+
+            <Button
+              color="inherit"
+              startIcon={<LiveTv />}
+              onClick={() => navigate('/live')}
+              sx={{ mr: 2 }}
+            >
+              라이브
             </Button>
 
             <Typography variant="body1" sx={{ mr: 2 }}>
