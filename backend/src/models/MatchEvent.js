@@ -68,7 +68,28 @@ module.exports = (sequelize, DataTypes) => {
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+      validate: {
+        len: [0, 1000],
+        isValidText(value) {
+          if (value && typeof value === 'string') {
+            const { sanitizeAndValidateText } = require('../utils/sanitizer');
+            const result = sanitizeAndValidateText(value, { maxLength: 1000 });
+            if (!result.isValid) {
+              throw new Error(result.error);
+            }
+          }
+        }
+      },
+      set(value) {
+        if (value && typeof value === 'string') {
+          const { sanitizeAndValidateText } = require('../utils/sanitizer');
+          const result = sanitizeAndValidateText(value, { maxLength: 1000 });
+          this.setDataValue('description', result.sanitized);
+        } else {
+          this.setDataValue('description', value);
+        }
+      }
     },
     related_player_id: {
       type: DataTypes.INTEGER,

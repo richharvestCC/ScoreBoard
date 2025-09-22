@@ -15,7 +15,28 @@ module.exports = (sequelize, DataTypes) => {
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
+      validate: {
+        len: [0, 2500],
+        isValidText(value) {
+          if (value && typeof value === 'string') {
+            const { sanitizeAndValidateText } = require('../utils/sanitizer');
+            const result = sanitizeAndValidateText(value, { maxLength: 2500, allowRichText: true });
+            if (!result.isValid) {
+              throw new Error(result.error);
+            }
+          }
+        }
+      },
+      set(value) {
+        if (value && typeof value === 'string') {
+          const { sanitizeAndValidateText } = require('../utils/sanitizer');
+          const result = sanitizeAndValidateText(value, { maxLength: 2500, allowRichText: true });
+          this.setDataValue('description', result.sanitized);
+        } else {
+          this.setDataValue('description', value);
+        }
+      }
     },
     location: {
       type: DataTypes.STRING,

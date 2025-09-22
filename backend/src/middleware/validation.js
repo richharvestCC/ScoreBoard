@@ -1,4 +1,33 @@
 const Joi = require('joi');
+const { sanitizeAndValidateText } = require('../utils/sanitizer');
+
+// Create custom Joi extension for XSS-safe text
+const customJoi = Joi.extend({
+  type: 'xssString',
+  base: Joi.string(),
+  messages: {
+    'xssString.unsafe': '{{#label}} contains potentially unsafe content',
+    'xssString.tooLong': '{{#label}} exceeds maximum length after sanitization'
+  },
+  rules: {
+    safe: {
+      method(options = {}) {
+        return this.$_addRule({
+          name: 'safe',
+          args: { options },
+          validate(value, helpers, { options }) {
+            const result = sanitizeAndValidateText(value, options);
+            if (!result.isValid) {
+              return helpers.error('xssString.unsafe');
+            }
+            // Return sanitized value to be used
+            return result.sanitized;
+          }
+        });
+      }
+    }
+  }
+});
 
 const validate = (schema) => {
   return (req, res, next) => {
@@ -36,10 +65,10 @@ const loginSchema = Joi.object({
 });
 
 // Club validation schemas
-const createClubSchema = Joi.object({
+const createClubSchema = customJoi.object({
   name: Joi.string().min(1).max(100).required(),
   club_type: Joi.string().valid('general', 'pro', 'youth', 'national').optional().default('general'),
-  description: Joi.string().optional(),
+  description: customJoi.xssString().safe({ maxLength: 2500, allowRichText: true }).optional(),
   location: Joi.string().min(1).max(200).optional(),
   founded_year: Joi.number().integer().min(1800).max(new Date().getFullYear()).optional(),
   logo_url: Joi.string().uri().optional(),
@@ -47,10 +76,10 @@ const createClubSchema = Joi.object({
   contact_phone: Joi.string().pattern(/^[\+]?[0-9\-\s]+$/).optional()
 });
 
-const updateClubSchema = Joi.object({
+const updateClubSchema = customJoi.object({
   name: Joi.string().min(1).max(100).optional(),
   club_type: Joi.string().valid('general', 'pro', 'youth', 'national').optional(),
-  description: Joi.string().optional(),
+  description: customJoi.xssString().safe({ maxLength: 2500, allowRichText: true }).optional(),
   location: Joi.string().min(1).max(200).optional(),
   founded_year: Joi.number().integer().min(1800).max(new Date().getFullYear()).optional(),
   logo_url: Joi.string().uri().optional(),
@@ -82,7 +111,7 @@ const updateMemberSchema = Joi.object({
 });
 
 // Match validation schemas
-const createMatchSchema = Joi.object({
+const createMatchSchema = customJoi.object({
   home_club_id: Joi.string().uuid().required(),
   away_club_id: Joi.string().uuid().required(),
   match_date: Joi.date().iso().required(),
@@ -91,11 +120,11 @@ const createMatchSchema = Joi.object({
   duration_minutes: Joi.number().integer().min(1).max(200).optional(),
   referee_name: Joi.string().max(100).optional(),
   weather: Joi.string().max(100).optional(),
-  notes: Joi.string().optional()
+  notes: customJoi.xssString().safe({ maxLength: 2000 }).optional()
 });
 
 // Match event validation schemas
-const createMatchEventSchema = Joi.object({
+const createMatchEventSchema = customJoi.object({
   player_id: Joi.string().uuid().optional(),
   event_type: Joi.string().valid(
     'GOAL', 'ASSIST', 'YELLOW_CARD', 'RED_CARD',
@@ -105,7 +134,7 @@ const createMatchEventSchema = Joi.object({
   ).required(),
   minute: Joi.number().integer().min(0).max(200).required(),
   second: Joi.number().integer().min(0).max(59).optional(),
-  description: Joi.string().optional(),
+  description: customJoi.xssString().safe({ maxLength: 1000 }).optional(),
   metadata: Joi.object().optional()
 });
 
@@ -138,34 +167,34 @@ module.exports = {
 };
 
 // Tournament validation schemas
-const createTournamentSchema = Joi.object({
+const createTournamentSchema = customJoi.object({
   name: Joi.string().min(1).max(100).required(),
   tournament_type: Joi.string().valid('league', 'tournament').required(),
   format: Joi.string().valid('round_robin', 'knockout', 'mixed').optional().default('knockout'),
   level: Joi.string().valid('local', 'national', 'international').optional().default('local'),
-  description: Joi.string().optional(),
+  description: customJoi.xssString().safe({ maxLength: 3000, allowRichText: true }).optional(),
   start_date: Joi.date().iso().optional(),
   end_date: Joi.date().iso().min(Joi.ref('start_date')).optional(),
   max_participants: Joi.number().integer().min(2).max(128).optional(),
   entry_fee: Joi.number().min(0).optional(),
-  prize_description: Joi.string().optional(),
-  rules: Joi.string().optional(),
+  prize_description: customJoi.xssString().safe({ maxLength: 1500, allowRichText: true }).optional(),
+  rules: customJoi.xssString().safe({ maxLength: 5000, allowRichText: true }).optional(),
   is_public: Joi.boolean().optional().default(true),
   has_group_stage: Joi.boolean().optional().default(false)
 });
 
-const updateTournamentSchema = Joi.object({
+const updateTournamentSchema = customJoi.object({
   name: Joi.string().min(1).max(100).optional(),
   tournament_type: Joi.string().valid('league', 'tournament').optional(),
   format: Joi.string().valid('round_robin', 'knockout', 'mixed').optional(),
   level: Joi.string().valid('local', 'national', 'international').optional(),
-  description: Joi.string().optional(),
+  description: customJoi.xssString().safe({ maxLength: 3000, allowRichText: true }).optional(),
   start_date: Joi.date().iso().optional(),
   end_date: Joi.date().iso().optional(),
   max_participants: Joi.number().integer().min(2).max(128).optional(),
   entry_fee: Joi.number().min(0).optional(),
-  prize_description: Joi.string().optional(),
-  rules: Joi.string().optional(),
+  prize_description: customJoi.xssString().safe({ maxLength: 1500, allowRichText: true }).optional(),
+  rules: customJoi.xssString().safe({ maxLength: 5000, allowRichText: true }).optional(),
   is_public: Joi.boolean().optional(),
   has_group_stage: Joi.boolean().optional(),
   status: Joi.string().valid('draft', 'open', 'closed', 'in_progress', 'completed', 'cancelled').optional()
