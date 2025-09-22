@@ -12,11 +12,17 @@ import {
 } from '@mui/material';
 import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useTypedNavigation } from '../../hooks/useTypedNavigation';
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const {
+    navigateToProfile,
+    navigateToClubs,
+    navigateToMatches,
+    navigateToTournaments,
+    navigateToAuth
+  } = useTypedNavigation();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenu = (event) => {
@@ -25,6 +31,11 @@ const Header = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleProfile = () => {
+    navigateToProfile();
+    handleClose();
   };
 
   const handleLogout = () => {
@@ -45,7 +56,7 @@ const Header = () => {
             <Button
               color="inherit"
               startIcon={<Groups />}
-              onClick={() => navigate('/clubs')}
+              onClick={navigateToClubs}
               sx={{ mr: 2 }}
             >
               클럽
@@ -54,7 +65,7 @@ const Header = () => {
             <Button
               color="inherit"
               startIcon={<Sports />}
-              onClick={() => navigate('/matches')}
+              onClick={navigateToMatches}
               sx={{ mr: 2 }}
             >
               경기
@@ -63,7 +74,7 @@ const Header = () => {
             <Button
               color="inherit"
               startIcon={<EmojiEvents />}
-              onClick={() => navigate('/tournaments')}
+              onClick={navigateToTournaments}
               sx={{ mr: 2 }}
             >
               토너먼트
@@ -101,7 +112,7 @@ const Header = () => {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleClose}>
+              <MenuItem onClick={handleProfile}>
                 <AccountCircle sx={{ mr: 1 }} />
                 프로필
               </MenuItem>
@@ -112,7 +123,7 @@ const Header = () => {
             </Menu>
           </Box>
         ) : (
-          <Button color="inherit" href="/auth">
+          <Button color="inherit" onClick={navigateToAuth}>
             로그인
           </Button>
         )}
