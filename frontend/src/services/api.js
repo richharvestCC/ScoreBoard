@@ -83,8 +83,11 @@ export const clubAPI = {
   getAll: (params) => api.get('/clubs', { params }),
   update: (id, clubData) => api.put(`/clubs/${id}`, clubData),
   delete: (id) => api.delete(`/clubs/${id}`),
-  join: (id) => api.post(`/clubs/${id}/join`),
-  getMembers: (id) => api.get(`/clubs/${id}/members`),
+  join: (id, memberData) => api.post(`/clubs/${id}/join`, memberData),
+  leave: (id) => api.post(`/clubs/${id}/leave`),
+  getMembers: (id, params) => api.get(`/clubs/${id}/members`, { params }),
+  updateMember: (id, memberId, memberData) => api.put(`/clubs/${id}/members/${memberId}`, memberData),
+  removeMember: (id, memberId) => api.delete(`/clubs/${id}/members/${memberId}`)
 };
 
 // Match API calls

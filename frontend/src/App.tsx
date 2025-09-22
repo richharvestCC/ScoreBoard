@@ -11,6 +11,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Pages
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
+import ClubList from './pages/ClubList';
+import ClubDetail from './pages/ClubDetail';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -86,6 +88,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/clubs"
+                element={
+                  <ProtectedRoute>
+                    <ClubList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/clubs/:id"
+                element={
+                  <ProtectedRoute>
+                    <ClubDetail />
                   </ProtectedRoute>
                 }
               />
