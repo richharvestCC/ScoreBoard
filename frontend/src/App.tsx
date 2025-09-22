@@ -13,6 +13,8 @@ import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import ClubList from './pages/ClubList';
 import ClubDetail from './pages/ClubDetail';
+import TournamentList from './pages/TournamentList';
+import TournamentDetail from './pages/TournamentDetail';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -104,6 +106,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ClubDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tournaments"
+                element={
+                  <ProtectedRoute>
+                    <TournamentList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tournaments/:id"
+                element={
+                  <ProtectedRoute>
+                    <TournamentDetail />
                   </ProtectedRoute>
                 }
               />
