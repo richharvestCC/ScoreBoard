@@ -12,7 +12,7 @@ dotenv.config();
 // Import modules
 const { testConnection, syncDatabase } = require('./models');
 const routes = require('./routes');
-const { logger, log } = require('./config/logger');
+const { logger, log, correlationMiddleware } = require('./config/logger');
 
 const app = express();
 const server = http.createServer(app);
@@ -27,7 +27,16 @@ const io = new Server(server, {
 
 // Middleware
 app.use(helmet());
-app.use(morgan('combined'));
+
+// Request correlation tracking (before morgan)
+app.use(correlationMiddleware());
+
+// Enhanced Morgan logging with structured output
+app.use(morgan((tokens, req, res) => {
+  const responseTime = tokens['response-time'](req, res);
+  log.request(req, res, parseFloat(responseTime) || 0);
+  return null; // Prevent default morgan output
+}));
 
 // CORS configuration
 const corsOptions = {
