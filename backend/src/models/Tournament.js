@@ -1,7 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-
-const Tournament = sequelize.define('Tournament', {
+module.exports = (sequelize, DataTypes) => {
+  const Tournament = sequelize.define('Tournament', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -106,31 +104,32 @@ const Tournament = sequelize.define('Tournament', {
   ]
 });
 
-// Define associations
-Tournament.associate = (models) => {
-  // Admin user relationship
-  Tournament.belongsTo(models.User, {
-    foreignKey: 'admin_user_id',
-    as: 'admin'
-  });
+  // Define associations
+  Tournament.associate = (models) => {
+    // Admin user relationship
+    Tournament.belongsTo(models.User, {
+      foreignKey: 'admin_user_id',
+      as: 'admin'
+    });
 
-  // Organization relationship
-  Tournament.belongsTo(models.Organization, {
-    foreignKey: 'organization_id',
-    as: 'organization'
-  });
+    // Organization relationship
+    Tournament.belongsTo(models.Organization, {
+      foreignKey: 'organization_id',
+      as: 'organization'
+    });
 
-  // Participants relationship
-  Tournament.hasMany(models.TournamentParticipant, {
-    foreignKey: 'tournament_id',
-    as: 'participants'
-  });
+    // Participants relationship
+    Tournament.hasMany(models.TournamentParticipant, {
+      foreignKey: 'tournament_id',
+      as: 'participants'
+    });
 
-  // Matches relationship
-  Tournament.hasMany(models.Match, {
-    foreignKey: 'tournament_id',
-    as: 'matches'
-  });
+    // Matches relationship
+    Tournament.hasMany(models.Match, {
+      foreignKey: 'tournament_id',
+      as: 'matches'
+    });
+  };
+
+  return Tournament;
 };
-
-module.exports = Tournament;
