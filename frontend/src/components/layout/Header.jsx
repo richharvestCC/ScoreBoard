@@ -51,6 +51,15 @@ const Header = () => {
               클럽
             </Button>
 
+            <Button
+              color="inherit"
+              startIcon={<Sports />}
+              onClick={() => navigate('/matches')}
+              sx={{ mr: 2 }}
+            >
+              경기
+            </Button>
+
             <Typography variant="body1" sx={{ mr: 2 }}>
               안녕하세요, {user?.name || user?.user_id}님!
             </Typography>

@@ -13,6 +13,8 @@ import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import ClubList from './pages/ClubList';
 import ClubDetail from './pages/ClubDetail';
+import MatchList from './pages/MatchList';
+import MatchDetail from './pages/MatchDetail';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -104,6 +106,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ClubDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/matches"
+                element={
+                  <ProtectedRoute>
+                    <MatchList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/matches/:id"
+                element={
+                  <ProtectedRoute>
+                    <MatchDetail />
                   </ProtectedRoute>
                 }
               />
