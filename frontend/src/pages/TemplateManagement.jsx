@@ -30,7 +30,7 @@ import { competitionAPI } from '../services/api';
 import TemplateCard from '../components/competitions/TemplateCard';
 import CreateTemplateDialog from '../components/competitions/CreateTemplateDialog';
 import CreateFromTemplateDialog from '../components/competitions/CreateFromTemplateDialog';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 const TemplateManagement = () => {
   const { user } = useAuth();

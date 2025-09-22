@@ -18,6 +18,7 @@ import MatchDetail from './pages/MatchDetail';
 import LiveScoring from './pages/LiveScoring';
 import TournamentList from './pages/TournamentList';
 import TournamentDetail from './pages/TournamentDetail';
+import TemplateManagement from './pages/TemplateManagement';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -153,6 +154,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <TournamentDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/templates"
+                element={
+                  <ProtectedRoute>
+                    <TemplateManagement />
                   </ProtectedRoute>
                 }
               />
