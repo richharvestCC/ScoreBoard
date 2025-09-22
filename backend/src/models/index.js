@@ -53,25 +53,81 @@ db.testConnection = async () => {
 };
 
 db.syncDatabase = async () => {
-  try {
-    // Only use sync in development environment
-    // Production should use migrations
-    const env = process.env.NODE_ENV || 'development';
+  const env = process.env.NODE_ENV || 'development';
 
+  try {
     if (env === 'production') {
-      console.log('⚠️ In production mode - skipping automatic sync. Please use migrations.');
+      console.log('🏭 Production mode - using migrations only');
+      await db.runMigrations();
       return true;
     }
 
-    // In development, use alter: false to prevent automatic schema changes
-    // Use migrations for schema changes even in development
-    await sequelize.sync({ alter: false });
-    console.log('✅ Database synchronized successfully.');
+    // Development mode: check if migrations should be used
+    const migrationsExist = await db.checkMigrationsExist();
+
+    if (migrationsExist) {
+      console.log('📋 Migrations detected - running migrations instead of sync');
+      await db.runMigrations();
+    } else {
+      console.log('🔄 No migrations found - using model sync for development');
+      await sequelize.sync({ alter: true });
+      console.log('✅ Database synchronized successfully.');
+    }
+
     return true;
   } catch (error) {
-    console.error('❌ Unable to sync database:', error);
+    console.error('❌ Unable to sync/migrate database:', error);
     throw error;
   }
+};
+
+// Check if migrations directory has any files
+db.checkMigrationsExist = async () => {
+  const fs = require('fs');
+  const path = require('path');
+
+  try {
+    const migrationsPath = path.resolve(__dirname, '../../migrations');
+    const files = fs.readdirSync(migrationsPath);
+    const migrationFiles = files.filter(file => file.endsWith('.js'));
+    return migrationFiles.length > 0;
+  } catch (error) {
+    return false;
+  }
+};
+
+// Run pending migrations
+db.runMigrations = async () => {
+  const { Umzug, SequelizeStorage } = require('umzug');
+  const path = require('path');
+
+  const umzug = new Umzug({
+    migrations: {
+      glob: path.resolve(__dirname, '../../migrations/*.js'),
+      resolve: ({ name, path: migrationPath }) => {
+        const migration = require(migrationPath);
+        return {
+          name,
+          up: async () => migration.up(sequelize.getQueryInterface(), sequelize.constructor),
+          down: async () => migration.down(sequelize.getQueryInterface(), sequelize.constructor),
+        };
+      },
+    },
+    context: sequelize.getQueryInterface(),
+    storage: new SequelizeStorage({ sequelize }),
+    logger: console,
+  });
+
+  console.log('📋 Running pending migrations...');
+  const migrations = await umzug.up();
+
+  if (migrations.length === 0) {
+    console.log('✅ No pending migrations');
+  } else {
+    console.log(`✅ Applied ${migrations.length} migrations:`, migrations.map(m => m.name));
+  }
+
+  return migrations;
 };
 
 module.exports = db;
