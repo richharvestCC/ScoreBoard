@@ -27,6 +27,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { clubAPI } from '../services/api';
 import CreateClubDialog from '../components/clubs/CreateClubDialog';
+import { getClubTypeLabel, getClubTypeColor } from '../constants/clubTypes';
 
 const ClubList = () => {
   const navigate = useNavigate();
@@ -172,6 +173,13 @@ const ClubList = () => {
                   )}
 
                   <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
+                    {club.club_type && (
+                      <Chip
+                        label={getClubTypeLabel(club.club_type)}
+                        size="small"
+                        color={getClubTypeColor(club.club_type)}
+                      />
+                    )}
                     {club.location && (
                       <Chip
                         icon={<LocationIcon />}

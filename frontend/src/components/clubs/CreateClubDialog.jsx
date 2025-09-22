@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { clubAPI } from '../../services/api';
+import { removeEmptyFields } from '../../utils/formHelpers';
 
 const CreateClubDialog = ({ open, onClose, onSuccess }) => {
   const queryClient = useQueryClient();
@@ -65,26 +66,7 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const submitData = { ...formData };
-    if (submitData.founded_year === '') {
-      delete submitData.founded_year;
-    }
-    if (submitData.logo_url === '') {
-      delete submitData.logo_url;
-    }
-    if (submitData.contact_email === '') {
-      delete submitData.contact_email;
-    }
-    if (submitData.contact_phone === '') {
-      delete submitData.contact_phone;
-    }
-    if (submitData.description === '') {
-      delete submitData.description;
-    }
-    if (submitData.location === '') {
-      delete submitData.location;
-    }
-
+    const submitData = removeEmptyFields(formData);
     createMutation.mutate(submitData);
   };
 
