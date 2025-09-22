@@ -1,4 +1,5 @@
 // Custom error classes for better error handling
+const { log } = require('../config/logger');
 
 class AppError extends Error {
   constructor(message, statusCode = 500, code = null) {
@@ -139,7 +140,7 @@ const errorHandler = (error, req, res, next) => {
 
   // Log error for debugging
   if (statusCode >= 500) {
-    console.error('Server Error:', error);
+    log.error('Server Error:', { error: error.message, stack: error.stack });
   }
 
   res.status(statusCode).json({

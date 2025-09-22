@@ -168,6 +168,12 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'match_id',
       as: 'events'
     });
+
+    // Match statistics relationship
+    Match.hasOne(models.MatchStatistics, {
+      foreignKey: 'match_id',
+      as: 'statistics'
+    });
   };
 
   return Match;

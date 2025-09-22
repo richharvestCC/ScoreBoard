@@ -16,4 +16,9 @@ router.delete('/:id', matchController.deleteMatch);
 router.post('/:id/events', validateMatchEventCreation, matchController.addMatchEvent);
 router.get('/:id/events', matchController.getMatchEvents);
 
+// Match statistics routes
+router.get('/:id/statistics', matchController.getMatchStatistics);
+router.put('/:id/statistics', matchController.updateMatchStatistics);
+router.post('/:id/statistics/calculate', matchController.calculateStatisticsFromEvents);
+
 module.exports = router;
