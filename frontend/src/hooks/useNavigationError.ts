@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { log } from '../services/logger';
-import { globalNavigateToAuth, globalNavigateToHome } from '../contexts/NavigationContext';
+import { globalNavigateToAuth, globalNavigateToHome, globalNavigateBack } from '../contexts/NavigationContext';
 
 interface NavigationError {
   message: string;

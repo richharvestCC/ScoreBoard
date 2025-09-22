@@ -8,6 +8,8 @@ interface NavigationContextType {
   navigateToHome: () => void;
   navigateWithReplace: (path: string) => void;
   navigateWithOptions: (path: string, options?: NavigateOptions) => void;
+  navigateBack: () => void;
+  navigateForward: () => void;
 }
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
@@ -41,13 +43,25 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
     navigate(path, options);
   }, [navigate, location]);
 
+  const navigateBack = useCallback(() => {
+    log.navigation(location.pathname, '[previous]', 'back');
+    navigate(-1);
+  }, [navigate, location]);
+
+  const navigateForward = useCallback(() => {
+    log.navigation(location.pathname, '[next]', 'forward');
+    navigate(1);
+  }, [navigate, location]);
+
   const value: NavigationContextType = useMemo(() => ({
     navigate,
     navigateToAuth,
     navigateToHome,
     navigateWithReplace,
     navigateWithOptions,
-  }), [navigate, navigateToAuth, navigateToHome, navigateWithReplace, navigateWithOptions]);
+    navigateBack,
+    navigateForward,
+  }), [navigate, navigateToAuth, navigateToHome, navigateWithReplace, navigateWithOptions, navigateBack, navigateForward]);
 
   return (
     <NavigationContext.Provider value={value}>
@@ -76,6 +90,8 @@ interface GlobalNavigationCallbacks {
   navigateToHome?: () => void;
   navigateWithReplace?: (path: string) => void;
   navigateWithOptions?: (path: string, options?: NavigateOptions) => void;
+  navigateBack?: () => void;
+  navigateForward?: () => void;
 }
 
 let globalNavigationCallbacks: GlobalNavigationCallbacks = {};
@@ -144,5 +160,29 @@ export function globalNavigateWithOptions(path: string, options?: NavigateOption
       fallbackMethod: 'window.location'
     });
     window.location.href = path;
+  }
+}
+
+export function globalNavigateBack(): void {
+  if (globalNavigationCallbacks.navigateBack) {
+    log.userAction('global_navigation', 'back_navigation', { method: 'callback' });
+    globalNavigationCallbacks.navigateBack();
+  } else {
+    log.warn('Global navigation not initialized. Falling back to window.history', 'navigation', {
+      fallbackMethod: 'window.history.back'
+    });
+    window.history.back();
+  }
+}
+
+export function globalNavigateForward(): void {
+  if (globalNavigationCallbacks.navigateForward) {
+    log.userAction('global_navigation', 'forward_navigation', { method: 'callback' });
+    globalNavigationCallbacks.navigateForward();
+  } else {
+    log.warn('Global navigation not initialized. Falling back to window.history', 'navigation', {
+      fallbackMethod: 'window.history.forward'
+    });
+    window.history.forward();
   }
 }

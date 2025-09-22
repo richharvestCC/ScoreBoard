@@ -36,6 +36,8 @@ function NavigationSetup() {
       navigateToHome: navigation.navigateToHome,
       navigateWithReplace: navigation.navigateWithReplace,
       navigateWithOptions: navigation.navigateWithOptions,
+      navigateBack: navigation.navigateBack,
+      navigateForward: navigation.navigateForward,
     });
   }, [navigation]);
 
