@@ -103,24 +103,70 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3001;
 
 const startServer = async () => {
-  try {
-    // Test database connection
-    await testConnection();
+  let dbConnected = false;
 
-    // Sync database models
+  try {
+    // Test database connection with retries
+    log.info('📡 Attempting to connect to database...');
+    await testConnection(3, 5000);
+    dbConnected = true;
+
+    // Sync database models only if connected
+    log.info('🔄 Synchronizing database models...');
     await syncDatabase();
 
-    // Start server
+  } catch (error) {
+    log.error('⚠️ Database connection failed during startup', {
+      error: error.message,
+      code: error.code,
+      errno: error.errno
+    });
+
+    // Continue without database in development mode for graceful degradation
+    if (process.env.NODE_ENV !== 'production') {
+      log.warn('🔧 Running in development mode without database - some features will be unavailable');
+      log.warn('💡 Please ensure PostgreSQL is running and configured correctly');
+    } else {
+      log.error('💥 Database is required in production mode. Server cannot start.');
+      process.exit(1);
+    }
+  }
+
+  try {
+    // Start server regardless of database status
     server.listen(PORT, () => {
       log.info(`🚀 ScoreBoard API Server running on port ${PORT}`);
       log.info(`📍 Server URL: http://localhost:${PORT}`);
       log.info(`🔗 API Docs: http://localhost:${PORT}/api/v1/health`);
       log.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      log.info(`💾 Database Status: ${dbConnected ? '✅ Connected' : '❌ Disconnected'}`);
+
+      // Set up periodic database health checks if initial connection failed
+      if (!dbConnected) {
+        setupDatabaseHealthCheck();
+      }
     });
   } catch (error) {
-    log.error('❌ Failed to start server', { error: error.message, stack: error.stack });
+    log.error('❌ Failed to start HTTP server', { error: error.message, stack: error.stack });
     process.exit(1);
   }
+};
+
+// Periodic database health check and reconnection
+const setupDatabaseHealthCheck = () => {
+  const healthCheckInterval = 30000; // 30 seconds
+
+  setInterval(async () => {
+    const { checkConnectionHealth } = require('./models');
+    const health = await checkConnectionHealth();
+
+    if (health.healthy) {
+      log.info('🔄 Database reconnected successfully');
+      clearInterval(this); // Stop health checks once reconnected
+    } else {
+      log.warn('💔 Database still unavailable', { error: health.error });
+    }
+  }, healthCheckInterval);
 };
 
 // Handle graceful shutdown

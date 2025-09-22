@@ -40,15 +40,33 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-// Add utility functions
-db.testConnection = async () => {
+// Add utility functions with resilience
+db.testConnection = async (retries = 3, delay = 5000) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await sequelize.authenticate();
+      console.log(`✅ Database connection established successfully (attempt ${attempt}/${retries})`);
+      return true;
+    } catch (error) {
+      console.error(`❌ Database connection attempt ${attempt}/${retries} failed:`, error.message);
+
+      if (attempt === retries) {
+        console.error('💥 All database connection attempts failed. Check your database configuration.');
+        throw error;
+      }
+
+      console.log(`⏳ Retrying in ${delay/1000} seconds...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
+
+db.checkConnectionHealth = async () => {
   try {
     await sequelize.authenticate();
-    console.log('✅ Database connection has been established successfully.');
-    return true;
+    return { healthy: true, error: null };
   } catch (error) {
-    console.error('❌ Unable to connect to the database:', error);
-    throw error;
+    return { healthy: false, error: error.message };
   }
 };
 
