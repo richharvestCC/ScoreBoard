@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
@@ -14,6 +14,25 @@ import Dashboard from './pages/Dashboard';
 
 // Hooks
 import useAuthStore from './stores/authStore';
+
+// Navigation handler component to handle API redirects
+function NavigationHandler() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleForceNavigate = (event: CustomEvent) => {
+      navigate(event.detail.path);
+    };
+
+    window.addEventListener('forceNavigate', handleForceNavigate as EventListener);
+
+    return () => {
+      window.removeEventListener('forceNavigate', handleForceNavigate as EventListener);
+    };
+  }, [navigate]);
+
+  return null;
+}
 
 // Create query client
 const queryClient = new QueryClient({
@@ -49,6 +68,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
+          <NavigationHandler />
           <Box sx={{ flexGrow: 1 }}>
             <Header />
             <Routes>

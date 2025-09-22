@@ -54,7 +54,12 @@ api.interceptors.response.use(
         // Refresh failed, logout user
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+
+        // Use navigation event instead of window.location.href
+        const navigationEvent = new CustomEvent('forceNavigate', {
+          detail: { path: '/auth' }
+        });
+        window.dispatchEvent(navigationEvent);
       }
     }
 
