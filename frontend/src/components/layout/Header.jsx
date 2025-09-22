@@ -10,7 +10,7 @@ import {
   MenuItem,
   IconButton,
 } from '@mui/material';
-import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents } from '@mui/icons-material';
+import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, Assignment, AdminPanelSettings } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -68,6 +68,17 @@ const Header = () => {
             >
               토너먼트
             </Button>
+
+            {user && ['admin', 'moderator'].includes(user.role) && (
+              <Button
+                color="inherit"
+                startIcon={<AdminPanelSettings />}
+                onClick={() => navigate('/admin')}
+                sx={{ mr: 2 }}
+              >
+                관리자
+              </Button>
+            )}
 
             <Typography variant="body1" sx={{ mr: 2 }}>
               안녕하세요, {user?.name || user?.user_id}님!
