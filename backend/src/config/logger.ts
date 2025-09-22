@@ -1,5 +1,6 @@
 import winston from 'winston';
 import path from 'path';
+import { Request, Response } from 'express';
 
 // Define log levels type
 type LogLevel = 'error' | 'warn' | 'info' | 'debug';
@@ -125,7 +126,7 @@ interface TypedLogger {
   warn: (message: string, meta?: LogMetadata) => void;
   info: (message: string, meta?: LogMetadata) => void;
   debug: (message: string, meta?: LogMetadata) => void;
-  request: (req: any, res: any, responseTime: number) => void;
+  request: (req: Request, res: Response, responseTime: number) => void;
   database: (operation: string, table: string, duration: number, error?: Error) => void;
   socket: (event: string, socketId: string, data?: Record<string, any>) => void;
 }
@@ -138,7 +139,7 @@ const log: TypedLogger = {
   debug: (message: string, meta: LogMetadata = {}) => logger.debug(message, meta),
 
   // HTTP request logging with typed data
-  request: (req: any, res: any, responseTime: number) => {
+  request: (req: Request, res: Response, responseTime: number) => {
     const logData: HttpLogData = {
       method: req.method,
       url: req.originalUrl,
@@ -208,9 +209,50 @@ const enhancedLog: CorrelatedLogger = {
         logger.info(`[${correlationPrefix}] ${message}`, meta),
       debug: (message: string, meta: LogMetadata = {}) =>
         logger.debug(`[${correlationPrefix}] ${message}`, meta),
-      request: log.request,
-      database: log.database,
-      socket: log.socket
+      request: (req: Request, res: Response, responseTime: number) => {
+        const logData: HttpLogData = {
+          method: req.method,
+          url: req.originalUrl,
+          statusCode: res.statusCode,
+          responseTime: `${responseTime}ms`,
+          userAgent: req.get('User-Agent'),
+          ip: req.ip || req.connection?.remoteAddress,
+          correlationId: correlationPrefix
+        };
+
+        if (res.statusCode >= 400) {
+          logger.warn(`[${correlationPrefix}] HTTP Request`, logData);
+        } else {
+          logger.info(`[${correlationPrefix}] HTTP Request`, logData);
+        }
+      },
+      database: (operation: string, table: string, duration: number, error?: Error) => {
+        const logData: DatabaseLogData = {
+          operation,
+          table,
+          duration: `${duration}ms`,
+          correlationId: correlationPrefix
+        };
+
+        if (error) {
+          logger.error(`[${correlationPrefix}] Database Error: ${operation} on ${table}`, {
+            ...logData,
+            error: error.message
+          });
+        } else {
+          logger.debug(`[${correlationPrefix}] Database Operation: ${operation} on ${table}`, logData);
+        }
+      },
+      socket: (event: string, socketId: string, data: Record<string, any> = {}) => {
+        const logData: SocketLogData = {
+          socketId,
+          event,
+          correlationId: correlationPrefix,
+          ...data
+        };
+
+        logger.info(`[${correlationPrefix}] Socket Event: ${event}`, logData);
+      }
     };
   },
 

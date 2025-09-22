@@ -48,7 +48,7 @@ export interface LoginData {
 export interface AuthResponse {
   token: string;
   refreshToken: string;
-  user: Omit<User, 'password'>;
+  user: User;
 }
 
 // Club Types
