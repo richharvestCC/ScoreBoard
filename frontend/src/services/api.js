@@ -113,4 +113,16 @@ export const tournamentAPI = {
   getMatches: (id) => api.get(`/tournaments/${id}/matches`),
 };
 
+// Live Scoring API calls
+export const liveScoringAPI = {
+  startLiveMatch: (matchId) => api.post(`/live/${matchId}/start`),
+  endLiveMatch: (matchId, data = {}) => api.post(`/live/${matchId}/end`, data),
+  updateLiveScore: (matchId, scoreData) => api.put(`/live/${matchId}/score`, scoreData),
+  addLiveEvent: (matchId, eventData) => api.post(`/live/${matchId}/event`, eventData),
+  updateLiveStats: (matchId, statsData) => api.put(`/live/${matchId}/stats`, statsData),
+  getLiveMatchInfo: (matchId) => api.get(`/live/${matchId}`),
+  getLiveMatches: (params = {}) => api.get('/live/matches/live', { params }),
+  getLiveStats: () => api.get('/live/stats/live')
+};
+
 export default api;
