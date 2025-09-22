@@ -28,10 +28,18 @@ import {
   Timer as TimerIcon,
   EmojiEvents as TrophyIcon
 } from '@mui/icons-material';
+import { Pagination } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { matchAPI } from '../services/api';
 import CreateMatchDialog from '../components/matches/CreateMatchDialog';
+import {
+  getMatchTypeLabel,
+  getMatchTypeColor,
+  getStatusLabel,
+  getStatusColor,
+  getStageLabel
+} from '../utils/matchUtils';
 
 const MatchList = () => {
   const navigate = useNavigate();
@@ -82,64 +90,10 @@ const MatchList = () => {
     refetch();
   };
 
-  const getMatchTypeLabel = (type) => {
-    switch(type) {
-      case 'practice': return '연습경기';
-      case 'casual': return '캐주얼';
-      case 'friendly': return '친선경기';
-      case 'tournament': return '토너먼트';
-      case 'a_friendly': return 'A매치 친선';
-      case 'a_tournament': return 'A매치 토너먼트';
-      default: return type;
-    }
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
   };
 
-  const getMatchTypeColor = (type) => {
-    switch(type) {
-      case 'practice': return 'default';
-      case 'casual': return 'primary';
-      case 'friendly': return 'success';
-      case 'tournament': return 'secondary';
-      case 'a_friendly': return 'warning';
-      case 'a_tournament': return 'error';
-      default: return 'default';
-    }
-  };
-
-  const getStatusLabel = (status) => {
-    switch(status) {
-      case 'scheduled': return '예정';
-      case 'in_progress': return '진행중';
-      case 'completed': return '완료';
-      case 'cancelled': return '취소';
-      case 'postponed': return '연기';
-      default: return status;
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'scheduled': return 'info';
-      case 'in_progress': return 'warning';
-      case 'completed': return 'success';
-      case 'cancelled': return 'error';
-      case 'postponed': return 'default';
-      default: return 'default';
-    }
-  };
-
-  const getStageLabel = (stage) => {
-    switch(stage) {
-      case 'group': return '조별리그';
-      case 'round_of_16': return '16강';
-      case 'quarter': return '8강';
-      case 'semi': return '준결승';
-      case 'final': return '결승';
-      case 'regular_season': return '정규시즌';
-      case 'playoff': return '플레이오프';
-      default: return stage;
-    }
-  };
 
   if (isLoading) {
     return (
@@ -160,6 +114,7 @@ const MatchList = () => {
   }
 
   const matches = matchesData?.data?.data || [];
+  const pagination = matchesData?.data?.pagination || { page: 1, totalPages: 1 };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -358,6 +313,21 @@ const MatchList = () => {
             </Grid>
           ))}
         </Grid>
+      )}
+
+      {/* Pagination */}
+      {matches.length > 0 && pagination.totalPages > 1 && (
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Pagination
+            count={pagination.totalPages}
+            page={pagination.page}
+            onChange={handlePageChange}
+            color="primary"
+            size="large"
+            showFirstButton
+            showLastButton
+          />
+        </Box>
       )}
 
       {/* Floating Action Button */}
