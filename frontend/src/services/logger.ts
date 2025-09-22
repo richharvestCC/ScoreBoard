@@ -3,16 +3,11 @@
  * Structured logging for client-side events and errors
  */
 
-interface LogLevel {
-  ERROR: 'error';
-  WARN: 'warn';
-  INFO: 'info';
-  DEBUG: 'debug';
-}
+type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 
 interface LogEntry {
   timestamp: string;
-  level: keyof LogLevel;
+  level: LogLevel;
   message: string;
   category?: string;
   userId?: string;

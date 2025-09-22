@@ -31,17 +31,11 @@ app.use(helmet());
 // Request correlation tracking (before morgan)
 app.use(correlationMiddleware());
 
-// Enhanced Morgan logging with correlation ID
-app.use(morgan('combined', {
-  stream: {
-    write: (message) => {
-      // Extract morgan log info and enhance with correlation
-      const trimmed = message.trim();
-      if (trimmed) {
-        log.info('HTTP Access', { message: trimmed, category: 'http-access' });
-      }
-    }
-  }
+// Enhanced Morgan logging with structured output
+app.use(morgan((tokens, req, res) => {
+  const responseTime = tokens['response-time'](req, res);
+  log.request(req, res, parseFloat(responseTime) || 0);
+  return null; // Prevent default morgan output
 }));
 
 // CORS configuration

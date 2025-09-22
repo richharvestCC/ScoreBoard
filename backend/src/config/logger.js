@@ -101,9 +101,9 @@ if (process.env.NODE_ENV === 'production') {
   }
 }
 
-// Context storage for request correlation
-const asyncHooks = require('async_hooks');
-const contextStorage = new Map();
+// Context storage for request correlation using AsyncLocalStorage
+const { AsyncLocalStorage } = require('async_hooks');
+const contextStorage = new AsyncLocalStorage();
 
 // Generate correlation ID for request tracking
 function generateCorrelationId() {
@@ -112,14 +112,14 @@ function generateCorrelationId() {
 
 // Get current context
 function getCurrentContext() {
-  const asyncId = asyncHooks.executionAsyncId();
-  return contextStorage.get(asyncId) || {};
+  return contextStorage.getStore() || {};
 }
 
 // Set context for current async execution
 function setContext(context) {
-  const asyncId = asyncHooks.executionAsyncId();
-  contextStorage.set(asyncId, { ...getCurrentContext(), ...context });
+  const currentContext = getCurrentContext();
+  const newContext = { ...currentContext, ...context };
+  contextStorage.enterWith(newContext);
 }
 
 // Enhanced helper functions with context support
@@ -291,29 +291,27 @@ module.exports = {
   correlationMiddleware: () => {
     return (req, res, next) => {
       req.correlationId = generateCorrelationId();
-      setContext({ correlationId: req.correlationId });
-      next();
+      const context = { correlationId: req.correlationId };
+      contextStorage.run(context, () => {
+        next();
+      });
     };
   },
 
-  // Performance timing decorator
-  timeOperation: (operationName) => {
-    return (target, propertyName, descriptor) => {
-      const method = descriptor.value;
-      descriptor.value = async function (...args) {
-        const start = Date.now();
-        try {
-          const result = await method.apply(this, args);
-          const duration = Date.now() - start;
-          log.performance(operationName, duration, { success: true });
-          return result;
-        } catch (error) {
-          const duration = Date.now() - start;
-          log.performance(operationName, duration, { success: false, error: error.message });
-          throw error;
-        }
-      };
-      return descriptor;
+  // Performance timing utility function
+  timeOperation: (operationName, fn) => {
+    return async (...args) => {
+      const start = Date.now();
+      try {
+        const result = await fn(...args);
+        const duration = Date.now() - start;
+        log.performance(operationName, duration, { success: true });
+        return result;
+      } catch (error) {
+        const duration = Date.now() - start;
+        log.performance(operationName, duration, { success: false, error: error.message });
+        throw error;
+      }
     };
   },
 
