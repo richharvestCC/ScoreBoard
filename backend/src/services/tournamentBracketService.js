@@ -1,4 +1,4 @@
-const { Tournament, TournamentBracket, TournamentParticipant, Match, sequelize } = require('../models');
+const { Tournament, TournamentBracket, TournamentParticipant, Match, Club, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { NotFoundError, ValidationError, UnauthorizedError } = require('../utils/errors');
 const { log } = require('../config/logger');
@@ -179,10 +179,10 @@ class TournamentBracketService {
           }
 
           // Handle bye winners advancing to this round
-          // Filter bye winners for this specific match position
-          const byeWinnersForThisMatch = byeWinners.filter(bye =>
-            Math.floor(bye.advancesToPosition / 2) === i
-          );
+          // Filter bye winners for this specific match position (only in second round)
+          const byeWinnersForThisMatch = round === 2 ? byeWinners.filter(bye =>
+            bye.advancesToPosition === i
+          ) : [];
 
           // Assign bye winners to correct sides
           byeWinnersForThisMatch.forEach((bye, index) => {
@@ -263,12 +263,12 @@ class TournamentBracketService {
           as: 'match',
           include: [
             {
-              model: require('../models').Club,
+              model: Club,
               as: 'homeClub',
               attributes: ['id', 'name']
             },
             {
-              model: require('../models').Club,
+              model: Club,
               as: 'awayClub',
               attributes: ['id', 'name']
             }
@@ -433,16 +433,18 @@ class TournamentBracketService {
   // Get round name based on round number
   getRoundName(totalRounds, currentRound) {
     // currentRound: 1 = Final, 2 = Semi-final, etc.
-    // So we need to check currentRound directly, not calculate from total
-    switch (currentRound) {
-      case 1: return 'final';
-      case 2: return 'semi_final';
-      case 3: return 'quarter_final';
-      case 4: return 'round_16';
-      case 5: return 'round_32';
-      case 6: return 'round_64';
-      default: return `round_${Math.pow(2, currentRound)}`;
-    }
+    // Use mapping array for consistent round naming
+    const roundNames = {
+      1: 'final',
+      2: 'semi_final',
+      3: 'quarter_final',
+      4: 'round_16',
+      5: 'round_32',
+      6: 'round_64',
+      7: 'round_128'
+    };
+
+    return roundNames[currentRound] || `round_${Math.pow(2, currentRound)}`;
   }
 }
 

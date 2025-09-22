@@ -13,6 +13,7 @@ dotenv.config();
 const { testConnection, syncDatabase } = require('./models');
 const routes = require('./routes');
 const { logger, log } = require('./config/logger');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 const server = http.createServer(app);
@@ -60,23 +61,8 @@ app.get('/', (req, res) => {
   });
 });
 
-// Global error handler
-app.use((error, req, res, next) => {
-  log.error('Global error handler', {
-    message: error.message,
-    stack: error.stack,
-    url: req.originalUrl,
-    method: req.method
-  });
-
-  res.status(error.status || 500).json({
-    success: false,
-    message: process.env.NODE_ENV === 'production'
-      ? 'Internal server error'
-      : error.message,
-    ...(process.env.NODE_ENV !== 'production' && { stack: error.stack })
-  });
-});
+// Global error handler - use centralized error handling middleware
+app.use(errorHandler);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
