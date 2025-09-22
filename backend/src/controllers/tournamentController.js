@@ -21,7 +21,7 @@ const tournamentController = {
       res.status(500).json({
         success: false,
         message: 'Failed to create tournament',
-        error: error.message
+        error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
       });
     }
   },
@@ -49,7 +49,7 @@ const tournamentController = {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournaments',
-        error: error.message
+        error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
       });
     }
   },
@@ -78,7 +78,7 @@ const tournamentController = {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournament',
-        error: error.message
+        error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
       });
     }
   },
@@ -113,7 +113,7 @@ const tournamentController = {
       res.status(500).json({
         success: false,
         message: 'Failed to update tournament',
-        error: error.message
+        error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
       });
     }
   },
@@ -147,7 +147,7 @@ const tournamentController = {
       res.status(500).json({
         success: false,
         message: 'Failed to delete tournament',
-        error: error.message
+        error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
       });
     }
   },
@@ -183,7 +183,7 @@ const tournamentController = {
       res.status(500).json({
         success: false,
         message: 'Failed to join tournament',
-        error: error.message
+        error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
       });
     }
   },
@@ -211,7 +211,7 @@ const tournamentController = {
       res.status(500).json({
         success: false,
         message: 'Failed to leave tournament',
-        error: error.message
+        error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
       });
     }
   },
@@ -232,7 +232,7 @@ const tournamentController = {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournament participants',
-        error: error.message
+        error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
       });
     }
   },
@@ -253,7 +253,7 @@ const tournamentController = {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournament matches',
-        error: error.message
+        error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
       });
     }
   },
@@ -296,8 +296,7 @@ const tournamentController = {
       }
       res.status(500).json({
         success: false,
-        message: 'Failed to generate bracket',
-        error: error.message
+        message: 'Failed to generate bracket'
       });
     }
   },
@@ -323,8 +322,7 @@ const tournamentController = {
       }
       res.status(500).json({
         success: false,
-        message: 'Failed to fetch bracket',
-        error: error.message
+        message: 'Failed to fetch bracket'
       });
     }
   },
@@ -359,10 +357,15 @@ const tournamentController = {
           message: error.message
         });
       }
+      if (error.name === 'UnauthorizedError') {
+        return res.status(403).json({
+          success: false,
+          message: error.message
+        });
+      }
       res.status(500).json({
         success: false,
-        message: 'Failed to update bracket match',
-        error: error.message
+        message: 'Failed to update bracket match'
       });
     }
   }

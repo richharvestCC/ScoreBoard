@@ -64,6 +64,7 @@ class TournamentBracketService {
       const brackets = [];
       const matches = [];
       const matchMap = new Map(); // For O(1) lookup performance
+      const bracketMap = new Map(); // For O(1) bracket lookup by match ID
       const byeWinners = []; // Track participants who advance via bye
 
       // Create first round matches
@@ -114,7 +115,7 @@ class TournamentBracketService {
         matchMap.set(match.id, match);
 
         // Create bracket entry
-        brackets.push({
+        const bracket = {
           tournament_id: tournamentId,
           match_id: match.id,
           round_number: rounds,
@@ -122,7 +123,9 @@ class TournamentBracketService {
           home_seed: homeParticipant.seed_number,
           away_seed: awayParticipant.seed_number,
           next_match_id: null // Will be updated later
-        });
+        };
+        brackets.push(bracket);
+        bracketMap.set(match.id, bracket);
       }
 
       // Create subsequent round matches
@@ -147,44 +150,57 @@ class TournamentBracketService {
           roundMatches.push(match);
 
           // Create bracket entry
-          brackets.push({
+          const bracket = {
             tournament_id: tournamentId,
             match_id: match.id,
             round_number: round,
             bracket_position: i + 1,
             next_match_id: null
-          });
+          };
+          brackets.push(bracket);
+          bracketMap.set(match.id, bracket);
 
           // Update previous round matches to point to this match
-          // Using index calculation for bracket position determination
+          // Using Map for O(1) lookup performance
           if (previousRoundMatches.length > i * 2) {
             const match1Index = i * 2;
             const match2Index = i * 2 + 1;
 
-            if (match1Index < brackets.length) {
-              // Find bracket by position for better performance
-              const bracket1 = brackets.find(b => b.match_id === previousRoundMatches[match1Index].id);
+            if (match1Index < previousRoundMatches.length) {
+              // Use Map for O(1) lookup instead of Array.find
+              const bracket1 = bracketMap.get(previousRoundMatches[match1Index].id);
               if (bracket1) bracket1.next_match_id = match.id;
             }
 
-            if (match2Index < brackets.length && match2Index < previousRoundMatches.length) {
-              const bracket2 = brackets.find(b => b.match_id === previousRoundMatches[match2Index].id);
+            if (match2Index < previousRoundMatches.length) {
+              const bracket2 = bracketMap.get(previousRoundMatches[match2Index].id);
               if (bracket2) bracket2.next_match_id = match.id;
             }
           }
 
           // Handle bye winners advancing to this round
-          byeWinners.forEach(bye => {
-            if (bye.advancesToPosition === i) {
-              // Determine if bye winner goes to home or away side
-              const isHomeSide = i % 2 === 0;
-              if (isHomeSide && !match.home_club_id) {
-                match.home_club_id = bye.participant.participant_type === 'club' ? bye.participant.participant_id : null;
-              } else if (!isHomeSide && !match.away_club_id) {
-                match.away_club_id = bye.participant.participant_type === 'club' ? bye.participant.participant_id : null;
-              }
+          // Filter bye winners for this specific match position
+          const byeWinnersForThisMatch = byeWinners.filter(bye =>
+            Math.floor(bye.advancesToPosition / 2) === i
+          );
+
+          // Assign bye winners to correct sides
+          byeWinnersForThisMatch.forEach((bye, index) => {
+            const participant = bye.participant;
+            const participantId = participant.participant_type === 'club' ? participant.participant_id : null;
+
+            // First bye winner goes to home side, second to away side
+            if (index === 0 && !match.home_club_id) {
+              match.home_club_id = participantId;
+            } else if (index === 1 && !match.away_club_id) {
+              match.away_club_id = participantId;
             }
           });
+
+          // Save match updates if bye winners were assigned
+          if (byeWinnersForThisMatch.length > 0) {
+            await match.save({ transaction });
+          }
         }
 
         previousRoundMatches = roundMatches;
@@ -292,13 +308,17 @@ class TournamentBracketService {
     const transaction = await sequelize.transaction();
 
     try {
-      // Find the bracket entry for this match
+      // Find the bracket entry for this match with tournament info
       const bracket = await TournamentBracket.findOne({
         where: { match_id: matchId },
         include: [
           {
             model: Match,
             as: 'match'
+          },
+          {
+            model: Tournament,
+            as: 'tournament'
           }
         ],
         transaction
@@ -309,6 +329,12 @@ class TournamentBracketService {
       }
 
       const match = bracket.match;
+      const tournament = bracket.tournament;
+
+      // Check authorization - only tournament admin can update bracket
+      if (tournament.admin_user_id !== userId) {
+        throw new UnauthorizedError('Only tournament admin can update bracket matches');
+      }
 
       // Check if match is completed
       if (match.status !== 'completed') {
@@ -394,23 +420,28 @@ class TournamentBracketService {
       };
     } catch (error) {
       await transaction.rollback();
-      log.error('Failed to update bracket match', { matchId, error: error.message });
+      log.error('Failed to update bracket match', {
+        matchId,
+        userId,
+        errorType: error.name,
+        errorMessage: error.message
+      });
       throw error;
     }
   }
 
   // Get round name based on round number
   getRoundName(totalRounds, currentRound) {
-    const roundsFromFinal = totalRounds - currentRound + 1;
-
-    switch (roundsFromFinal) {
+    // currentRound: 1 = Final, 2 = Semi-final, etc.
+    // So we need to check currentRound directly, not calculate from total
+    switch (currentRound) {
       case 1: return 'final';
       case 2: return 'semi_final';
       case 3: return 'quarter_final';
       case 4: return 'round_16';
       case 5: return 'round_32';
       case 6: return 'round_64';
-      default: return `round_${currentRound}`;
+      default: return `round_${Math.pow(2, currentRound)}`;
     }
   }
 }
