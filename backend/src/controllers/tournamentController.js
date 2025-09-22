@@ -1,4 +1,5 @@
 const tournamentService = require('../services/tournamentService');
+const tournamentBracketService = require('../services/tournamentBracketService');
 
 const tournamentController = {
   // Create a new tournament
@@ -251,6 +252,109 @@ const tournamentController = {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournament matches',
+        error: error.message
+      });
+    }
+  },
+
+  // Generate tournament bracket
+  async generateBracket(req, res) {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+
+      const result = await tournamentBracketService.generateBracket(id, userId);
+
+      res.json({
+        success: true,
+        message: result.message,
+        data: {
+          totalMatches: result.totalMatches,
+          rounds: result.rounds
+        }
+      });
+    } catch (error) {
+      console.error('Generate bracket error:', error);
+      if (error.name === 'NotFoundError') {
+        return res.status(404).json({
+          success: false,
+          message: error.message
+        });
+      }
+      if (error.name === 'ValidationError' || error.name === 'UnauthorizedError') {
+        return res.status(400).json({
+          success: false,
+          message: error.message
+        });
+      }
+      res.status(500).json({
+        success: false,
+        message: 'Failed to generate bracket',
+        error: error.message
+      });
+    }
+  },
+
+  // Get tournament bracket
+  async getBracket(req, res) {
+    try {
+      const { id } = req.params;
+
+      const bracket = await tournamentBracketService.getBracket(id);
+
+      res.json({
+        success: true,
+        data: bracket
+      });
+    } catch (error) {
+      console.error('Get bracket error:', error);
+      if (error.name === 'NotFoundError') {
+        return res.status(404).json({
+          success: false,
+          message: error.message
+        });
+      }
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch bracket',
+        error: error.message
+      });
+    }
+  },
+
+  // Update bracket match result
+  async updateBracketMatch(req, res) {
+    try {
+      const { id, matchId } = req.params;
+      const userId = req.user.id;
+
+      const result = await tournamentBracketService.updateBracketMatch(matchId, userId);
+
+      res.json({
+        success: true,
+        message: result.message,
+        data: {
+          winnerId: result.winnerId,
+          nextMatchId: result.nextMatchId
+        }
+      });
+    } catch (error) {
+      console.error('Update bracket match error:', error);
+      if (error.name === 'NotFoundError') {
+        return res.status(404).json({
+          success: false,
+          message: error.message
+        });
+      }
+      if (error.name === 'ValidationError') {
+        return res.status(400).json({
+          success: false,
+          message: error.message
+        });
+      }
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update bracket match',
         error: error.message
       });
     }
