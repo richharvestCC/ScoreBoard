@@ -3,6 +3,7 @@ const authRoutes = require('./auth');
 const clubRoutes = require('./clubs');
 const matchRoutes = require('./matches');
 const tournamentRoutes = require('./tournaments');
+const liveScoringRoutes = require('./liveScoring');
 
 const router = express.Router();
 
@@ -44,6 +45,7 @@ router.use('/auth', authRoutes);
 router.use('/clubs', clubRoutes);
 router.use('/matches', matchRoutes);
 router.use('/tournaments', tournamentRoutes);
+router.use('/live', liveScoringRoutes);
 
 // 404 handler for API routes
 router.use((req, res) => {
