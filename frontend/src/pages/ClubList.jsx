@@ -172,6 +172,22 @@ const ClubList = () => {
                   )}
 
                   <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
+                    {club.club_type && (
+                      <Chip
+                        label={
+                          club.club_type === 'general' ? '일반' :
+                          club.club_type === 'pro' ? '프로' :
+                          club.club_type === 'youth' ? '유스' :
+                          club.club_type === 'national' ? '국가대표' : club.club_type
+                        }
+                        size="small"
+                        color={
+                          club.club_type === 'pro' ? 'primary' :
+                          club.club_type === 'national' ? 'secondary' :
+                          club.club_type === 'youth' ? 'success' : 'default'
+                        }
+                      />
+                    )}
                     {club.location && (
                       <Chip
                         icon={<LocationIcon />}

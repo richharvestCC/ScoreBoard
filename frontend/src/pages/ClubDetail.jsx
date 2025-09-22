@@ -247,11 +247,11 @@ const ClubDetail = () => {
           {!isClubMember ? (
             <Button
               variant="contained"
-              startIcon={<AddIcon />}
+              startIcon={joinMutation.isLoading ? <CircularProgress size={16} /> : <AddIcon />}
               onClick={() => setJoinDialogOpen(true)}
               disabled={joinMutation.isLoading}
             >
-              클럽 가입
+              {joinMutation.isLoading ? '가입 중...' : '클럽 가입'}
             </Button>
           ) : (
             <Box display="flex" gap={1}>
@@ -267,11 +267,11 @@ const ClubDetail = () => {
               <Button
                 variant="outlined"
                 color="error"
-                startIcon={<ExitIcon />}
+                startIcon={leaveMutation.isLoading ? <CircularProgress size={16} /> : <ExitIcon />}
                 onClick={() => leaveMutation.mutate()}
                 disabled={leaveMutation.isLoading}
               >
-                클럽 탈퇴
+                {leaveMutation.isLoading ? '탈퇴 중...' : '클럽 탈퇴'}
               </Button>
             </Box>
           )}
