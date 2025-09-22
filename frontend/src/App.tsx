@@ -30,11 +30,12 @@ function NavigationSetup() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // Set up global navigation callbacks for use in API interceptors
+    // Set up global navigation callbacks for use in API interceptors and other non-React contexts
     setGlobalNavigationCallbacks({
       navigateToAuth: navigation.navigateToAuth,
       navigateToHome: navigation.navigateToHome,
       navigateWithReplace: navigation.navigateWithReplace,
+      navigateWithOptions: navigation.navigateWithOptions,
     });
   }, [navigation]);
 
