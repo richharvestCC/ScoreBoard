@@ -35,7 +35,8 @@ import {
   AttachMoney as MoneyIcon,
   Edit as EditIcon,
   GroupAdd as JoinIcon,
-  ExitToApp as LeaveIcon
+  ExitToApp as LeaveIcon,
+  TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tournamentAPI } from '../services/api';
@@ -102,6 +103,10 @@ const TournamentDetail = () => {
 
   const getTournamentTypeLabel = (type) => {
     return type === 'league' ? '리그' : '토너먼트';
+  };
+
+  const navigateToLeagueDashboard = () => {
+    navigate(`/leagues/${id}/dashboard`);
   };
 
   const getFormatLabel = (format) => {
@@ -298,21 +303,32 @@ const TournamentDetail = () => {
         </CardContent>
 
         <CardActions>
-          {!isParticipating && tournament.status === 'open' ? (
-            <Button
-              variant="contained"
-              startIcon={<JoinIcon />}
-              onClick={() => setJoinDialogOpen(true)}
-              disabled={joinMutation.isLoading}
-            >
-              참가 신청
-            </Button>
-          ) : isParticipating ? (
-            <Box display="flex" gap={1}>
-              {isAdmin && (
-                <Button
-                  variant="outlined"
-                  startIcon={<EditIcon />}
+          <Box display="flex" gap={1} flexWrap="wrap">
+            {tournament.competition_type === 'league' && (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<TrendingUpIcon />}
+                onClick={navigateToLeagueDashboard}
+              >
+                리그 대시보드
+              </Button>
+            )}
+            {!isParticipating && tournament.status === 'open' ? (
+              <Button
+                variant="contained"
+                startIcon={<JoinIcon />}
+                onClick={() => setJoinDialogOpen(true)}
+                disabled={joinMutation.isLoading}
+              >
+                참가 신청
+              </Button>
+            ) : isParticipating ? (
+              <Box display="flex" gap={1}>
+                {isAdmin && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<EditIcon />}
                   onClick={() => navigate(`/tournaments/${id}/manage`)}
                 >
                   토너먼트 관리

@@ -18,6 +18,7 @@ import MatchDetail from './pages/MatchDetail';
 import LiveScoring from './pages/LiveScoring';
 import TournamentList from './pages/TournamentList';
 import TournamentDetail from './pages/TournamentDetail';
+import LeagueDashboard from './pages/LeagueDashboard';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -153,6 +154,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <TournamentDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/leagues/:competitionId/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <LeagueDashboard />
                   </ProtectedRoute>
                 }
               />
