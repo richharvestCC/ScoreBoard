@@ -10,7 +10,7 @@ import {
   MenuItem,
   IconButton,
 } from '@mui/material';
-import { AccountCircle, Sports, ExitToApp, Groups } from '@mui/icons-material';
+import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -49,6 +49,24 @@ const Header = () => {
               sx={{ mr: 2 }}
             >
               클럽
+            </Button>
+
+            <Button
+              color="inherit"
+              startIcon={<Sports />}
+              onClick={() => navigate('/matches')}
+              sx={{ mr: 2 }}
+            >
+              경기
+            </Button>
+
+            <Button
+              color="inherit"
+              startIcon={<EmojiEvents />}
+              onClick={() => navigate('/tournaments')}
+              sx={{ mr: 2 }}
+            >
+              토너먼트
             </Button>
 
             <Typography variant="body1" sx={{ mr: 2 }}>

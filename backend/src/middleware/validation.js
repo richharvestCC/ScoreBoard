@@ -136,3 +136,77 @@ module.exports = {
   createMatchSchema,
   createMatchEventSchema
 };
+
+// Tournament validation schemas
+const createTournamentSchema = Joi.object({
+  name: Joi.string().min(1).max(100).required(),
+  tournament_type: Joi.string().valid('league', 'tournament').required(),
+  format: Joi.string().valid('round_robin', 'knockout', 'mixed').optional().default('knockout'),
+  level: Joi.string().valid('local', 'national', 'international').optional().default('local'),
+  description: Joi.string().optional(),
+  start_date: Joi.date().iso().optional(),
+  end_date: Joi.date().iso().min(Joi.ref('start_date')).optional(),
+  max_participants: Joi.number().integer().min(2).max(128).optional(),
+  entry_fee: Joi.number().min(0).optional(),
+  prize_description: Joi.string().optional(),
+  rules: Joi.string().optional(),
+  is_public: Joi.boolean().optional().default(true),
+  has_group_stage: Joi.boolean().optional().default(false)
+});
+
+const updateTournamentSchema = Joi.object({
+  name: Joi.string().min(1).max(100).optional(),
+  tournament_type: Joi.string().valid('league', 'tournament').optional(),
+  format: Joi.string().valid('round_robin', 'knockout', 'mixed').optional(),
+  level: Joi.string().valid('local', 'national', 'international').optional(),
+  description: Joi.string().optional(),
+  start_date: Joi.date().iso().optional(),
+  end_date: Joi.date().iso().optional(),
+  max_participants: Joi.number().integer().min(2).max(128).optional(),
+  entry_fee: Joi.number().min(0).optional(),
+  prize_description: Joi.string().optional(),
+  rules: Joi.string().optional(),
+  is_public: Joi.boolean().optional(),
+  has_group_stage: Joi.boolean().optional(),
+  status: Joi.string().valid('draft', 'open', 'closed', 'in_progress', 'completed', 'cancelled').optional()
+});
+
+const joinTournamentSchema = Joi.object({
+  club_id: Joi.string().uuid().required()
+});
+
+module.exports = {
+  validate,
+
+  // Auth validation functions
+  validateRegister: validate(registerSchema),
+  validateLogin: validate(loginSchema),
+
+  // Club validation functions
+  validateClubCreation: validate(createClubSchema),
+  validateClubUpdate: validate(updateClubSchema),
+  validateClubJoin: validate(joinClubSchema),
+  validateMemberUpdate: validate(updateMemberSchema),
+
+  // Match validation functions
+  validateMatchCreation: validate(createMatchSchema),
+  validateMatchEventCreation: validate(createMatchEventSchema),
+
+  // Tournament validation functions
+  validateTournamentCreation: validate(createTournamentSchema),
+  validateTournamentUpdate: validate(updateTournamentSchema),
+  validateTournamentJoin: validate(joinTournamentSchema),
+
+  // Export schemas for direct use
+  registerSchema,
+  loginSchema,
+  createClubSchema,
+  updateClubSchema,
+  joinClubSchema,
+  updateMemberSchema,
+  createMatchSchema,
+  createMatchEventSchema,
+  createTournamentSchema,
+  updateTournamentSchema,
+  joinTournamentSchema
+};

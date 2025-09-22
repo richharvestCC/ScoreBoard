@@ -77,6 +77,35 @@ export const authAPI = {
 };
 
 // Club API calls
+export const tournamentAPI = {
+  // Get all tournaments with optional filters
+  getAll: (params = {}) => api.get('/tournaments', { params }),
+
+  // Get tournament by ID
+  getById: (id) => api.get(`/tournaments/${id}`),
+
+  // Create new tournament
+  create: (data) => api.post('/tournaments', data),
+
+  // Update tournament
+  update: (id, data) => api.put(`/tournaments/${id}`, data),
+
+  // Delete tournament
+  delete: (id) => api.delete(`/tournaments/${id}`),
+
+  // Join tournament
+  join: (id, data) => api.post(`/tournaments/${id}/join`, data),
+
+  // Leave tournament
+  leave: (id) => api.post(`/tournaments/${id}/leave`),
+
+  // Get tournament participants
+  getParticipants: (id) => api.get(`/tournaments/${id}/participants`),
+
+  // Get tournament matches
+  getMatches: (id) => api.get(`/tournaments/${id}/matches`)
+};
+
 export const clubAPI = {
   create: (clubData) => api.post('/clubs', clubData),
   getById: (id) => api.get(`/clubs/${id}`),
@@ -99,6 +128,18 @@ export const matchAPI = {
   delete: (id) => api.delete(`/matches/${id}`),
   addEvent: (id, eventData) => api.post(`/matches/${id}/events`, eventData),
   getEvents: (id) => api.get(`/matches/${id}/events`),
+};
+
+// Tournament API calls
+export const tournamentAPI = {
+  create: (tournamentData) => api.post('/tournaments', tournamentData),
+  getById: (id) => api.get(`/tournaments/${id}`),
+  getAll: (params) => api.get('/tournaments', { params }),
+  update: (id, tournamentData) => api.put(`/tournaments/${id}`, tournamentData),
+  delete: (id) => api.delete(`/tournaments/${id}`),
+  join: (id, participantData) => api.post(`/tournaments/${id}/join`, participantData),
+  leave: (id) => api.post(`/tournaments/${id}/leave`),
+  getParticipants: (id, params) => api.get(`/tournaments/${id}/participants`, { params }),
 };
 
 export default api;
