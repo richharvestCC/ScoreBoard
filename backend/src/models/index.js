@@ -40,4 +40,27 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
+// Add utility functions
+db.testConnection = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Database connection has been established successfully.');
+    return true;
+  } catch (error) {
+    console.error('❌ Unable to connect to the database:', error);
+    throw error;
+  }
+};
+
+db.syncDatabase = async () => {
+  try {
+    await sequelize.sync({ alter: true });
+    console.log('✅ Database synchronized successfully.');
+    return true;
+  } catch (error) {
+    console.error('❌ Unable to sync database:', error);
+    throw error;
+  }
+};
+
 module.exports = db;

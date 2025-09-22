@@ -1,7 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-
-const TournamentParticipant = sequelize.define('TournamentParticipant', {
+module.exports = (sequelize, DataTypes) => {
+  const TournamentParticipant = sequelize.define('TournamentParticipant', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -106,17 +104,18 @@ const TournamentParticipant = sequelize.define('TournamentParticipant', {
   ]
 });
 
-// Define associations
-TournamentParticipant.associate = (models) => {
-  // Tournament relationship
-  TournamentParticipant.belongsTo(models.Tournament, {
-    foreignKey: 'tournament_id',
-    as: 'tournament'
-  });
+  // Define associations
+  TournamentParticipant.associate = (models) => {
+    // Tournament relationship
+    TournamentParticipant.belongsTo(models.Tournament, {
+      foreignKey: 'tournament_id',
+      as: 'tournament'
+    });
 
-  // Dynamic association based on participant_type
-  // This will be handled in queries rather than static associations
-  // since we can't have conditional associations in Sequelize
+    // Dynamic association based on participant_type
+    // This will be handled in queries rather than static associations
+    // since we can't have conditional associations in Sequelize
+  };
+
+  return TournamentParticipant;
 };
-
-module.exports = TournamentParticipant;
