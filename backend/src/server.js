@@ -104,31 +104,59 @@ const PORT = process.env.PORT || 3001;
 
 const startServer = async () => {
   let dbConnected = false;
+  let dbConnectionResult = null;
 
   try {
-    // Test database connection with retries
-    log.info('📡 Attempting to connect to database...');
-    await testConnection(3, 5000);
+    // Test database connection with enhanced retry logic and circuit breaker
+    log.info('Attempting to establish database connection...');
+    dbConnectionResult = await testConnection(3, 2000);
     dbConnected = true;
 
-    // Sync database models only if connected
-    log.info('🔄 Synchronizing database models...');
-    await syncDatabase();
-
-  } catch (error) {
-    log.error('⚠️ Database connection failed during startup', {
-      error: error.message,
-      code: error.code,
-      errno: error.errno
+    log.info('Database connection established', {
+      attempt: dbConnectionResult.attempt,
+      duration: `${dbConnectionResult.duration}ms`
     });
 
-    // Continue without database in development mode for graceful degradation
-    if (process.env.NODE_ENV !== 'production') {
-      log.warn('🔧 Running in development mode without database - some features will be unavailable');
-      log.warn('💡 Please ensure PostgreSQL is running and configured correctly');
-    } else {
-      log.error('💥 Database is required in production mode. Server cannot start.');
+    // Sync database models with enhanced error handling
+    log.info('Synchronizing database models...');
+    const syncResult = await syncDatabase();
+
+    log.info('Database synchronization completed', {
+      method: syncResult.method,
+      duration: syncResult.duration ? `${syncResult.duration}ms` : 'N/A'
+    });
+
+  } catch (error) {
+    log.error('Database connection failed during startup', {
+      error: error.message,
+      errorCode: error.code,
+      errorErrno: error.errno,
+      stack: error.stack
+    });
+
+    // Environment-specific failure handling
+    const env = process.env.NODE_ENV || 'development';
+
+    if (env === 'production') {
+      log.error('Database is required in production mode. Server cannot start.', {
+        environment: env,
+        shutdownReason: 'database_connection_failed'
+      });
       process.exit(1);
+    } else {
+      log.warn('Running in development mode without database', {
+        environment: env,
+        degradedMode: true,
+        impact: 'Some features will be unavailable'
+      });
+      log.info('Development mode troubleshooting tips', {
+        tips: [
+          'Ensure PostgreSQL is running',
+          'Check database configuration in config/database.js',
+          'Verify database credentials',
+          'Check if database exists'
+        ]
+      });
     }
   }
 
@@ -141,9 +169,12 @@ const startServer = async () => {
       log.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
       log.info(`💾 Database Status: ${dbConnected ? '✅ Connected' : '❌ Disconnected'}`);
 
-      // Set up periodic database health checks if initial connection failed
+      // Set up enhanced database monitoring if initial connection failed
       if (!dbConnected) {
-        setupDatabaseHealthCheck();
+        const healthCheckTimer = setupDatabaseHealthCheck();
+
+        // Store timer for graceful shutdown
+        process.healthCheckTimer = healthCheckTimer;
       }
     });
   } catch (error) {
@@ -152,30 +183,153 @@ const startServer = async () => {
   }
 };
 
-// Periodic database health check and reconnection
+// Enhanced database health monitoring with adaptive intervals
 const setupDatabaseHealthCheck = () => {
-  const healthCheckInterval = 30000; // 30 seconds
+  let healthCheckInterval = 30000; // Start with 30 seconds
+  let consecutiveFailures = 0;
+  let healthCheckTimer;
 
-  setInterval(async () => {
-    const { checkConnectionHealth } = require('./models');
-    const health = await checkConnectionHealth();
+  const performHealthCheck = async () => {
+    try {
+      const { checkConnectionHealth, circuitBreaker } = require('./models');
 
-    if (health.healthy) {
-      log.info('🔄 Database reconnected successfully');
-      clearInterval(this); // Stop health checks once reconnected
-    } else {
-      log.warn('💔 Database still unavailable', { error: health.error });
+      // Check circuit breaker status
+      const circuitStatus = circuitBreaker.getStatus();
+      log.debug('Circuit breaker status', circuitStatus);
+
+      if (circuitStatus.state === 'OPEN') {
+        log.warn('Circuit breaker is OPEN - skipping health check', {
+          nextAttempt: circuitStatus.nextAttempt,
+          failureCount: circuitStatus.failureCount
+        });
+        return;
+      }
+
+      const health = await checkConnectionHealth();
+
+      if (health.healthy) {
+        log.info('Database connection restored', {
+          responseTime: `${health.responseTime}ms`,
+          downtime: consecutiveFailures > 0 ? `${consecutiveFailures * healthCheckInterval}ms` : 'N/A'
+        });
+
+        // Reset failure counter and interval
+        consecutiveFailures = 0;
+        healthCheckInterval = 30000; // Reset to 30 seconds
+
+        // Clear health check timer - database is back
+        clearInterval(healthCheckTimer);
+        log.info('Database health monitoring stopped - connection restored');
+
+      } else {
+        consecutiveFailures++;
+
+        // Exponential backoff for health checks (max 5 minutes)
+        healthCheckInterval = Math.min(
+          healthCheckInterval * 1.5,
+          300000 // 5 minutes max
+        );
+
+        log.warn('Database still unavailable', {
+          error: health.error,
+          errorType: health.errorType,
+          consecutiveFailures,
+          nextCheckIn: `${healthCheckInterval}ms`,
+          troubleshooting: health.troubleshooting
+        });
+
+        // Restart timer with new interval
+        clearInterval(healthCheckTimer);
+        healthCheckTimer = setInterval(performHealthCheck, healthCheckInterval);
+      }
+
+    } catch (error) {
+      log.error('Health check failed', {
+        error: error.message,
+        consecutiveFailures: ++consecutiveFailures
+      });
     }
-  }, healthCheckInterval);
+  };
+
+  log.info('Starting database health monitoring', {
+    initialInterval: `${healthCheckInterval}ms`
+  });
+
+  healthCheckTimer = setInterval(performHealthCheck, healthCheckInterval);
+
+  // Store timer reference for cleanup
+  return healthCheckTimer;
 };
 
-// Handle graceful shutdown
-process.on('SIGTERM', () => {
-  log.info('🛑 SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    log.info('✅ Server closed');
+// Enhanced graceful shutdown handling
+process.on('SIGTERM', async () => {
+  log.info('SIGTERM received, initiating graceful shutdown');
+
+  // Clear health check timer if running
+  if (process.healthCheckTimer) {
+    clearInterval(process.healthCheckTimer);
+    log.info('Database health monitoring stopped');
+  }
+
+  // Close HTTP server
+  server.close(async () => {
+    log.info('HTTP server closed');
+
+    // Close database connections
+    try {
+      const { sequelize } = require('./models');
+      await sequelize.close();
+      log.info('Database connections closed');
+    } catch (error) {
+      log.error('Error closing database connections', {
+        error: error.message
+      });
+    }
+
+    log.info('Graceful shutdown completed');
     process.exit(0);
   });
+
+  // Force exit after 10 seconds
+  setTimeout(() => {
+    log.error('Forceful shutdown after timeout');
+    process.exit(1);
+  }, 10000);
+});
+
+process.on('SIGINT', async () => {
+  log.info('SIGINT received, initiating graceful shutdown');
+
+  // Clear health check timer if running
+  if (process.healthCheckTimer) {
+    clearInterval(process.healthCheckTimer);
+    log.info('Database health monitoring stopped');
+  }
+
+  // Close HTTP server
+  server.close(async () => {
+    log.info('HTTP server closed');
+
+    // Close database connections
+    try {
+      const { sequelize } = require('./models');
+      await sequelize.close();
+      log.info('Database connections closed');
+    } catch (error) {
+      log.error('Error closing database connections', {
+        error: error.message
+      });
+    }
+
+    log.info('Graceful shutdown completed');
+    process.exit(0);
+  });
+
+  // Force exit after 10 seconds
+  setTimeout(() => {
+    log.error('Forceful shutdown after timeout');
+    process.exit(1);
+  }, 10000);
 });
 
 process.on('SIGINT', () => {
