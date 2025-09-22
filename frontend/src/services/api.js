@@ -130,4 +130,16 @@ export const matchAPI = {
   getEvents: (id) => api.get(`/matches/${id}/events`),
 };
 
+// Tournament API calls
+export const tournamentAPI = {
+  create: (tournamentData) => api.post('/tournaments', tournamentData),
+  getById: (id) => api.get(`/tournaments/${id}`),
+  getAll: (params) => api.get('/tournaments', { params }),
+  update: (id, tournamentData) => api.put(`/tournaments/${id}`, tournamentData),
+  delete: (id) => api.delete(`/tournaments/${id}`),
+  join: (id, participantData) => api.post(`/tournaments/${id}/join`, participantData),
+  leave: (id) => api.post(`/tournaments/${id}/leave`),
+  getParticipants: (id, params) => api.get(`/tournaments/${id}/participants`, { params }),
+};
+
 export default api;

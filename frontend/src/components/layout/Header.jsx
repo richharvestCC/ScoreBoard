@@ -46,9 +46,18 @@ const Header = () => {
               color="inherit"
               startIcon={<Groups />}
               onClick={() => navigate('/clubs')}
-              sx={{ mr: 1 }}
+              sx={{ mr: 2 }}
             >
               클럽
+            </Button>
+
+            <Button
+              color="inherit"
+              startIcon={<Sports />}
+              onClick={() => navigate('/matches')}
+              sx={{ mr: 2 }}
+            >
+              경기
             </Button>
 
             <Button
