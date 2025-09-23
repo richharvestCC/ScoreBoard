@@ -40,9 +40,8 @@ export { default as SVGTournamentBracket } from './bracket/SVGTournamentBracket'
 export { default as GroupStageGrid } from './bracket/GroupStageGrid';
 export { default as MatchCard } from './bracket/MatchCard';
 
-// Task 5: Zoom/Pinch Gestures
-// export { default as ZoomPanContainer } from './bracket/ZoomPanContainer';
-// export { useZoomPan } from './bracket/ZoomPanContainer';
+// Task 5: Zoom/Pinch Gestures ✅
+export { default as ZoomPanContainer, useZoomPan } from './bracket/ZoomPanContainer';
 
 // Task 6: Safety & Modal System
 // export { default as TournamentCreationModal } from './creation/TournamentCreationModal';
