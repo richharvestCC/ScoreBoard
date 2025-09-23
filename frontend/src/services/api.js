@@ -55,11 +55,9 @@ api.interceptors.response.use(
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
 
-        // Use navigation event instead of window.location.href
-        const navigationEvent = new CustomEvent('forceNavigate', {
-          detail: { path: '/auth' }
-        });
-        window.dispatchEvent(navigationEvent);
+        // Use global navigation utility instead of window.location.href
+        const { globalNavigateToAuth } = await import('../contexts/NavigationContext');
+        globalNavigateToAuth();
       }
     }
 

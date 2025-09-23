@@ -22,4 +22,9 @@ router.post('/:id/leave', tournamentController.leaveTournament);
 router.get('/:id/participants', tournamentController.getTournamentParticipants);
 router.get('/:id/matches', tournamentController.getTournamentMatches);
 
+// Tournament bracket operations
+router.post('/:id/bracket/generate', tournamentController.generateBracket);
+router.get('/:id/bracket', tournamentController.getBracket);
+router.put('/:id/bracket/match/:matchId', tournamentController.updateBracketMatch);
+
 module.exports = router;

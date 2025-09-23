@@ -1,4 +1,5 @@
 const matchService = require('../services/matchService');
+const matchStatisticsService = require('../services/matchStatisticsService');
 const { log } = require('../config/logger');
 
 const matchController = {
@@ -241,6 +242,101 @@ const matchController = {
       res.status(500).json({
         success: false,
         message: 'Internal server error'
+      });
+    }
+  },
+
+  // Get match statistics
+  async getMatchStatistics(req, res) {
+    try {
+      const { id } = req.params;
+
+      const statistics = await matchStatisticsService.getStatistics(id);
+
+      res.json({
+        success: true,
+        data: statistics
+      });
+    } catch (error) {
+      log.error('Error getting match statistics', { error: error.message, matchId: req.params.id });
+
+      if (error.name === 'NotFoundError') {
+        return res.status(404).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch match statistics'
+      });
+    }
+  },
+
+  // Update match statistics
+  async updateMatchStatistics(req, res) {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const statistics = req.body;
+
+      const updatedStats = await matchStatisticsService.updateStatistics(id, statistics, userId);
+
+      res.json({
+        success: true,
+        message: 'Statistics updated successfully',
+        data: updatedStats
+      });
+    } catch (error) {
+      log.error('Error updating match statistics', { error: error.message, matchId: req.params.id });
+
+      if (error.name === 'NotFoundError') {
+        return res.status(404).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      if (error.name === 'UnauthorizedError') {
+        return res.status(403).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update match statistics'
+      });
+    }
+  },
+
+  // Calculate statistics from events
+  async calculateStatisticsFromEvents(req, res) {
+    try {
+      const { id } = req.params;
+
+      const statistics = await matchStatisticsService.calculateFromEvents(id);
+
+      res.json({
+        success: true,
+        message: 'Statistics calculated successfully',
+        data: statistics
+      });
+    } catch (error) {
+      log.error('Error calculating match statistics', { error: error.message, matchId: req.params.id });
+
+      if (error.name === 'NotFoundError') {
+        return res.status(404).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to calculate match statistics'
       });
     }
   }
