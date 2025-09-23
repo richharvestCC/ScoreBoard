@@ -38,15 +38,15 @@ import { useResponsive } from '../shared/ResponsiveLayout';
 
 // Styled Components
 const GroupContainer = styled(Paper)(({ theme }) => ({
-  background: alpha(theme.palette.surface?.container || theme.palette.background.paper, 0.8),
+  background: alpha(theme.palette.background.paper, 0.8),
   backdropFilter: 'blur(20px)',
   border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: `${(theme.shape.borderRadius as number) * 2}px`,
   overflow: 'hidden',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 
   '&:hover': {
-    background: alpha(theme.palette.surface?.containerHigh || theme.palette.background.paper, 0.9),
+    background: alpha(theme.palette.background.paper, 0.9),
     transform: 'translateY(-2px)',
     boxShadow: theme.shadows[4]
   }
@@ -64,7 +64,7 @@ const GroupHeader = styled(Box)(({ theme }) => ({
 const StandingsTable = styled(Table)(({ theme }) => ({
   '& .MuiTableHead-root': {
     '& .MuiTableCell-head': {
-      backgroundColor: alpha(theme.palette.surface?.containerLow || theme.palette.background.default, 0.5),
+      backgroundColor: alpha(theme.palette.background.default, 0.5),
       fontWeight: 600,
       fontSize: '0.75rem',
       color: theme.palette.text.secondary
@@ -86,7 +86,7 @@ const MatchCard = styled(Paper)<{ status: MatchStatus }>(({ theme, status }) => 
     ? alpha(theme.palette.success.main, 0.1)
     : status === 'in_progress'
     ? alpha(theme.palette.warning.main, 0.1)
-    : alpha(theme.palette.surface?.container || theme.palette.background.paper, 0.7),
+    : alpha(theme.palette.background.paper || theme.palette.background.paper, 0.7),
   border: `1px solid ${
     status === 'completed'
       ? alpha(theme.palette.success.main, 0.3)
@@ -287,9 +287,9 @@ const GroupDisplay: React.FC<GroupDisplayProps> = ({
       <Accordion expanded={expanded} onChange={handleToggle} elevation={0}>
         <AccordionSummary sx={{ display: 'none' }} />
         <AccordionDetails sx={{ padding: 0 }}>
-          <Grid container spacing={2} sx={{ p: 2 }}>
+          <Box sx={{ p: 2, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
             {/* Standings Table */}
-            <Grid item xs={12} md={6}>
+            <Box sx={{ flex: 1 }}>
               <Typography variant="subtitle2" gutterBottom fontWeight={600}>
                 순위표
               </Typography>
@@ -359,10 +359,10 @@ const GroupDisplay: React.FC<GroupDisplayProps> = ({
                   ))}
                 </TableBody>
               </StandingsTable>
-            </Grid>
+            </Box>
 
             {/* Matches */}
-            <Grid item xs={12} md={6}>
+            <Box sx={{ flex: 1 }}>
               <Typography variant="subtitle2" gutterBottom fontWeight={600}>
                 경기 일정
               </Typography>
@@ -376,8 +376,8 @@ const GroupDisplay: React.FC<GroupDisplayProps> = ({
                   />
                 ))}
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </AccordionDetails>
       </Accordion>
     </GroupContainer>
@@ -414,7 +414,7 @@ const GroupStageGrid: React.FC<GroupStageProps> = ({
         sx={{
           mb: 3,
           p: 2,
-          background: (theme) => alpha(theme.palette.surface?.container || theme.palette.background.paper, 0.8),
+          background: (theme) => alpha(theme.palette.background.paper || theme.palette.background.paper, 0.8),
           backdropFilter: 'blur(10px)',
           borderRadius: 2,
           border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.12)}`

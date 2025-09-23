@@ -82,7 +82,7 @@ const ToggleContainer = styled(Box)(({ theme }) => ({
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 
   '&:hover': {
-    background: alpha(theme.palette.surface?.containerHigh || theme.palette.background.paper, 0.9),
+    background: alpha(theme.palette.background.paper, 0.9),
     transform: 'translateY(-1px)',
     boxShadow: theme.shadows[2]
   }

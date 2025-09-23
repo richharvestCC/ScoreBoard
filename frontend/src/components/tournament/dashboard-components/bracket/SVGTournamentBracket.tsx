@@ -46,8 +46,8 @@ const MatchCard = styled('foreignObject')<{ isWinner?: boolean; isEmpty?: boolea
       width: '100%',
       height: '100%',
       background: isEmpty
-        ? alpha(theme.palette.surface?.containerLow || theme.palette.background.paper, 0.3)
-        : alpha(theme.palette.surface?.container || theme.palette.background.paper, 0.9),
+        ? alpha(theme.palette.background.paper, 0.3)
+        : alpha(theme.palette.background.paper || theme.palette.background.paper, 0.9),
       backdropFilter: 'blur(10px)',
       border: `1px solid ${
         isWinner
@@ -63,7 +63,7 @@ const MatchCard = styled('foreignObject')<{ isWinner?: boolean; isEmpty?: boolea
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 
       '&:hover': isEmpty ? {} : {
-        background: alpha(theme.palette.surface?.containerHigh || theme.palette.background.paper, 0.95),
+        background: alpha(theme.palette.background.paper, 0.95),
         transform: 'translateY(-2px)',
         boxShadow: theme.shadows[4]
       }
@@ -478,7 +478,7 @@ const SVGTournamentBracket: React.FC<TournamentBracketProps> = ({
           position: 'absolute',
           top: 16,
           right: 16,
-          background: alpha(theme.palette.surface?.container || theme.palette.background.paper, 0.9),
+          background: alpha(theme.palette.background.paper || theme.palette.background.paper, 0.9),
           backdropFilter: 'blur(10px)',
           borderRadius: 2,
           padding: 2,

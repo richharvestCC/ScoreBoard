@@ -39,7 +39,7 @@ import { useResponsive } from '../shared/ResponsiveLayout';
 // Styled Components
 const StyledMatchCard = styled(Card)<{ status: MatchStatus; isCompact?: boolean }>(
   ({ theme, status, isCompact }) => ({
-    background: alpha(theme.palette.surface?.container || theme.palette.background.paper, 0.8),
+    background: alpha(theme.palette.background.paper || theme.palette.background.paper, 0.8),
     backdropFilter: 'blur(10px)',
     border: `1px solid ${
       status === 'completed'
@@ -57,7 +57,7 @@ const StyledMatchCard = styled(Card)<{ status: MatchStatus; isCompact?: boolean 
     '&:hover': {
       transform: 'translateY(-2px)',
       boxShadow: theme.shadows[4],
-      background: alpha(theme.palette.surface?.containerHigh || theme.palette.background.paper, 0.9)
+      background: alpha(theme.palette.background.paper, 0.9)
     },
 
     '&::before': status === 'in_progress' ? {
