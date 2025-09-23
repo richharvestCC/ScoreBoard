@@ -10,11 +10,7 @@ import {
   MenuItem,
   IconButton,
 } from '@mui/material';
-<<<<<<< HEAD
-import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, Assignment } from '@mui/icons-material';
-=======
-import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, Assignment, AdminPanelSettings } from '@mui/icons-material';
->>>>>>> feature/3-user-role-dashboard
+import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, Assignment, AdminPanelSettings, LiveTv } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -80,6 +76,15 @@ const Header = () => {
               sx={{ mr: 2 }}
             >
               템플릿
+            </Button>
+
+            <Button
+              color="inherit"
+              startIcon={<LiveTv />}
+              onClick={() => navigate('/live')}
+              sx={{ mr: 2 }}
+            >
+              라이브
             </Button>
 
             {user && ['admin', 'moderator'].includes(user.role) && (

@@ -17,13 +17,8 @@ const { logger, log, correlationMiddleware } = require('./config/logger');
 const app = express();
 const server = http.createServer(app);
 
-// Socket.io setup
-const io = new Server(server, {
-  cors: {
-    origin: process.env.SOCKET_CORS_ORIGIN || "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
-});
+// Live Socket Service
+const liveSocketService = require('./services/liveSocketService');
 
 // Middleware
 app.use(helmet());
@@ -50,9 +45,9 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Make io accessible to routes
+// Make live socket service accessible to routes
 app.use((req, res, next) => {
-  req.io = io;
+  req.liveSocketService = liveSocketService;
   next();
 });
 
@@ -87,26 +82,8 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Socket.io connection handling
-io.on('connection', (socket) => {
-  log.socket('user_connected', socket.id);
-
-  // Join match room
-  socket.on('join-match', (matchId) => {
-    socket.join(`match-${matchId}`);
-    log.socket('join_match', socket.id, { matchId });
-  });
-
-  // Leave match room
-  socket.on('leave-match', (matchId) => {
-    socket.leave(`match-${matchId}`);
-    log.socket('leave_match', socket.id, { matchId });
-  });
-
-  socket.on('disconnect', () => {
-    log.socket('user_disconnected', socket.id);
-  });
-});
+// Initialize Live Socket Service
+liveSocketService.initialize(server);
 
 // Start server
 const PORT = process.env.PORT || 3001;
