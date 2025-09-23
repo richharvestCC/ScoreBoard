@@ -16,7 +16,7 @@ const tournamentController = {
         data: tournament
       });
     } catch (error) {
-      console.error('Create tournament error:', error);
+      log.error('Create tournament error', { error: error.message, userId: req.user?.id });
       res.status(500).json({
         success: false,
         message: 'Failed to create tournament',
@@ -44,7 +44,7 @@ const tournamentController = {
         data: result
       });
     } catch (error) {
-      console.error('Get tournaments error:', error);
+      log.error('Get tournaments error', { error: error.message });
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournaments',
@@ -73,7 +73,7 @@ const tournamentController = {
         data: tournament
       });
     } catch (error) {
-      console.error('Get tournament error:', error);
+      log.error('Get tournament error', { error: error.message, tournamentId: req.params.id });
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournament',
@@ -96,7 +96,7 @@ const tournamentController = {
         data: tournament
       });
     } catch (error) {
-      console.error('Update tournament error:', error);
+      log.error('Update tournament error', { error: error.message, tournamentId: req.params.id, userId: req.user?.id });
       if (error.message === 'Tournament not found') {
         return res.status(404).json({
           success: false,
@@ -130,7 +130,7 @@ const tournamentController = {
         message: 'Tournament deleted successfully'
       });
     } catch (error) {
-      console.error('Delete tournament error:', error);
+      log.error('Delete tournament error', { error: error.message, tournamentId: req.params.id, userId: req.user?.id });
       if (error.message === 'Tournament not found') {
         return res.status(404).json({
           success: false,
@@ -166,7 +166,7 @@ const tournamentController = {
         data: participation
       });
     } catch (error) {
-      console.error('Join tournament error:', error);
+      log.error('Join tournament error', { error: error.message, tournamentId: req.params.id, userId: req.user?.id });
       if (error.message === 'Tournament not found') {
         return res.status(404).json({
           success: false,
@@ -200,7 +200,7 @@ const tournamentController = {
         message: 'Successfully left tournament'
       });
     } catch (error) {
-      console.error('Leave tournament error:', error);
+      log.error('Leave tournament error', { error: error.message, tournamentId: req.params.id, userId: req.user?.id });
       if (error.message === 'Tournament not found' || error.message === 'Not participating in this tournament') {
         return res.status(404).json({
           success: false,
@@ -227,7 +227,7 @@ const tournamentController = {
         data: participants
       });
     } catch (error) {
-      console.error('Get tournament participants error:', error);
+      log.error('Get tournament participants error', { error: error.message, tournamentId: req.params.id });
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournament participants',
@@ -248,7 +248,7 @@ const tournamentController = {
         data: matches
       });
     } catch (error) {
-      console.error('Get tournament matches error:', error);
+      log.error('Get tournament matches error', { error: error.message, tournamentId: req.params.id });
       res.status(500).json({
         success: false,
         message: 'Failed to fetch tournament matches',

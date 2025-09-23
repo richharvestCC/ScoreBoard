@@ -1,6 +1,7 @@
 const { Match, MatchStatistics, MatchEvent, Club, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { NotFoundError, ValidationError, UnauthorizedError } = require('../utils/errors');
+const { log } = require('../config/logger');
 
 class MatchStatisticsService {
   // Create or update match statistics
@@ -602,7 +603,7 @@ class MatchStatisticsService {
 
     } catch (error) {
       // Fallback to the original method if raw query fails
-      console.warn('Optimized query failed, falling back to ORM method:', error.message);
+      log.warn('Optimized query failed, falling back to ORM method', { error: error.message, clubId });
       return this.getTeamStatistics(clubId, limit);
     }
   }

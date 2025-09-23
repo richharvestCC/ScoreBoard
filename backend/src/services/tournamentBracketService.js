@@ -71,9 +71,41 @@ class TournamentBracketService {
         const homeIndex = i;
         const awayIndex = totalSlots - 1 - i;
 
-        // Check if this is a bye match
+        // Handle bye matches - automatically advance the participant to next round
         if (homeIndex >= participantCount || awayIndex >= participantCount) {
-          continue; // Skip bye matches for now
+          const advancingParticipant = homeIndex < participantCount ? participants[homeIndex] : participants[awayIndex];
+
+          // Create a bye match record for bracket completeness
+          const byeMatch = await Match.create({
+            tournament_id: tournamentId,
+            match_type: 'tournament',
+            stage: this.getRoundName(rounds, rounds),
+            round_number: rounds,
+            match_number: `R${rounds}M${i + 1}`,
+            home_club_id: advancingParticipant.participant_type === 'club' ? advancingParticipant.participant_id : null,
+            away_club_id: null, // No opponent in bye match
+            status: 'completed', // Bye matches are automatically completed
+            home_score: 1, // Winner by default
+            away_score: 0,
+            created_by_user_id: userId
+          }, { transaction });
+
+          matches.push(byeMatch);
+
+          // Create bracket entry for bye match
+          const byeBracket = {
+            tournament_id: tournamentId,
+            match_id: byeMatch.id,
+            round_number: rounds,
+            bracket_position: i + 1,
+            home_seed: advancingParticipant.seed_number,
+            away_seed: null, // No opponent seed
+            next_match_id: null, // Will be updated later
+            is_bye: true // Mark as bye match
+          };
+          brackets.push(byeBracket);
+          bracketMap.set(byeMatch.id, byeBracket);
+          continue;
         }
 
         const homeParticipant = participants[homeIndex];
