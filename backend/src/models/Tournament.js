@@ -150,7 +150,7 @@ module.exports = (sequelize, DataTypes) => {
     onDelete: 'RESTRICT'
   }
 }, {
-  tableName: 'tournaments',
+  tableName: 'competitions',
   indexes: [
     {
       fields: ['tournament_type']

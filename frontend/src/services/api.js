@@ -113,4 +113,39 @@ export const tournamentAPI = {
   getMatches: (id) => api.get(`/tournaments/${id}/matches`),
 };
 
+// Competition API calls
+export const competitionAPI = {
+  create: (competitionData) => api.post('/competitions', competitionData),
+  getById: (id) => api.get(`/competitions/${id}`),
+  getAll: (params) => api.get('/competitions', { params }),
+  update: (id, competitionData) => api.put(`/competitions/${id}`, competitionData),
+  delete: (id) => api.delete(`/competitions/${id}`),
+  updateStatus: (id, status) => api.patch(`/competitions/${id}/status`, { status }),
+  getTemplates: () => api.get('/competitions/templates'),
+  getActive: () => api.get('/competitions/active'),
+  getUserCompetitions: (role) => api.get('/competitions/my', { params: { role } }),
+  createFromTemplate: (templateId, competitionData) => api.post(`/competitions/from-template/${templateId}`, competitionData),
+};
+
+// Admin API calls
+export const adminAPI = {
+  getDashboardStats: () => api.get('/admin/dashboard/stats'),
+  getAllUsers: (params) => api.get('/admin/users', { params }),
+  getUserById: (id) => api.get(`/admin/users/${id}`),
+  updateUser: (id, userData) => api.put(`/admin/users/${id}`, userData),
+  getUserActivity: (id) => api.get(`/admin/users/${id}/activity`),
+  getSystemStatus: () => api.get('/admin/system/status'),
+};
+
+// Live Scoring API calls
+export const liveScoringAPI = {
+  startLiveMatch: (matchId) => api.post(`/live/${matchId}/start`),
+  endLiveMatch: (matchId, data = {}) => api.post(`/live/${matchId}/end`, data),
+  updateLiveScore: (matchId, scoreData) => api.put(`/live/${matchId}/score`, scoreData),
+  addLiveEvent: (matchId, eventData) => api.post(`/live/${matchId}/event`, eventData),
+  updateLiveStats: (matchId, statsData) => api.put(`/live/${matchId}/stats`, statsData),
+  getLiveMatchInfo: (matchId) => api.get(`/live/${matchId}`),
+  getLiveMatches: (params = {}) => api.get('/live/matches/live', { params }),
+  getLiveStats: () => api.get('/live/stats/live')
+};
 export default api;

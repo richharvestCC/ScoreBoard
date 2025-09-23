@@ -1,5 +1,6 @@
 import winston from 'winston';
 import path from 'path';
+import fs from 'fs';
 import { Request, Response } from 'express';
 
 // Define log levels type
@@ -86,6 +87,11 @@ const logger = winston.createLogger({
 if (process.env.NODE_ENV === 'production') {
   const logDir = process.env.LOG_DIR || path.join(process.cwd(), 'logs');
 
+  // Create logs directory if it doesn't exist
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+
   // Error log file
   logger.add(new winston.transports.File({
     filename: path.join(logDir, 'error.log'),
@@ -108,16 +114,6 @@ if (process.env.NODE_ENV === 'production') {
       winston.format.json()
     )
   }));
-}
-
-// Create logs directory if it doesn't exist
-if (process.env.NODE_ENV === 'production') {
-  const fs = require('fs');
-  const logDir = process.env.LOG_DIR || path.join(process.cwd(), 'logs');
-
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
-  }
 }
 
 // Typed logger interface

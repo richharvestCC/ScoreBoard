@@ -13,20 +13,19 @@ dotenv.config();
 const { testConnection, syncDatabase } = require('./models');
 const routes = require('./routes');
 const { logger, log, correlationMiddleware } = require('./config/logger');
+const xssProtection = require('./middleware/xss-protection');
 
 const app = express();
 const server = http.createServer(app);
 
-// Socket.io setup
-const io = new Server(server, {
-  cors: {
-    origin: process.env.SOCKET_CORS_ORIGIN || "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
-});
+// Live Socket Service
+const liveSocketService = require('./services/liveSocketService');
 
-// Middleware
+// Security middleware
 app.use(helmet());
+app.use(xssProtection.securityHeaders);
+app.use(xssProtection.requestValidation);
+app.use(xssProtection.rateLimiting);
 
 // Request correlation tracking (before morgan)
 app.use(correlationMiddleware());
@@ -46,13 +45,13 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
+// Body parsing middleware with XSS protection
+app.use(express.json(xssProtection.jsonParserLimits));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Make io accessible to routes
+// Make live socket service accessible to routes
 app.use((req, res, next) => {
-  req.io = io;
+  req.liveSocketService = liveSocketService;
   next();
 });
 
@@ -68,6 +67,9 @@ app.get('/', (req, res) => {
     documentation: '/api/v1/health'
   });
 });
+
+// XSS error handler (before global error handler)
+app.use(xssProtection.xssErrorHandler);
 
 // Global error handler
 app.use((error, req, res, next) => {
@@ -87,26 +89,8 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Socket.io connection handling
-io.on('connection', (socket) => {
-  log.socket('user_connected', socket.id);
-
-  // Join match room
-  socket.on('join-match', (matchId) => {
-    socket.join(`match-${matchId}`);
-    log.socket('join_match', socket.id, { matchId });
-  });
-
-  // Leave match room
-  socket.on('leave-match', (matchId) => {
-    socket.leave(`match-${matchId}`);
-    log.socket('leave_match', socket.id, { matchId });
-  });
-
-  socket.on('disconnect', () => {
-    log.socket('user_disconnected', socket.id);
-  });
-});
+// Initialize Live Socket Service
+liveSocketService.initialize(server);
 
 // Start server
 const PORT = process.env.PORT || 3001;
@@ -341,13 +325,7 @@ process.on('SIGINT', async () => {
   }, 10000);
 });
 
-process.on('SIGINT', () => {
-  log.info('🛑 SIGINT received, shutting down gracefully');
-  server.close(() => {
-    log.info('✅ Server closed');
-    process.exit(0);
-  });
-});
+// Note: SIGINT handler is already defined above with enhanced shutdown logic
 
 startServer();
 

@@ -1,6 +1,6 @@
 const winston = require('winston');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 
 // Enhanced structured log format
 const structuredFormat = winston.format.combine(
@@ -107,7 +107,7 @@ const contextStorage = new AsyncLocalStorage();
 
 // Generate correlation ID for request tracking
 function generateCorrelationId() {
-  return uuidv4();
+  return randomUUID();
 }
 
 // Get current context

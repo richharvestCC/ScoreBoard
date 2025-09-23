@@ -18,6 +18,11 @@ const matchService = {
         throw new Error('Home and away clubs must be different');
       }
 
+      // Check for scheduling conflicts with consistent 12-hour interval
+      if (matchData.match_date) {
+        await this.checkMatchConflicts(matchData.home_club_id, matchData.away_club_id, matchData.match_date);
+      }
+
       // Check if user is member of at least one club
       const membershipCheck = await ClubMember.findOne({
         where: {
@@ -517,6 +522,73 @@ const matchService = {
       return await this.getMatchById(matchId, userId);
     } catch (error) {
       throw error;
+    }
+  },
+
+  // Check for match scheduling conflicts with consistent 12-hour interval
+  async checkMatchConflicts(homeClubId, awayClubId, matchDate) {
+    try {
+      const matchDateTime = new Date(matchDate);
+
+      // Create 12-hour interval window (6 hours before and after)
+      const intervalStart = new Date(matchDateTime.getTime() - (12 * 60 * 60 * 1000)); // 12 hours before
+      const intervalEnd = new Date(matchDateTime.getTime() + (12 * 60 * 60 * 1000)); // 12 hours after
+
+      // Check for conflicts with either club involved
+      const conflictingMatches = await Match.findAll({
+        where: {
+          [Op.and]: [
+            {
+              match_date: {
+                [Op.between]: [intervalStart, intervalEnd]
+              }
+            },
+            {
+              [Op.or]: [
+                { home_club_id: homeClubId },
+                { away_club_id: homeClubId },
+                { home_club_id: awayClubId },
+                { away_club_id: awayClubId }
+              ]
+            },
+            {
+              status: {
+                [Op.in]: ['scheduled', 'in_progress']
+              }
+            }
+          ]
+        },
+        include: [
+          {
+            model: Club,
+            as: 'homeClub',
+            attributes: ['name']
+          },
+          {
+            model: Club,
+            as: 'awayClub',
+            attributes: ['name']
+          }
+        ]
+      });
+
+      if (conflictingMatches.length > 0) {
+        const conflictDetails = conflictingMatches.map(match => {
+          const conflictDate = new Date(match.match_date);
+          const timeDiff = Math.abs(matchDateTime - conflictDate) / (1000 * 60 * 60); // hours
+          return `${match.homeClub?.name || 'Unknown'} vs ${match.awayClub?.name || 'Unknown'} at ${conflictDate.toISOString()} (${timeDiff.toFixed(1)}h difference)`;
+        }).join(', ');
+
+        throw new Error(`Match scheduling conflict detected within 12-hour window. Conflicting matches: ${conflictDetails}`);
+      }
+
+      return true;
+    } catch (error) {
+      if (error.message.includes('scheduling conflict')) {
+        throw error;
+      }
+      log.error('Error checking match conflicts', { error: error.message, homeClubId, awayClubId, matchDate });
+      throw new Error('Failed to validate match scheduling');
     }
   }
 };

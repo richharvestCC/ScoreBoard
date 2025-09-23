@@ -51,6 +51,28 @@ module.exports = (sequelize, DataTypes) => {
     profile_image_url: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    role: {
+      type: DataTypes.ENUM('user', 'admin', 'moderator', 'organizer'),
+      allowNull: false,
+      defaultValue: 'user',
+      comment: 'user: 일반사용자, admin: 관리자, moderator: 운영자, organizer: 대회주최자'
+    },
+    is_active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      comment: '계정 활성화 상태'
+    },
+    last_login_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: '마지막 로그인 시간'
+    },
+    permissions: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: '추가 권한 설정 (JSON format)'
     }
   }, {
     tableName: 'users',
@@ -63,6 +85,12 @@ module.exports = (sequelize, DataTypes) => {
       {
         unique: true,
         fields: ['email']
+      },
+      {
+        fields: ['role']
+      },
+      {
+        fields: ['is_active']
       }
     ]
   });
@@ -97,6 +125,103 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'recorded_by',
       as: 'recordedEvents'
     });
+
+    // Competition associations
+    User.hasMany(models.Competition, {
+      foreignKey: 'admin_user_id',
+      as: 'adminCompetitions'
+    });
+
+    User.hasMany(models.Competition, {
+      foreignKey: 'created_by',
+      as: 'createdCompetitions'
+    });
+  };
+
+  // Instance methods for role and permission checking
+  User.prototype.hasRole = function(role) {
+    return this.role === role;
+  };
+
+  User.prototype.hasAnyRole = function(roles) {
+    return roles.includes(this.role);
+  };
+
+  User.prototype.canManageUsers = function() {
+    return this.hasAnyRole(['admin', 'moderator']);
+  };
+
+  User.prototype.canCreateCompetition = function() {
+    return this.hasAnyRole(['admin', 'moderator', 'organizer']);
+  };
+
+  User.prototype.canManageCompetition = function(competition) {
+    if (this.hasRole('admin')) return true;
+    if (competition && (competition.admin_user_id === this.id || competition.created_by === this.id)) return true;
+    return false;
+  };
+
+  User.prototype.canModerateContent = function() {
+    return this.hasAnyRole(['admin', 'moderator']);
+  };
+
+  User.prototype.hasPermission = function(permission) {
+    if (this.hasRole('admin')) return true;
+    if (!this.permissions) return false;
+    return this.permissions[permission] === true;
+  };
+
+  // Class methods for role management
+  User.getRoleHierarchy = function() {
+    return {
+      admin: 4,
+      moderator: 3,
+      organizer: 2,
+      user: 1
+    };
+  };
+
+  User.getDefaultPermissions = function(role) {
+    const permissions = {
+      user: {
+        create_competition: false,
+        manage_own_competitions: true,
+        moderate_content: false,
+        manage_users: false,
+        view_analytics: false
+      },
+      organizer: {
+        create_competition: true,
+        manage_own_competitions: true,
+        moderate_content: false,
+        manage_users: false,
+        view_analytics: true
+      },
+      moderator: {
+        create_competition: true,
+        manage_own_competitions: true,
+        moderate_content: true,
+        manage_users: false,
+        view_analytics: true
+      },
+      admin: {
+        create_competition: true,
+        manage_own_competitions: true,
+        moderate_content: true,
+        manage_users: true,
+        view_analytics: true
+      }
+    };
+    return permissions[role] || permissions.user;
+  };
+
+  User.prototype.toJSON = function() {
+    const values = Object.assign({}, this.get());
+
+    // Remove sensitive information
+    delete values.password_hash;
+
+    return values;
   };
 
   return User;

@@ -18,6 +18,12 @@ import MatchDetail from './pages/MatchDetail';
 import LiveScoring from './pages/LiveScoring';
 import TournamentList from './pages/TournamentList';
 import TournamentDetail from './pages/TournamentDetail';
+import TemplateManagement from './pages/TemplateManagement';
+import AdminDashboard from './pages/AdminDashboard';
+import MatchScheduling from './pages/MatchScheduling';
+import LiveMatchView from './pages/LiveMatchView';
+import LiveMatchesPage from './pages/LiveMatchesPage';
+import LeagueDashboard from './pages/LeagueDashboard';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -153,6 +159,46 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <TournamentDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/templates"
+                element={
+                  <ProtectedRoute>
+                    <TemplateManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/competitions/:competitionId/scheduling"
+                element={
+                  <ProtectedRoute>
+                    <MatchScheduling />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/live"
+                element={
+                  <ProtectedRoute>
+                    <LiveMatchesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/leagues/:competitionId/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <LeagueDashboard />
                   </ProtectedRoute>
                 }
               />
