@@ -61,6 +61,7 @@ class TournamentBracketService {
 
       // Generate bracket matches
       const brackets = [];
+      const bracketMap = new Map(); // Performance optimization: O(1) lookup instead of O(n)
       const matches = [];
 
       // Create first round matches
@@ -95,7 +96,7 @@ class TournamentBracketService {
         matches.push(match);
 
         // Create bracket entry
-        brackets.push({
+        const newBracket = {
           tournament_id: tournamentId,
           match_id: match.id,
           round_number: rounds,
@@ -103,7 +104,9 @@ class TournamentBracketService {
           home_seed: homeParticipant.seed_number,
           away_seed: awayParticipant.seed_number,
           next_match_id: null // Will be updated later
-        });
+        };
+        brackets.push(newBracket);
+        bracketMap.set(match.id, newBracket);
       }
 
       // Create subsequent round matches
@@ -128,26 +131,28 @@ class TournamentBracketService {
           roundMatches.push(match);
 
           // Create bracket entry
-          brackets.push({
+          const newBracket = {
             tournament_id: tournamentId,
             match_id: match.id,
             round_number: round,
             bracket_position: i + 1,
             next_match_id: null
-          });
+          };
+          brackets.push(newBracket);
+          bracketMap.set(match.id, newBracket);
 
           // Update previous round matches to point to this match
           if (previousRoundMatches.length > i * 2) {
             const match1Index = i * 2;
             const match2Index = i * 2 + 1;
 
-            if (match1Index < brackets.length) {
-              const bracket1 = brackets.find(b => b.match_id === previousRoundMatches[match1Index].id);
+            if (match1Index < previousRoundMatches.length) {
+              const bracket1 = bracketMap.get(previousRoundMatches[match1Index].id);
               if (bracket1) bracket1.next_match_id = match.id;
             }
 
-            if (match2Index < brackets.length && match2Index < previousRoundMatches.length) {
-              const bracket2 = brackets.find(b => b.match_id === previousRoundMatches[match2Index].id);
+            if (match2Index < previousRoundMatches.length) {
+              const bracket2 = bracketMap.get(previousRoundMatches[match2Index].id);
               if (bracket2) bracket2.next_match_id = match.id;
             }
           }

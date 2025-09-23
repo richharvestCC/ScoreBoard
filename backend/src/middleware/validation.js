@@ -70,7 +70,13 @@ const createClubSchema = customJoi.object({
   club_type: Joi.string().valid('general', 'pro', 'youth', 'national').optional().default('general'),
   description: customJoi.xssString().safe({ maxLength: 2500, allowRichText: true }).optional(),
   location: Joi.string().min(1).max(200).optional(),
-  founded_year: Joi.number().integer().min(1800).max(new Date().getFullYear()).optional(),
+  founded_year: Joi.number().integer().min(1800).custom((value, helpers) => {
+    const currentYear = new Date().getFullYear();
+    if (value > currentYear) {
+      return helpers.error('number.max', { limit: currentYear });
+    }
+    return value;
+  }, 'current year validation').optional(),
   logo_url: Joi.string().uri().optional(),
   contact_email: Joi.string().email().optional(),
   contact_phone: Joi.string().pattern(/^[\+]?[0-9\-\s]+$/).optional()
@@ -81,7 +87,13 @@ const updateClubSchema = customJoi.object({
   club_type: Joi.string().valid('general', 'pro', 'youth', 'national').optional(),
   description: customJoi.xssString().safe({ maxLength: 2500, allowRichText: true }).optional(),
   location: Joi.string().min(1).max(200).optional(),
-  founded_year: Joi.number().integer().min(1800).max(new Date().getFullYear()).optional(),
+  founded_year: Joi.number().integer().min(1800).custom((value, helpers) => {
+    const currentYear = new Date().getFullYear();
+    if (value > currentYear) {
+      return helpers.error('number.max', { limit: currentYear });
+    }
+    return value;
+  }, 'current year validation').optional(),
   logo_url: Joi.string().uri().optional(),
   contact_email: Joi.string().email().optional(),
   contact_phone: Joi.string().pattern(/^[\+]?[0-9\-\s]+$/).optional()

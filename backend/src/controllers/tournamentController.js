@@ -1,5 +1,6 @@
 const tournamentService = require('../services/tournamentService');
 const tournamentBracketService = require('../services/tournamentBracketService');
+const { log } = require('../config/logger');
 
 const tournamentController = {
   // Create a new tournament
@@ -274,7 +275,7 @@ const tournamentController = {
         }
       });
     } catch (error) {
-      console.error('Generate bracket error:', error);
+      log.error('Generate bracket error', { error: error.message, stack: error.stack });
       if (error.name === 'NotFoundError') {
         return res.status(404).json({
           success: false,
@@ -307,7 +308,7 @@ const tournamentController = {
         data: bracket
       });
     } catch (error) {
-      console.error('Get bracket error:', error);
+      log.error('Get bracket error', { error: error.message, stack: error.stack });
       if (error.name === 'NotFoundError') {
         return res.status(404).json({
           success: false,
@@ -339,7 +340,7 @@ const tournamentController = {
         }
       });
     } catch (error) {
-      console.error('Update bracket match error:', error);
+      log.error('Update bracket match error', { error: error.message, stack: error.stack });
       if (error.name === 'NotFoundError') {
         return res.status(404).json({
           success: false,
