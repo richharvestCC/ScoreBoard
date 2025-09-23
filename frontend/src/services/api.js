@@ -127,4 +127,13 @@ export const competitionAPI = {
   createFromTemplate: (templateId, competitionData) => api.post(`/competitions/from-template/${templateId}`, competitionData),
 };
 
+// Admin API calls
+export const adminAPI = {
+  getDashboardStats: () => api.get('/admin/dashboard/stats'),
+  getAllUsers: (params) => api.get('/admin/users', { params }),
+  getUserById: (id) => api.get(`/admin/users/${id}`),
+  updateUser: (id, userData) => api.put(`/admin/users/${id}`, userData),
+  getUserActivity: (id) => api.get(`/admin/users/${id}/activity`),
+  getSystemStatus: () => api.get('/admin/system/status'),
+};
 export default api;

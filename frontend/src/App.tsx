@@ -19,6 +19,7 @@ import LiveScoring from './pages/LiveScoring';
 import TournamentList from './pages/TournamentList';
 import TournamentDetail from './pages/TournamentDetail';
 import TemplateManagement from './pages/TemplateManagement';
+import AdminDashboard from './pages/AdminDashboard';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -162,6 +163,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <TemplateManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
                   </ProtectedRoute>
                 }
               />
