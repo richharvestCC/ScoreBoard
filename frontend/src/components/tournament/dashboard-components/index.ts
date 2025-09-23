@@ -35,10 +35,10 @@ export { default as MaterialToggle, TournamentTypeToggle, GroupStageToggle, Icon
 // Task 3: Responsive Layout (Already implemented)
 // ✅ ResponsiveProvider and related utilities
 
-// Task 4: SVG Bracket Rendering
-// export { default as SVGTournamentBracket } from './bracket/SVGTournamentBracket';
-// export { default as GroupStageGrid } from './bracket/GroupStageGrid';
-// export { default as MatchCard } from './bracket/MatchCard';
+// Task 4: SVG Bracket Rendering ✅
+export { default as SVGTournamentBracket } from './bracket/SVGTournamentBracket';
+export { default as GroupStageGrid } from './bracket/GroupStageGrid';
+export { default as MatchCard } from './bracket/MatchCard';
 
 // Task 5: Zoom/Pinch Gestures
 // export { default as ZoomPanContainer } from './bracket/ZoomPanContainer';
