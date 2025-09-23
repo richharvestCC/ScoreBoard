@@ -221,12 +221,16 @@ module.exports = {
       defaultValue: 'general'
     });
 
-    // Update matches table with new structure
-    await queryInterface.changeColumn('matches', 'match_type', {
-      type: Sequelize.ENUM('practice', 'casual', 'friendly', 'tournament', 'a_friendly', 'a_tournament'),
-      allowNull: false,
-      defaultValue: 'casual'
-    });
+    // Update matches table with new structure - safely modify enum
+    await queryInterface.sequelize.query(`
+      ALTER TABLE matches ALTER COLUMN match_type DROP DEFAULT;
+      DROP TYPE IF EXISTS "enum_matches_match_type_new";
+      CREATE TYPE "enum_matches_match_type_new" AS ENUM('practice', 'casual', 'friendly', 'league', 'tournament', 'a_friendly', 'a_tournament');
+      ALTER TABLE matches ALTER COLUMN match_type TYPE "enum_matches_match_type_new" USING match_type::text::"enum_matches_match_type_new";
+      DROP TYPE IF EXISTS "enum_matches_match_type";
+      ALTER TYPE "enum_matches_match_type_new" RENAME TO "enum_matches_match_type";
+      ALTER TABLE matches ALTER COLUMN match_type SET DEFAULT 'casual';
+    `);
 
     await queryInterface.addColumn('matches', 'match_number', {
       type: Sequelize.STRING,
