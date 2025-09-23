@@ -205,7 +205,28 @@ module.exports = (sequelize, DataTypes) => {
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,
-      comment: 'Additional notes about match statistics'
+      comment: 'Additional notes about match statistics',
+      validate: {
+        len: [0, 2000],
+        isValidText(value) {
+          if (value && typeof value === 'string') {
+            const { sanitizeAndValidateText } = require('../utils/sanitizer');
+            const result = sanitizeAndValidateText(value, { maxLength: 2000, allowRichText: true });
+            if (!result.isValid) {
+              throw new Error(result.error);
+            }
+          }
+        }
+      },
+      set(value) {
+        if (value && typeof value === 'string') {
+          const { sanitizeAndValidateText } = require('../utils/sanitizer');
+          const result = sanitizeAndValidateText(value, { maxLength: 2000, allowRichText: true });
+          this.setDataValue('notes', result.sanitized);
+        } else {
+          this.setDataValue('notes', value);
+        }
+      }
     }
   }, {
     tableName: 'match_statistics',

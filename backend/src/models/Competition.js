@@ -86,12 +86,54 @@ const Competition = sequelize.define('Competition', {
   },
   description: {
     type: DataTypes.TEXT,
-    allowNull: true
+    allowNull: true,
+    validate: {
+      len: [0, 5000],
+      isValidText(value) {
+        if (value && typeof value === 'string') {
+          const { sanitizeAndValidateText } = require('../utils/sanitizer');
+          const result = sanitizeAndValidateText(value, { maxLength: 5000, allowRichText: true });
+          if (!result.isValid) {
+            throw new Error(result.error);
+          }
+        }
+      }
+    },
+    set(value) {
+      if (value && typeof value === 'string') {
+        const { sanitizeAndValidateText } = require('../utils/sanitizer');
+        const result = sanitizeAndValidateText(value, { maxLength: 5000, allowRichText: true });
+        this.setDataValue('description', result.sanitized);
+      } else {
+        this.setDataValue('description', value);
+      }
+    }
   },
   rules: {
     type: DataTypes.TEXT,
     allowNull: true,
-    comment: '대회 규정 및 규칙'
+    comment: '대회 규정 및 규칙',
+    validate: {
+      len: [0, 10000],
+      isValidText(value) {
+        if (value && typeof value === 'string') {
+          const { sanitizeAndValidateText } = require('../utils/sanitizer');
+          const result = sanitizeAndValidateText(value, { maxLength: 10000, allowRichText: true });
+          if (!result.isValid) {
+            throw new Error(result.error);
+          }
+        }
+      }
+    },
+    set(value) {
+      if (value && typeof value === 'string') {
+        const { sanitizeAndValidateText } = require('../utils/sanitizer');
+        const result = sanitizeAndValidateText(value, { maxLength: 10000, allowRichText: true });
+        this.setDataValue('rules', result.sanitized);
+      } else {
+        this.setDataValue('rules', value);
+      }
+    }
   },
   max_participants: {
     type: DataTypes.INTEGER,
@@ -118,12 +160,54 @@ const Competition = sequelize.define('Competition', {
   },
   prize_description: {
     type: DataTypes.TEXT,
-    allowNull: true
+    allowNull: true,
+    validate: {
+      len: [0, 2000],
+      isValidText(value) {
+        if (value && typeof value === 'string') {
+          const { sanitizeAndValidateText } = require('../utils/sanitizer');
+          const result = sanitizeAndValidateText(value, { maxLength: 2000, allowRichText: true });
+          if (!result.isValid) {
+            throw new Error(result.error);
+          }
+        }
+      }
+    },
+    set(value) {
+      if (value && typeof value === 'string') {
+        const { sanitizeAndValidateText } = require('../utils/sanitizer');
+        const result = sanitizeAndValidateText(value, { maxLength: 2000, allowRichText: true });
+        this.setDataValue('prize_description', result.sanitized);
+      } else {
+        this.setDataValue('prize_description', value);
+      }
+    }
   },
   venue_info: {
     type: DataTypes.TEXT,
     allowNull: true,
-    comment: '경기장 정보 및 안내사항'
+    comment: '경기장 정보 및 안내사항',
+    validate: {
+      len: [0, 3000],
+      isValidText(value) {
+        if (value && typeof value === 'string') {
+          const { sanitizeAndValidateText } = require('../utils/sanitizer');
+          const result = sanitizeAndValidateText(value, { maxLength: 3000, allowRichText: true });
+          if (!result.isValid) {
+            throw new Error(result.error);
+          }
+        }
+      }
+    },
+    set(value) {
+      if (value && typeof value === 'string') {
+        const { sanitizeAndValidateText } = require('../utils/sanitizer');
+        const result = sanitizeAndValidateText(value, { maxLength: 3000, allowRichText: true });
+        this.setDataValue('venue_info', result.sanitized);
+      } else {
+        this.setDataValue('venue_info', value);
+      }
+    }
   },
   is_public: {
     type: DataTypes.BOOLEAN,

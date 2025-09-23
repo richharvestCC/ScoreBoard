@@ -1,5 +1,6 @@
 const competitionService = require('../services/competitionService');
 const Joi = require('joi');
+const { log } = require('../config/logger');
 
 // 입력 데이터 검증 스키마
 const competitionSchema = Joi.object({
@@ -64,7 +65,7 @@ class CompetitionController {
         pagination: result.pagination
       });
     } catch (error) {
-      console.error('Error fetching competitions:', error);
+      log.error('Error fetching competitions', { error: error.message, stack: error.stack });
       res.status(500).json({
         success: false,
         message: 'Internal server error',
@@ -86,7 +87,7 @@ class CompetitionController {
         data: templates
       });
     } catch (error) {
-      console.error('Error fetching templates:', error);
+      log.error('Error fetching templates', { error: error.message, stack: error.stack });
       res.status(500).json({
         success: false,
         message: 'Internal server error',
@@ -108,7 +109,7 @@ class CompetitionController {
         data: competitions
       });
     } catch (error) {
-      console.error('Error fetching active competitions:', error);
+      log.error('Error fetching active competitions', { error: error.message, stack: error.stack });
       res.status(500).json({
         success: false,
         message: 'Internal server error',
@@ -133,7 +134,7 @@ class CompetitionController {
         data: competitions
       });
     } catch (error) {
-      console.error('Error fetching user competitions:', error);
+      log.error('Error fetching user competitions', { error: error.message, stack: error.stack });
       res.status(500).json({
         success: false,
         message: 'Internal server error',
@@ -170,7 +171,7 @@ class CompetitionController {
         });
       }
 
-      console.error('Error fetching competition:', error);
+      log.error('Error fetching competition', { error: error.message, stack: error.stack });
       res.status(500).json({
         success: false,
         message: 'Internal server error',
@@ -203,7 +204,7 @@ class CompetitionController {
         message: 'Competition created successfully'
       });
     } catch (error) {
-      console.error('Error creating competition:', error);
+      log.error('Error creating competition', { error: error.message, stack: error.stack });
 
       if (error.message.includes('required') || error.message.includes('must be')) {
         return res.status(400).json({
@@ -252,7 +253,7 @@ class CompetitionController {
         message: 'Competition created from template successfully'
       });
     } catch (error) {
-      console.error('Error creating competition from template:', error);
+      log.error('Error creating competition from template', { error: error.message, stack: error.stack });
 
       if (error.message === 'Template not found') {
         return res.status(404).json({
@@ -301,7 +302,7 @@ class CompetitionController {
         message: 'Competition updated successfully'
       });
     } catch (error) {
-      console.error('Error updating competition:', error);
+      log.error('Error updating competition', { error: error.message, stack: error.stack });
 
       if (error.message === 'Competition not found') {
         return res.status(404).json({
@@ -347,7 +348,7 @@ class CompetitionController {
         message: 'Competition deleted successfully'
       });
     } catch (error) {
-      console.error('Error deleting competition:', error);
+      log.error('Error deleting competition', { error: error.message, stack: error.stack });
 
       if (error.message === 'Competition not found') {
         return res.status(404).json({
@@ -411,7 +412,7 @@ class CompetitionController {
         message: `Competition status updated to ${status}`
       });
     } catch (error) {
-      console.error('Error updating competition status:', error);
+      log.error('Error updating competition status', { error: error.message, stack: error.stack });
 
       if (error.message === 'Competition not found') {
         return res.status(404).json({
