@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'tournaments',
+        model: 'competitions',
         key: 'id'
       },
       onUpdate: 'CASCADE',
@@ -56,11 +56,17 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       comment: 'Seed number of away team/player'
     },
-    is_consolation: {
+    is_third_place: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
-      comment: 'Whether this is a consolation match (3rd place, etc.)'
+      comment: 'Whether this is a third place playoff match'
+    },
+    bracket_type: {
+      type: DataTypes.ENUM('main', 'third_place'),
+      allowNull: false,
+      defaultValue: 'main',
+      comment: 'Type of bracket match'
     }
   }, {
     tableName: 'tournament_brackets',
@@ -86,7 +92,7 @@ module.exports = (sequelize, DataTypes) => {
 
   // Define associations
   TournamentBracket.associate = (models) => {
-    // Tournament relationship
+    // Tournament relationship (competitions table)
     TournamentBracket.belongsTo(models.Tournament, {
       foreignKey: 'tournament_id',
       as: 'tournament'
