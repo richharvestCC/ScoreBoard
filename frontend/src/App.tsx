@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Box } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline, Box, useMediaQuery, useTheme } from '@mui/material';
+import material3Theme from './theme/material3Theme';
 
 // Components
 import Header from './components/layout/Header';
@@ -24,6 +25,7 @@ import MatchScheduling from './pages/MatchScheduling';
 import LiveMatchView from './pages/LiveMatchView';
 import LiveMatchesPage from './pages/LiveMatchesPage';
 import LeagueDashboard from './pages/LeagueDashboard';
+import CompetitionPage from './pages/CompetitionPage';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -60,155 +62,222 @@ const queryClient = new QueryClient({
   },
 });
 
-// Create theme
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
+// Use Material 3 theme
 
-function App() {
+// Main App Component with Responsive Layout
+function AppContent() {
   const { initializeAuth, isAuthenticated } = useAuthStore();
+  const theme = useTheme();
+
+  // Material Design Breakpoints
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // < 600px
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600px - 900px
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md')); // >= 900px
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg')); // >= 1200px
 
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
 
+  // Responsive container max width based on Material Design guidelines
+  const getContainerMaxWidth = () => {
+    if (isMobile) return '100%';
+    if (isTablet) return 'md';
+    if (isLargeScreen) return 'xl';
+    return 'lg';
+  };
+
+  // Responsive padding based on screen size
+  const getResponsivePadding = () => {
+    if (isMobile) return theme.spacing(1, 2); // 8px vertical, 16px horizontal
+    if (isTablet) return theme.spacing(2, 3); // 16px vertical, 24px horizontal
+    return theme.spacing(3); // 24px all around
+  };
+
+  return (
+    <Router>
+      <NavigationProvider>
+        <NavigationSetup />
+        <Box
+          sx={{
+            flexGrow: 1,
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            // Material Design responsive spacing
+            padding: getResponsivePadding(),
+            // Responsive max width
+            maxWidth: getContainerMaxWidth(),
+            margin: '0 auto',
+            // Responsive layout adjustments
+            [theme.breakpoints.down('sm')]: {
+              padding: theme.spacing(1),
+            },
+            [theme.breakpoints.up('sm')]: {
+              padding: theme.spacing(2),
+            },
+            [theme.breakpoints.up('md')]: {
+              padding: theme.spacing(3),
+            },
+          }}
+        >
+          <Header />
+
+          {/* Main Content Area with responsive spacing */}
+          <Box
+            component="main"
+            sx={{
+              flex: 1,
+              mt: theme.spacing(2),
+              // Responsive margin top
+              [theme.breakpoints.down('sm')]: {
+                mt: theme.spacing(1),
+              },
+              [theme.breakpoints.up('md')]: {
+                mt: theme.spacing(3),
+              },
+            }}
+          >
+              <Routes>
+                {/* Public routes */}
+                <Route
+                  path="/auth"
+                  element={
+                    isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />
+                  }
+                />
+
+                {/* Protected routes */}
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/clubs"
+                  element={
+                    <ProtectedRoute>
+                      <ClubList />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/clubs/:id"
+                  element={
+                    <ProtectedRoute>
+                      <ClubDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/matches"
+                  element={
+                    <ProtectedRoute>
+                      <MatchList />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/matches/:id"
+                  element={
+                    <ProtectedRoute>
+                      <MatchDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/matches/:id/live"
+                  element={
+                    <ProtectedRoute>
+                      <LiveScoring />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/competitions"
+                  element={
+                    <ProtectedRoute>
+                      <CompetitionPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tournaments"
+                  element={
+                    <ProtectedRoute>
+                      <TournamentList />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tournaments/:id"
+                  element={
+                    <ProtectedRoute>
+                      <TournamentDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/templates"
+                  element={
+                    <ProtectedRoute>
+                      <TemplateManagement />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/competitions/:competitionId/scheduling"
+                  element={
+                    <ProtectedRoute>
+                      <MatchScheduling />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/live"
+                  element={
+                    <ProtectedRoute>
+                      <LiveMatchesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/leagues/:competitionId/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <LeagueDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Catch-all redirect */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Box>
+          </Box>
+        </NavigationProvider>
+      </Router>
+  );
+}
+
+// Main App Component Wrapper
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={material3Theme}>
         <CssBaseline />
-        <Router>
-          <NavigationProvider>
-            <NavigationSetup />
-            <Box sx={{ flexGrow: 1 }}>
-            <Header />
-            <Routes>
-              {/* Public routes */}
-              <Route
-                path="/auth"
-                element={
-                  isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />
-                }
-              />
-
-              {/* Protected routes */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/clubs"
-                element={
-                  <ProtectedRoute>
-                    <ClubList />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/clubs/:id"
-                element={
-                  <ProtectedRoute>
-                    <ClubDetail />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/matches"
-                element={
-                  <ProtectedRoute>
-                    <MatchList />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/matches/:id"
-                element={
-                  <ProtectedRoute>
-                    <MatchDetail />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/matches/:id/live"
-                element={
-                  <ProtectedRoute>
-                    <LiveScoring />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/tournaments"
-                element={
-                  <ProtectedRoute>
-                    <TournamentList />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/tournaments/:id"
-                element={
-                  <ProtectedRoute>
-                    <TournamentDetail />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/templates"
-                element={
-                  <ProtectedRoute>
-                    <TemplateManagement />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/competitions/:competitionId/scheduling"
-                element={
-                  <ProtectedRoute>
-                    <MatchScheduling />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/live"
-                element={
-                  <ProtectedRoute>
-                    <LiveMatchesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/leagues/:competitionId/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <LeagueDashboard />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Catch-all redirect */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-            </Box>
-          </NavigationProvider>
-        </Router>
+        <AppContent />
       </ThemeProvider>
     </QueryClientProvider>
   );

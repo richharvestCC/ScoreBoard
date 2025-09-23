@@ -1,6 +1,4 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-
+module.exports = (sequelize, DataTypes) => {
 const Competition = sequelize.define('Competition', {
   id: {
     type: DataTypes.INTEGER,
@@ -338,4 +336,5 @@ Competition.getActiveCompetitions = async function() {
   });
 };
 
-module.exports = Competition;
+return Competition;
+};

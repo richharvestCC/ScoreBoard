@@ -72,19 +72,19 @@ class AuthService {
     };
   }
 
-  static async login(email, password) {
-    // Find user by email
-    const user = await User.findOne({ where: { email } });
+  static async login(user_id, password) {
+    // Find user by user_id
+    const user = await User.findOne({ where: { user_id } });
 
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid user_id or password');
     }
 
     // Check password
     const isValidPassword = await this.comparePassword(password, user.password_hash);
 
     if (!isValidPassword) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid user_id or password');
     }
 
     // Generate tokens

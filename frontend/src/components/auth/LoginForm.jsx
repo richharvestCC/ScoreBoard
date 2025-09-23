@@ -13,7 +13,7 @@ import { useAuth } from '../../hooks/useAuth';
 
 const LoginForm = ({ onSwitchToRegister }) => {
   const [formData, setFormData] = useState({
-    email: '',
+    user_id: '',
     password: '',
   });
 
@@ -48,14 +48,14 @@ const LoginForm = ({ onSwitchToRegister }) => {
       <Box component="form" onSubmit={handleSubmit}>
         <TextField
           fullWidth
-          name="email"
-          type="email"
-          label="이메일"
-          value={formData.email}
+          name="user_id"
+          type="text"
+          label="사용자 ID"
+          value={formData.user_id}
           onChange={handleChange}
           margin="normal"
           required
-          autoComplete="email"
+          autoComplete="username"
           autoFocus
         />
 

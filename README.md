@@ -299,15 +299,22 @@ JWT_REFRESH_SECRET=your_refresh_token_secret
 - 🔴 **인프라**: 개발 환경만 구축 (운영 환경 구축 필요)
 - 🟡 **문서화**: 기술 문서 존재 (API 문서 자동화 필요)
 
-## 🔗 관련 문서
+## 📚 문서 가이드
 
-### 기술 문서
-- [로깅 시스템 가이드](./backend/LOGGING.md)
-- [더미 사용자 가이드](./backend/docs/dummy-users.md)
+### 🎯 개발자용 빠른 시작
+1. **[시스템 아키텍처](./docs/ARCHITECTURE.md)** - 전체 시스템 설계 및 기술 스택
+2. **[API 문서](./docs/API.md)** - REST API 엔드포인트 및 사용법
+3. **[개발 계정](./backend/docs/dummy-users.md)** - 테스트용 사용자 계정 정보
+4. **[로깅 시스템](./backend/LOGGING.md)** - 구조화된 로깅 사용법
 
-### 설계 및 계획 문서
-- [Dashboard Design Implementation Guide](./docs/dashboard-design-implementation.md) - Material 3 + Financial Dashboard 스타일 완전 구현 가이드
-- [Technical Debt Analysis](./docs/technical-debt-analysis.md) - 현재 기술 부채 상태 및 해결 계획
+### 🏗️ 구현 가이드
+- **[Dashboard 디자인 구현](./docs/dashboard-design-implementation.md)** - Material 3 + Financial Dashboard 스타일 완전 구현 가이드
+- **[토너먼트 브라켓 시스템](./docs/tournament-bracket-implementation.md)** - 조별예선 + 본선토너먼트 구현 가이드
+- **[데이터베이스 마이그레이션](./docs/database-migrations.md)** - 스키마 변경 및 관리 가이드
+
+### 📊 프로젝트 관리
+- **[기술 부채 분석](./docs/technical-debt-analysis.md)** - 현재 기술 부채 상태 및 해결 계획
+- **[문서 관리 가이드](./docs/documentation-management-guide.md)** - 문서 작성 및 유지 관리 표준
 
 ### 개발 환경
 - **Backend API**: http://localhost:3001/api/v1

@@ -16,7 +16,7 @@ import {
   Schedule,
   CheckCircle,
   PlayArrow
-} from '@mui/material';
+} from '@mui/icons-material';
 
 const StatCard = ({ title, value, subtitle, icon: Icon, color = 'primary' }) => (
   <Card elevation={2} sx={{ height: '100%' }}>
