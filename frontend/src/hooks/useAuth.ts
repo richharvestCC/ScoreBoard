@@ -1,8 +1,48 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { authAPI } from '../services/api';
-import useAuthStore from '../stores/authStore';
+import useAuthStore, { User } from '../stores/authStore';
+import { useEffect } from 'react';
 
-export const useAuth = () => {
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+interface RegisterData extends LoginCredentials {
+  name: string;
+}
+
+interface ApiError {
+  message: string;
+  errors?: Record<string, string[]>;
+}
+
+interface AuthHookReturn {
+  // State
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+
+  // Actions
+  login: (credentials: LoginCredentials) => void;
+  register: (userData: RegisterData) => void;
+  logout: () => void;
+  clearError: () => void;
+
+  // Query states
+  isLoginLoading: boolean;
+  isRegisterLoading: boolean;
+  isLogoutLoading: boolean;
+  isProfileLoading: boolean;
+
+  // Profile data
+  profile: User | undefined;
+  refetchProfile: () => void;
+}
+
+export const useAuth = (): AuthHookReturn => {
   const { setAuth, logout, setLoading, setError, clearError, getters } = useAuthStore();
   const queryClient = useQueryClient();
 
@@ -18,7 +58,7 @@ export const useAuth = () => {
       setAuth(user, accessToken, refreshToken);
       setLoading(false);
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiError>) => {
       const message = error.response?.data?.message || 'Login failed';
       setError(message);
       setLoading(false);
@@ -37,7 +77,7 @@ export const useAuth = () => {
       setAuth(user, accessToken, refreshToken);
       setLoading(false);
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiError>) => {
       const message = error.response?.data?.message || 'Registration failed';
       setError(message);
       setLoading(false);
@@ -58,20 +98,24 @@ export const useAuth = () => {
     },
   });
 
-  // Get profile query
+  // Get profile query with React Query v5 pattern
   const profileQuery = useQuery({
     queryKey: ['profile'],
     queryFn: authAPI.getProfile,
     enabled: getters.isLoggedIn(),
     retry: false,
-    onSuccess: (response) => {
-      const user = response.data.data.user;
-      useAuthStore.getState().setUser(user);
-    },
-    onError: () => {
-      logout();
-    },
   });
+
+  // Handle profile query success/error in useEffect (React Query v5 pattern)
+  useEffect(() => {
+    if (profileQuery.data) {
+      const user = profileQuery.data.data.data;
+      useAuthStore.getState().setUser(user);
+    }
+    if (profileQuery.error) {
+      logout();
+    }
+  }, [profileQuery.data, profileQuery.error, logout]);
 
   return {
     // State
@@ -93,7 +137,7 @@ export const useAuth = () => {
     isProfileLoading: profileQuery.isLoading,
 
     // Profile data
-    profile: profileQuery.data?.data?.data?.user,
+    profile: profileQuery.data?.data?.data,
     refetchProfile: profileQuery.refetch,
   };
 };

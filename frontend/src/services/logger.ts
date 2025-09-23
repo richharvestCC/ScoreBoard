@@ -21,7 +21,7 @@ interface LogEntry {
 class FrontendLogger {
   private sessionId: string;
   private userId?: string;
-  private logLevel: keyof LogLevel;
+  private logLevel: LogLevel;
   private buffer: LogEntry[] = [];
   private maxBufferSize = 100;
   private flushInterval = 30000; // 30 seconds
@@ -29,7 +29,7 @@ class FrontendLogger {
 
   constructor() {
     this.sessionId = this.generateSessionId();
-    this.logLevel = (process.env.REACT_APP_LOG_LEVEL as keyof LogLevel) || 'info';
+    this.logLevel = (process.env.REACT_APP_LOG_LEVEL as LogLevel) || 'info';
 
     // Auto-flush logs periodically
     setInterval(() => this.flush(), this.flushInterval);
@@ -45,8 +45,8 @@ class FrontendLogger {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private shouldLog(level: keyof LogLevel): boolean {
-    const levels: Record<keyof LogLevel, number> = {
+  private shouldLog(level: LogLevel): boolean {
+    const levels: Record<LogLevel, number> = {
       error: 0,
       warn: 1,
       info: 2,
@@ -57,7 +57,7 @@ class FrontendLogger {
   }
 
   private createLogEntry(
-    level: keyof LogLevel,
+    level: LogLevel,
     message: string,
     category?: string,
     metadata?: Record<string, any>,
@@ -96,7 +96,7 @@ class FrontendLogger {
     }
   }
 
-  private getConsoleStyle(level: keyof LogLevel): string {
+  private getConsoleStyle(level: LogLevel): string {
     const styles = {
       error: 'color: #ff4444; font-weight: bold',
       warn: 'color: #ffaa00; font-weight: bold',

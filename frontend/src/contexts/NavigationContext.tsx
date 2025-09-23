@@ -49,7 +49,7 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
   }, [navigate, location]);
 
   const navigateForward = useCallback(() => {
-    log.navigation(location.pathname, '[next]', 'forward');
+    log.navigation(location.pathname, '[next]', 'push');
     navigate(1);
   }, [navigate, location]);
 
@@ -61,7 +61,7 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
     navigateWithOptions,
     navigateBack,
     navigateForward,
-  }), [navigate, navigateToAuth, navigateToHome, navigateWithReplace, navigateWithOptions, navigateBack, navigateForward]);
+  }), [navigate, location.pathname]);
 
   return (
     <NavigationContext.Provider value={value}>

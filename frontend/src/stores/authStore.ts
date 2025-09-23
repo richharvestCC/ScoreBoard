@@ -1,7 +1,40 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const useAuthStore = create(
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  user_id?: string;
+}
+
+interface AuthState {
+  // State
+  user: User | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+
+  // Actions
+  setAuth: (user: User, accessToken: string, refreshToken: string) => void;
+  setUser: (user: User) => void;
+  setLoading: (isLoading: boolean) => void;
+  setError: (error: string) => void;
+  clearError: () => void;
+  logout: () => void;
+  initializeAuth: () => void;
+
+  // Helper getters
+  getters: {
+    isLoggedIn: () => boolean;
+    getUser: () => User | null;
+    getToken: () => string | null;
+  };
+}
+
+const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       // State
@@ -13,7 +46,7 @@ const useAuthStore = create(
       error: null,
 
       // Actions
-      setAuth: (user, accessToken, refreshToken) => {
+      setAuth: (user: User, accessToken: string, refreshToken: string) => {
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
 
@@ -26,11 +59,11 @@ const useAuthStore = create(
         });
       },
 
-      setUser: (user) => set({ user }),
+      setUser: (user: User) => set({ user }),
 
-      setLoading: (isLoading) => set({ isLoading }),
+      setLoading: (isLoading: boolean) => set({ isLoading }),
 
-      setError: (error) => set({ error }),
+      setError: (error: string) => set({ error }),
 
       clearError: () => set({ error: null }),
 
@@ -63,7 +96,7 @@ const useAuthStore = create(
 
       // Helper getters
       getters: {
-        isLoggedIn: () => get().isAuthenticated && get().accessToken,
+        isLoggedIn: () => get().isAuthenticated && !!get().accessToken,
         getUser: () => get().user,
         getToken: () => get().accessToken,
       },
@@ -80,3 +113,4 @@ const useAuthStore = create(
 );
 
 export default useAuthStore;
+export type { User, AuthState };
