@@ -3,6 +3,7 @@ const authRoutes = require('./auth');
 const clubRoutes = require('./clubs');
 const matchRoutes = require('./matches');
 const tournamentRoutes = require('./tournaments');
+const competitionRoutes = require('./competitions');
 
 const router = express.Router();
 
@@ -42,6 +43,7 @@ router.get('/health', async (req, res) => {
 // API routes
 router.use('/auth', authRoutes);
 router.use('/clubs', clubRoutes);
+router.use('/competitions', competitionRoutes);
 router.use('/matches', matchRoutes);
 router.use('/tournaments', tournamentRoutes);
 
