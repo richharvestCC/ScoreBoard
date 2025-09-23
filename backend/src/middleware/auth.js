@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
+const { log } = require('../config/logger');
 
 const authenticateToken = async (req, res, next) => {
   try {
@@ -44,7 +45,7 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    console.error('Auth middleware error:', error);
+    log.error('Auth middleware error', { error: error.message, userId: decoded?.userId });
     return res.status(500).json({
       success: false,
       message: 'Internal server error'

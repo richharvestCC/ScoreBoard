@@ -20,6 +20,7 @@ import TournamentList from './pages/TournamentList';
 import TournamentDetail from './pages/TournamentDetail';
 import TemplateManagement from './pages/TemplateManagement';
 import AdminDashboard from './pages/AdminDashboard';
+import MatchScheduling from './pages/MatchScheduling';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -171,6 +172,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/competitions/:competitionId/scheduling"
+                element={
+                  <ProtectedRoute>
+                    <MatchScheduling />
                   </ProtectedRoute>
                 }
               />

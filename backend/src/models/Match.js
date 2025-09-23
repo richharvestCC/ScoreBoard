@@ -134,6 +134,71 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         min: 1
       }
+    },
+    competition_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'competitions',
+        key: 'id'
+      }
+    },
+    scheduled_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: '예정된 경기 날짜 (match_date와 다를 수 있음)'
+    },
+    estimated_duration: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 90,
+      validate: {
+        min: 30,
+        max: 240
+      },
+      comment: '예상 경기 시간 (분)'
+    },
+    venue_capacity: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      validate: {
+        min: 0
+      },
+      comment: '경기장 수용 인원'
+    },
+    ticket_price: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      validate: {
+        min: 0
+      },
+      comment: '입장료'
+    },
+    priority: {
+      type: DataTypes.ENUM('low', 'normal', 'high', 'critical'),
+      allowNull: false,
+      defaultValue: 'normal',
+      comment: '경기 우선순위 (스케줄링 시 참고)'
+    },
+    scheduling_status: {
+      type: DataTypes.ENUM('pending', 'confirmed', 'rescheduled', 'conflicted'),
+      allowNull: false,
+      defaultValue: 'pending',
+      comment: '스케줄링 상태'
+    },
+    conflict_reason: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      validate: {
+        len: [1, 500]
+      },
+      comment: '스케줄 충돌 사유'
+    },
+    auto_scheduled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      comment: '자동 스케줄링 여부'
     }
   }, {
     tableName: 'matches',
@@ -183,6 +248,12 @@ module.exports = (sequelize, DataTypes) => {
     Match.belongsTo(models.Tournament, {
       foreignKey: 'tournament_id',
       as: 'tournament'
+    });
+
+    // Competition relationship
+    Match.belongsTo(models.Competition, {
+      foreignKey: 'competition_id',
+      as: 'competition'
     });
 
     // Match events relationship
