@@ -3,15 +3,16 @@ const router = express.Router();
 const tournamentController = require('../controllers/tournamentController');
 const { authenticateToken } = require('../middleware/auth');
 const { validateTournamentCreation, validateTournamentUpdate, validateTournamentJoin } = require('../middleware/validation');
+const { sanitizeCommonFields, textInputRateLimit } = require('../middleware/xss-protection');
 
 // All tournament routes require authentication
 router.use(authenticateToken);
 
 // Tournament CRUD operations
-router.post('/', validateTournamentCreation, tournamentController.createTournament);
+router.post('/', validateTournamentCreation, textInputRateLimit, sanitizeCommonFields, tournamentController.createTournament);
 router.get('/', tournamentController.getAllTournaments);
 router.get('/:id', tournamentController.getTournamentById);
-router.put('/:id', validateTournamentUpdate, tournamentController.updateTournament);
+router.put('/:id', validateTournamentUpdate, textInputRateLimit, sanitizeCommonFields, tournamentController.updateTournament);
 router.delete('/:id', tournamentController.deleteTournament);
 
 // Tournament participation operations

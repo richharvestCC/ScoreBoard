@@ -13,6 +13,7 @@ dotenv.config();
 const { testConnection, syncDatabase } = require('./models');
 const routes = require('./routes');
 const { logger, log, correlationMiddleware } = require('./config/logger');
+const xssProtection = require('./middleware/xss-protection');
 
 const app = express();
 const server = http.createServer(app);
@@ -20,8 +21,11 @@ const server = http.createServer(app);
 // Live Socket Service
 const liveSocketService = require('./services/liveSocketService');
 
-// Middleware
+// Security middleware
 app.use(helmet());
+app.use(xssProtection.securityHeaders);
+app.use(xssProtection.requestValidation);
+app.use(xssProtection.rateLimiting);
 
 // Request correlation tracking (before morgan)
 app.use(correlationMiddleware());
@@ -41,8 +45,8 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
+// Body parsing middleware with XSS protection
+app.use(express.json(xssProtection.jsonParserLimits));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Make live socket service accessible to routes
@@ -63,6 +67,9 @@ app.get('/', (req, res) => {
     documentation: '/api/v1/health'
   });
 });
+
+// XSS error handler (before global error handler)
+app.use(xssProtection.xssErrorHandler);
 
 // Global error handler
 app.use((error, req, res, next) => {
@@ -318,13 +325,7 @@ process.on('SIGINT', async () => {
   }, 10000);
 });
 
-process.on('SIGINT', () => {
-  log.info('🛑 SIGINT received, shutting down gracefully');
-  server.close(() => {
-    log.info('✅ Server closed');
-    process.exit(0);
-  });
-});
+// Note: SIGINT handler is already defined above with enhanced shutdown logic
 
 startServer();
 

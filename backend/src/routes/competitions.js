@@ -3,6 +3,7 @@ const router = express.Router();
 const competitionController = require('../controllers/competitionController');
 const { authenticateToken } = require('../middleware/auth');
 const rateLimit = require('express-rate-limit');
+const { sanitizeCommonFields, textInputRateLimit } = require('../middleware/xss-protection');
 
 // Rate limiting for competition creation
 const createCompetitionLimit = rateLimit({
@@ -75,7 +76,7 @@ router.get('/:id', competitionController.getCompetitionById);
  * @access  Private
  * @body    Competition data (name, competition_type, format, etc.)
  */
-router.post('/', authenticateToken, createCompetitionLimit, competitionController.createCompetition);
+router.post('/', authenticateToken, createCompetitionLimit, textInputRateLimit, sanitizeCommonFields, competitionController.createCompetition);
 
 /**
  * @route   POST /api/competitions/from-template/:templateId
@@ -84,7 +85,7 @@ router.post('/', authenticateToken, createCompetitionLimit, competitionControlle
  * @param   templateId - Template ID
  * @body    Competition data to override template defaults
  */
-router.post('/from-template/:templateId', authenticateToken, createCompetitionLimit, competitionController.createFromTemplate);
+router.post('/from-template/:templateId', authenticateToken, createCompetitionLimit, textInputRateLimit, sanitizeCommonFields, competitionController.createFromTemplate);
 
 /**
  * @route   PUT /api/competitions/:id
@@ -93,7 +94,7 @@ router.post('/from-template/:templateId', authenticateToken, createCompetitionLi
  * @param   id - Competition ID
  * @body    Updated competition data
  */
-router.put('/:id', authenticateToken, competitionController.updateCompetition);
+router.put('/:id', authenticateToken, textInputRateLimit, sanitizeCommonFields, competitionController.updateCompetition);
 
 /**
  * @route   PATCH /api/competitions/:id/status

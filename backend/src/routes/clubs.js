@@ -3,15 +3,16 @@ const router = express.Router();
 const clubController = require('../controllers/clubController');
 const { authenticateToken } = require('../middleware/auth');
 const { validateClubCreation, validateClubUpdate, validateClubJoin, validateMemberUpdate } = require('../middleware/validation');
+const { sanitizeCommonFields, textInputRateLimit } = require('../middleware/xss-protection');
 
 // All club routes require authentication
 router.use(authenticateToken);
 
 // Club CRUD operations
-router.post('/', validateClubCreation, clubController.createClub);
+router.post('/', validateClubCreation, textInputRateLimit, sanitizeCommonFields, clubController.createClub);
 router.get('/', clubController.getAllClubs);
 router.get('/:id', clubController.getClubById);
-router.put('/:id', validateClubUpdate, clubController.updateClub);
+router.put('/:id', validateClubUpdate, textInputRateLimit, sanitizeCommonFields, clubController.updateClub);
 router.delete('/:id', clubController.deleteClub);
 
 // Club membership operations

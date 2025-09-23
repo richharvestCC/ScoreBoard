@@ -374,29 +374,7 @@ db.testConnectionWithCircuitBreaker = async (retries = 3, initialDelay = 2000) =
   });
 };
 
-// Add graceful shutdown handling
-process.on('SIGTERM', async () => {
-  log.info('SIGTERM received, closing database connections...');
-  try {
-    await sequelize.close();
-    log.info('Database connections closed successfully');
-  } catch (error) {
-    log.error('Error closing database connections', {
-      error: error.message
-    });
-  }
-});
-
-process.on('SIGINT', async () => {
-  log.info('SIGINT received, closing database connections...');
-  try {
-    await sequelize.close();
-    log.info('Database connections closed successfully');
-  } catch (error) {
-    log.error('Error closing database connections', {
-      error: error.message
-    });
-  }
-});
+// Note: Signal handlers are now centralized in server.js to avoid duplication
+// Database cleanup will be handled through the centralized graceful shutdown process
 
 module.exports = db;

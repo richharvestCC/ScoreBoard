@@ -23,6 +23,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import MatchScheduling from './pages/MatchScheduling';
 import LiveMatchView from './pages/LiveMatchView';
 import LiveMatchesPage from './pages/LiveMatchesPage';
+import LeagueDashboard from './pages/LeagueDashboard';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -190,6 +191,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <LiveMatchesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/leagues/:competitionId/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <LeagueDashboard />
                   </ProtectedRoute>
                 }
               />
