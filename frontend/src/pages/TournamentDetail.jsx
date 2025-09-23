@@ -107,6 +107,10 @@ const TournamentDetail = () => {
     return type === 'league' ? '리그' : '토너먼트';
   };
 
+  const handleLeave = () => {
+    leaveMutation.mutate();
+  };
+
   const navigateToLeagueDashboard = () => {
     navigate(`/leagues/${id}/dashboard`);
   };
@@ -331,22 +335,23 @@ const TournamentDetail = () => {
                   <Button
                     variant="outlined"
                     startIcon={<EditIcon />}
-                  onClick={() => navigate(`/tournaments/${id}/manage`)}
+                    onClick={() => navigate(`/tournaments/${id}/manage`)}
+                  >
+                    토너먼트 관리
+                  </Button>
+                )}
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<LeaveIcon />}
+                  onClick={() => leaveMutation.mutate()}
+                  disabled={leaveMutation.isLoading}
                 >
-                  토너먼트 관리
+                  참가 취소
                 </Button>
-              )}
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<LeaveIcon />}
-                onClick={() => leaveMutation.mutate()}
-                disabled={leaveMutation.isLoading}
-              >
-                참가 취소
-              </Button>
-            </Box>
-          ) : null}
+              </Box>
+            ) : null}
+          </Box>
         </CardActions>
       </Card>
 

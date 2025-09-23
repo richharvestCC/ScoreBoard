@@ -15,7 +15,7 @@ router.use(requireAuth);
 router.post(
   '/competitions/:competitionId/auto-schedule',
   requireRole(['admin', 'moderator', 'organizer']),
-  rateLimiter('scheduling', 10, 60), // 10 requests per minute
+  rateLimiter, // Use default rate limiter
   matchSchedulingController.autoScheduleMatches
 );
 

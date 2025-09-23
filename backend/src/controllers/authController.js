@@ -42,8 +42,8 @@ class AuthController {
 
   static async login(req, res) {
     try {
-      const { email, password } = req.body;
-      const result = await AuthService.login(email, password);
+      const { user_id, password } = req.body;
+      const result = await AuthService.login(user_id, password);
 
       res.json({
         success: true,
@@ -53,7 +53,7 @@ class AuthController {
     } catch (error) {
       log.error('Login error:', { error: error.message, stack: error.stack });
 
-      if (error.message.includes('Invalid email or password')) {
+      if (error.message.includes('Invalid user_id or password')) {
         return res.status(401).json({
           success: false,
           message: error.message

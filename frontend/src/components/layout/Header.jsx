@@ -10,7 +10,7 @@ import {
   MenuItem,
   IconButton,
 } from '@mui/material';
-import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, Assignment, AdminPanelSettings, LiveTv } from '@mui/icons-material';
+import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, Assignment, AdminPanelSettings, LiveTv, Stadium } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,6 +18,10 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
+
+  // Debug logging
+  console.log('Header - isAuthenticated:', isAuthenticated);
+  console.log('Header - user:', user);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -42,6 +46,15 @@ const Header = () => {
 
         {isAuthenticated ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Button
+              color="inherit"
+              startIcon={<Stadium />}
+              onClick={() => navigate('/competitions')}
+              sx={{ mr: 2 }}
+            >
+              대회
+            </Button>
+
             <Button
               color="inherit"
               startIcon={<Groups />}

@@ -59,10 +59,11 @@ export const useAuth = () => {
   });
 
   // Get profile query
+  const isLoggedIn = useAuthStore((state) => state.isAuthenticated && !!state.accessToken);
   const profileQuery = useQuery({
     queryKey: ['profile'],
     queryFn: authAPI.getProfile,
-    enabled: getters.isLoggedIn(),
+    enabled: isLoggedIn,
     retry: false,
     onSuccess: (response) => {
       const user = response.data.data.user;
