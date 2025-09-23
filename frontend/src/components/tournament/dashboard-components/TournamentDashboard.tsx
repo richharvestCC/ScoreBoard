@@ -29,6 +29,7 @@ import {
 
 // Theme and Components
 import MaterialToggle, { TournamentTypeToggle, GroupStageToggle } from './shared/MaterialToggle';
+import TournamentCreationModal from './creation/TournamentCreationModal';
 
 // Component Imports (will be implemented in subsequent tasks)
 // import TournamentHeader from './controls/TournamentHeader';
@@ -328,42 +329,12 @@ const TournamentDashboard: React.FC<TournamentDashboardProps> = ({
       </Fade>
 
       {/* Tournament Creation Modal - Will be implemented in Task 6 */}
-      {uiState.isCreationModalOpen && (
-        <Box
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
-            backdropFilter: 'blur(10px)',
-            zIndex: theme.zIndex.modal,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-          onClick={handleModalClose}
-        >
-          <Box
-            sx={{
-              background: theme.palette.background.paper,
-              borderRadius: 3,
-              padding: 4,
-              minWidth: 400,
-              textAlign: 'center'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Typography variant=\"h6\" gutterBottom>
-              🚧 토너먼트 생성 모달
-            </Typography>
-            <Typography variant=\"body2\" color=\"text.secondary\">
-              Task 6에서 구현될 예정입니다.
-            </Typography>
-          </Box>
-        </Box>
-      )}
+      <TournamentCreationModal
+        open={uiState.isCreationModalOpen}
+        onClose={handleModalClose}
+        onSubmit={handleTournamentCreated}
+        isCloneMode={uiState.isCloneMode}
+      />
     </DashboardContainer>
   );
 };

@@ -43,11 +43,9 @@ export { default as MatchCard } from './bracket/MatchCard';
 // Task 5: Zoom/Pinch Gestures ✅
 export { default as ZoomPanContainer, useZoomPan } from './bracket/ZoomPanContainer';
 
-// Task 6: Safety & Modal System
-// export { default as TournamentCreationModal } from './creation/TournamentCreationModal';
-// export { default as CompetitionTypeToggle } from './creation/CompetitionTypeToggle';
-// export { default as SafetyCheckDialog } from './creation/SafetyCheckDialog';
-// export { default as TournamentConfigForm } from './creation/TournamentConfigForm';
+// Task 6: Safety & Modal System ✅
+export { default as TournamentCreationModal } from './creation/TournamentCreationModal';
+export { default as SafetyCheckDialog } from './creation/SafetyCheckDialog';
 
 // Task 7: Animation & Motion Graphics
 // export { default as AnimatedModal } from './shared/AnimatedModal';
