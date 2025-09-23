@@ -27,6 +27,9 @@ import {
   BreakpointKey
 } from '../../../types/tournament';
 
+// Theme and Components
+import MaterialToggle, { TournamentTypeToggle, GroupStageToggle } from './shared/MaterialToggle';
+
 // Component Imports (will be implemented in subsequent tasks)
 // import TournamentHeader from './controls/TournamentHeader';
 // import ControlPanel from './controls/ControlPanel';
