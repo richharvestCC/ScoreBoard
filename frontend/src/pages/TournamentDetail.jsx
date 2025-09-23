@@ -41,6 +41,8 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tournamentAPI } from '../services/api';
 import { getClubTypeLabel } from '../constants/clubTypes';
+import ParticipantList from '../components/tournament/ParticipantList';
+import TournamentBracket from '../components/tournament/TournamentBracket';
 
 const TournamentDetail = () => {
   const { id } = useParams();
@@ -351,74 +353,26 @@ const TournamentDetail = () => {
       <Paper sx={{ mb: 3 }}>
         <Tabs value={activeTab} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tab label="참가팀" />
-          <Tab label="경기 일정" />
-          <Tab label="순위표" />
+          <Tab label="대진표" />
         </Tabs>
 
         <Box sx={{ p: 3 }}>
           {activeTab === 0 && (
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>팀명</TableCell>
-                    <TableCell>클럽 유형</TableCell>
-                    <TableCell>참가일</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {participantsLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={3} align="center">
-                        <CircularProgress size={24} />
-                      </TableCell>
-                    </TableRow>
-                  ) : participants.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} align="center">
-                        <Typography color="text.secondary">
-                          참가 신청한 팀이 없습니다.
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    participants.map((participant) => (
-                      <TableRow key={participant.id}>
-                        <TableCell>
-                          <Box display="flex" alignItems="center">
-                            <Avatar
-                              src={participant.club?.logo_url}
-                              sx={{ width: 32, height: 32, mr: 1 }}
-                            >
-                              {participant.club?.name?.charAt(0)}
-                            </Avatar>
-                            {participant.club?.name}
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          {participant.club?.club_type && getClubTypeLabel(participant.club.club_type)}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(participant.createdAt).toLocaleDateString()}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <ParticipantList
+              participants={participants}
+              loading={participantsLoading}
+              canManage={isAdmin}
+              canJoin={!isParticipating && tournament.status === 'open'}
+              onJoin={() => setJoinDialogOpen(true)}
+              onLeave={handleLeave}
+              // onUpdateStatus={handleUpdateParticipantStatus}
+            />
           )}
-
           {activeTab === 1 && (
-            <Typography color="text.secondary" align="center">
-              경기 일정은 곧 구현될 예정입니다.
-            </Typography>
-          )}
-
-          {activeTab === 2 && (
-            <Typography color="text.secondary" align="center">
-              순위표는 곧 구현될 예정입니다.
-            </Typography>
+            <TournamentBracket
+              bracket={null} // 추후 bracket 데이터 연결
+              loading={false}
+            />
           )}
         </Box>
       </Paper>
