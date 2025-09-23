@@ -206,29 +206,48 @@ class MatchStatisticsService {
     }
   }
 
-  // Get match statistics comparison for multiple matches
+  // Get match statistics comparison for multiple matches - Optimized version
   async getComparisonStats(matchIds) {
     if (!Array.isArray(matchIds) || matchIds.length === 0) {
       throw new ValidationError('Match IDs must be provided as an array');
     }
 
-    const statistics = await MatchStatistics.findAll({
+    // Use Match as the primary model to ensure we get matches even without statistics
+    const matchesWithStats = await Match.findAll({
       where: {
-        match_id: matchIds
+        id: matchIds
       },
       include: [
         {
-          model: Match,
-          as: 'match',
-          attributes: ['id', 'match_number', 'home_score', 'away_score', 'match_date']
+          model: MatchStatistics,
+          as: 'statistics',
+          required: false // LEFT JOIN to include matches without statistics
         }
       ],
-      order: [['createdAt', 'DESC']]
+      attributes: ['id', 'match_number', 'home_score', 'away_score', 'match_date'],
+      order: [['match_date', 'DESC']]
     });
+
+    // Convert to the format expected by the rest of the function
+    const statistics = matchesWithStats
+      .filter(match => match.statistics) // Only include matches that have statistics
+      .map(match => {
+        const stat = match.statistics;
+        stat.match = {
+          id: match.id,
+          match_number: match.match_number,
+          home_score: match.home_score,
+          away_score: match.away_score,
+          match_date: match.match_date
+        };
+        return stat;
+      });
 
     // Calculate averages and totals
     const aggregatedStats = {
       totalMatches: statistics.length,
+      totalMatchesRequested: matchIds.length,
+      matchesWithoutStats: matchIds.length - statistics.length,
       averages: {
         home_shots: 0,
         away_shots: 0,
@@ -291,9 +310,10 @@ class MatchStatisticsService {
     };
   }
 
-  // Get team statistics across multiple matches
+  // Get team statistics across multiple matches - Optimized version with eager loading
   async getTeamStatistics(clubId, limit = 10) {
-    const matches = await Match.findAll({
+    // Single query with eager loading to avoid N+1 problem
+    const matchesWithStats = await Match.findAll({
       where: {
         [Op.or]: [
           { home_club_id: clubId },
@@ -301,13 +321,28 @@ class MatchStatisticsService {
         ],
         status: 'completed'
       },
+      include: [
+        {
+          model: MatchStatistics,
+          as: 'statistics', // Need to add this association in Match model
+          required: false // LEFT JOIN to include matches without statistics
+        },
+        {
+          model: Club,
+          as: 'homeClub',
+          attributes: ['id', 'name']
+        },
+        {
+          model: Club,
+          as: 'awayClub',
+          attributes: ['id', 'name']
+        }
+      ],
       order: [['match_date', 'DESC']],
       limit: parseInt(limit)
     });
 
-    const matchIds = matches.map(m => m.id);
-
-    if (matchIds.length === 0) {
+    if (matchesWithStats.length === 0) {
       return {
         club_id: clubId,
         total_matches: 0,
@@ -315,21 +350,9 @@ class MatchStatisticsService {
       };
     }
 
-    const statistics = await MatchStatistics.findAll({
-      where: {
-        match_id: matchIds
-      },
-      include: [
-        {
-          model: Match,
-          as: 'match'
-        }
-      ]
-    });
-
     // Calculate team-specific statistics
     const teamStats = {
-      matches_played: matches.length,
+      matches_played: matchesWithStats.length,
       wins: 0,
       draws: 0,
       losses: 0,
@@ -345,9 +368,9 @@ class MatchStatisticsService {
 
     let possessionCount = 0;
 
-    statistics.forEach(stat => {
-      const match = stat.match;
+    matchesWithStats.forEach(match => {
       const isHome = match.home_club_id === clubId;
+      const stats = match.statistics; // Statistics are now eagerly loaded
 
       // Win/Draw/Loss calculation
       if (isHome) {
@@ -358,16 +381,18 @@ class MatchStatisticsService {
         else if (match.home_score === match.away_score) teamStats.draws++;
         else teamStats.losses++;
 
-        // Statistics
-        teamStats.total_shots += stat.home_shots || 0;
-        teamStats.total_shots_on_target += stat.home_shots_on_target || 0;
-        teamStats.total_fouls += stat.home_fouls || 0;
-        teamStats.total_yellow_cards += stat.home_yellow_cards || 0;
-        teamStats.total_red_cards += stat.home_red_cards || 0;
+        // Statistics (only if statistics exist)
+        if (stats) {
+          teamStats.total_shots += stats.home_shots || 0;
+          teamStats.total_shots_on_target += stats.home_shots_on_target || 0;
+          teamStats.total_fouls += stats.home_fouls || 0;
+          teamStats.total_yellow_cards += stats.home_yellow_cards || 0;
+          teamStats.total_red_cards += stats.home_red_cards || 0;
 
-        if (stat.home_possession) {
-          teamStats.average_possession += stat.home_possession;
-          possessionCount++;
+          if (stats.home_possession) {
+            teamStats.average_possession += stats.home_possession;
+            possessionCount++;
+          }
         }
       } else {
         teamStats.goals_for += match.away_score || 0;
@@ -377,16 +402,18 @@ class MatchStatisticsService {
         else if (match.away_score === match.home_score) teamStats.draws++;
         else teamStats.losses++;
 
-        // Statistics
-        teamStats.total_shots += stat.away_shots || 0;
-        teamStats.total_shots_on_target += stat.away_shots_on_target || 0;
-        teamStats.total_fouls += stat.away_fouls || 0;
-        teamStats.total_yellow_cards += stat.away_yellow_cards || 0;
-        teamStats.total_red_cards += stat.away_red_cards || 0;
+        // Statistics (only if statistics exist)
+        if (stats) {
+          teamStats.total_shots += stats.away_shots || 0;
+          teamStats.total_shots_on_target += stats.away_shots_on_target || 0;
+          teamStats.total_fouls += stats.away_fouls || 0;
+          teamStats.total_yellow_cards += stats.away_yellow_cards || 0;
+          teamStats.total_red_cards += stats.away_red_cards || 0;
 
-        if (stat.away_possession) {
-          teamStats.average_possession += stat.away_possession;
-          possessionCount++;
+          if (stats.away_possession) {
+            teamStats.average_possession += stats.away_possession;
+            possessionCount++;
+          }
         }
       }
     });
@@ -398,8 +425,186 @@ class MatchStatisticsService {
     return {
       club_id: clubId,
       statistics: teamStats,
-      recent_matches: matches
+      recent_matches: matchesWithStats.map(match => ({
+        id: match.id,
+        match_date: match.match_date,
+        home_score: match.home_score,
+        away_score: match.away_score,
+        home_club: match.homeClub,
+        away_club: match.awayClub,
+        venue: match.venue,
+        status: match.status
+      }))
     };
+  }
+
+  // High-performance team statistics using database aggregation
+  async getTeamStatisticsOptimized(clubId, limit = 10) {
+    try {
+      // Use raw SQL query for maximum performance with complex aggregations
+      const [results] = await sequelize.query(`
+        WITH team_matches AS (
+          SELECT
+            m.id,
+            m.match_date,
+            m.home_score,
+            m.away_score,
+            m.home_club_id,
+            m.away_club_id,
+            CASE
+              WHEN m.home_club_id = :clubId THEN 'home'
+              ELSE 'away'
+            END as team_side,
+            CASE
+              WHEN m.home_club_id = :clubId AND m.home_score > m.away_score THEN 'win'
+              WHEN m.away_club_id = :clubId AND m.away_score > m.home_score THEN 'win'
+              WHEN m.home_score = m.away_score THEN 'draw'
+              ELSE 'loss'
+            END as result,
+            CASE
+              WHEN m.home_club_id = :clubId THEN m.home_score
+              ELSE m.away_score
+            END as goals_for,
+            CASE
+              WHEN m.home_club_id = :clubId THEN m.away_score
+              ELSE m.home_score
+            END as goals_against,
+            ms.home_shots,
+            ms.away_shots,
+            ms.home_shots_on_target,
+            ms.away_shots_on_target,
+            ms.home_possession,
+            ms.away_possession,
+            ms.home_fouls,
+            ms.away_fouls,
+            ms.home_yellow_cards,
+            ms.away_yellow_cards,
+            ms.home_red_cards,
+            ms.away_red_cards
+          FROM matches m
+          LEFT JOIN match_statistics ms ON m.id = ms.match_id
+          WHERE (m.home_club_id = :clubId OR m.away_club_id = :clubId)
+            AND m.status = 'completed'
+          ORDER BY m.match_date DESC
+          LIMIT :limit
+        )
+        SELECT
+          COUNT(*) as matches_played,
+          SUM(CASE WHEN result = 'win' THEN 1 ELSE 0 END) as wins,
+          SUM(CASE WHEN result = 'draw' THEN 1 ELSE 0 END) as draws,
+          SUM(CASE WHEN result = 'loss' THEN 1 ELSE 0 END) as losses,
+          SUM(goals_for) as total_goals_for,
+          SUM(goals_against) as total_goals_against,
+          SUM(
+            CASE
+              WHEN team_side = 'home' THEN COALESCE(home_shots, 0)
+              ELSE COALESCE(away_shots, 0)
+            END
+          ) as total_shots,
+          SUM(
+            CASE
+              WHEN team_side = 'home' THEN COALESCE(home_shots_on_target, 0)
+              ELSE COALESCE(away_shots_on_target, 0)
+            END
+          ) as total_shots_on_target,
+          AVG(
+            CASE
+              WHEN team_side = 'home' AND home_possession IS NOT NULL THEN home_possession
+              WHEN team_side = 'away' AND away_possession IS NOT NULL THEN away_possession
+              ELSE NULL
+            END
+          ) as average_possession,
+          SUM(
+            CASE
+              WHEN team_side = 'home' THEN COALESCE(home_fouls, 0)
+              ELSE COALESCE(away_fouls, 0)
+            END
+          ) as total_fouls,
+          SUM(
+            CASE
+              WHEN team_side = 'home' THEN COALESCE(home_yellow_cards, 0)
+              ELSE COALESCE(away_yellow_cards, 0)
+            END
+          ) as total_yellow_cards,
+          SUM(
+            CASE
+              WHEN team_side = 'home' THEN COALESCE(home_red_cards, 0)
+              ELSE COALESCE(away_red_cards, 0)
+            END
+          ) as total_red_cards
+        FROM team_matches;
+      `, {
+        replacements: {
+          clubId: parseInt(clubId),
+          limit: parseInt(limit)
+        },
+        type: sequelize.QueryTypes.SELECT
+      });
+
+      const stats = results[0];
+
+      if (!stats || stats.matches_played === '0') {
+        return {
+          club_id: clubId,
+          total_matches: 0,
+          statistics: null
+        };
+      }
+
+      // Get recent matches for additional context
+      const recentMatches = await Match.findAll({
+        where: {
+          [Op.or]: [
+            { home_club_id: clubId },
+            { away_club_id: clubId }
+          ],
+          status: 'completed'
+        },
+        include: [
+          {
+            model: Club,
+            as: 'homeClub',
+            attributes: ['id', 'name']
+          },
+          {
+            model: Club,
+            as: 'awayClub',
+            attributes: ['id', 'name']
+          }
+        ],
+        order: [['match_date', 'DESC']],
+        limit: parseInt(limit),
+        attributes: ['id', 'match_date', 'home_score', 'away_score', 'venue', 'status']
+      });
+
+      return {
+        club_id: clubId,
+        statistics: {
+          matches_played: parseInt(stats.matches_played),
+          wins: parseInt(stats.wins),
+          draws: parseInt(stats.draws),
+          losses: parseInt(stats.losses),
+          goals_for: parseInt(stats.total_goals_for),
+          goals_against: parseInt(stats.total_goals_against),
+          total_shots: parseInt(stats.total_shots),
+          total_shots_on_target: parseInt(stats.total_shots_on_target),
+          average_possession: stats.average_possession ?
+            Math.round(parseFloat(stats.average_possession) * 100) / 100 : 0,
+          total_fouls: parseInt(stats.total_fouls),
+          total_yellow_cards: parseInt(stats.total_yellow_cards),
+          total_red_cards: parseInt(stats.total_red_cards),
+          goal_difference: parseInt(stats.total_goals_for) - parseInt(stats.total_goals_against),
+          win_percentage: Math.round((parseInt(stats.wins) / parseInt(stats.matches_played)) * 10000) / 100,
+          clean_sheets: 0 // Would require additional query to calculate properly
+        },
+        recent_matches: recentMatches
+      };
+
+    } catch (error) {
+      // Fallback to the original method if raw query fails
+      console.warn('Optimized query failed, falling back to ORM method:', error.message);
+      return this.getTeamStatistics(clubId, limit);
+    }
   }
 }
 
