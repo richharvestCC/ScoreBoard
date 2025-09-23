@@ -14,6 +14,7 @@ import {
   TournamentBracketProps
 } from '../../../../types/tournament';
 import { useResponsive } from '../shared/ResponsiveLayout';
+import ZoomPanContainer from './ZoomPanContainer';
 
 // Constants
 const MATCH_WIDTH = 200;
@@ -336,16 +337,31 @@ const SVGTournamentBracket: React.FC<TournamentBracketProps> = ({
     return connectors;
   }, [bracketRounds, dimensions]);
 
+  // Zoom change handler
+  const handleZoomChange = useCallback((newZoom: number) => {
+    onZoomChange?.(newZoom);
+  }, [onZoomChange]);
+
   return (
     <BracketContainer>
-      <SVGCanvas
-        viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-        preserveAspectRatio="xMidYMid meet"
-        style={{
-          transform: `scale(${scale})`,
-          transformOrigin: 'top left'
-        }}
-      >
+      {zoomEnabled ? (
+        <ZoomPanContainer
+          initialZoom={scale}
+          onZoomChange={handleZoomChange}
+          enableGestures={config.isTouchDevice || config.device !== 'mobile'}
+          showControls={config.device === 'desktop'}
+          showSlider={config.device === 'desktop'}
+          bounds={{
+            minX: -dimensions.width * 0.5,
+            maxX: dimensions.width * 0.5,
+            minY: -dimensions.height * 0.5,
+            maxY: dimensions.height * 0.5
+          }}
+        >
+          <SVGCanvas
+            viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+            preserveAspectRatio="xMidYMid meet"
+          >
         {/* Render connectors */}
         <g className="connectors">
           {renderConnectors()}
@@ -394,7 +410,67 @@ const SVGTournamentBracket: React.FC<TournamentBracketProps> = ({
             </text>
           ))}
         </g>
-      </SVGCanvas>
+          </SVGCanvas>
+        </ZoomPanContainer>
+      ) : (
+        <SVGCanvas
+          viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+          preserveAspectRatio="xMidYMid meet"
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: 'top left'
+          }}
+        >
+          {/* Render connectors */}
+          <g className="connectors">
+            {renderConnectors()}
+          </g>
+
+          {/* Render matches */}
+          <g className="matches">
+            {bracketRounds.map((round, roundIndex) =>
+              round.map((match, matchIndex) => {
+                const position = getMatchPosition(
+                  roundIndex,
+                  matchIndex,
+                  round.length,
+                  dimensions
+                );
+
+                return (
+                  <MatchComponent
+                    key={`match-${match.id}`}
+                    match={match}
+                    x={position.x}
+                    y={position.y}
+                    onMatchClick={handleMatchClick}
+                    isResponsive={config.device !== 'desktop'}
+                  />
+                );
+              })
+            )}
+          </g>
+
+          {/* Round labels */}
+          <g className="round-labels">
+            {bracketRounds.map((round, roundIndex) => (
+              <text
+                key={`round-label-${roundIndex}`}
+                x={roundIndex * ROUND_SPACING + 50 + MATCH_WIDTH / 2}
+                y={30}
+                textAnchor="middle"
+                fill={theme.palette.text.secondary}
+                fontSize={config.device === 'desktop' ? '14' : '12'}
+                fontFamily={theme.typography.fontFamily}
+              >
+                {roundIndex === bracketRounds.length - 1
+                  ? '결승'
+                  : `${Math.pow(2, bracketRounds.length - roundIndex - 1)}강`}
+              </text>
+            ))}
+          </g>
+        </SVGCanvas>
+      )}
 
       {/* Bracket info overlay */}
       <Box
