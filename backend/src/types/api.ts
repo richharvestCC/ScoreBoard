@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 // API Response Types
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -294,3 +296,6 @@ export interface CustomError extends Error {
   code?: string;
   details?: ValidationError[];
 }
+
+// Logger Types
+export type LogLevel = 'error' | 'warn' | 'info' | 'debug';
