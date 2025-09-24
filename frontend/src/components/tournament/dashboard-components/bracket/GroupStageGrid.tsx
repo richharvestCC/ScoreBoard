@@ -424,7 +424,7 @@ const GroupStageGrid: React.FC<GroupStageProps> = ({
           조별 예선
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <Typography variant="body2" color="text.secondary">
               총 그룹 수
             </Typography>
@@ -432,7 +432,7 @@ const GroupStageGrid: React.FC<GroupStageProps> = ({
               {groups.length}개
             </Typography>
           </Grid>
-          <Grid item xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <Typography variant="body2" color="text.secondary">
               참가 팀
             </Typography>
@@ -440,7 +440,7 @@ const GroupStageGrid: React.FC<GroupStageProps> = ({
               {totalTeams}팀
             </Typography>
           </Grid>
-          <Grid item xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <Typography variant="body2" color="text.secondary">
               경기 진행률
             </Typography>
@@ -448,7 +448,7 @@ const GroupStageGrid: React.FC<GroupStageProps> = ({
               {totalMatches > 0 ? Math.round((completedMatches / totalMatches) * 100) : 0}%
             </Typography>
           </Grid>
-          <Grid item xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <Typography variant="body2" color="text.secondary">
               완료 경기
             </Typography>
@@ -462,7 +462,7 @@ const GroupStageGrid: React.FC<GroupStageProps> = ({
       {/* Groups Grid */}
       <Grid container spacing={3}>
         {groups.map((group) => (
-          <Grid item xs={12} lg={6} key={group.id}>
+          <Grid size={{ xs: 12, lg: 6 }} key={group.id}>
             <GroupDisplay
               group={group}
               onMatchUpdate={onMatchUpdate}

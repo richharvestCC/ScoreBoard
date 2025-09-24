@@ -10,7 +10,6 @@ import React, {
   useEffect,
   useMemo,
   ReactNode,
-  TouchEvent,
   WheelEvent,
   MouseEvent
 } from 'react';
@@ -190,7 +189,7 @@ export const useZoomPan = (initialZoom = 1.0) => {
 };
 
 // Utility Functions
-const getTouchData = (touches: TouchList): TouchData[] => {
+const getTouchData = (touches: React.TouchList): TouchData[] => {
   return Array.from(touches).map(touch => ({
     id: touch.identifier,
     x: touch.clientX,
@@ -312,7 +311,7 @@ const ZoomPanContainer: React.FC<ZoomPanContainerProps> = ({
   ]);
 
   // Touch gesture handlers
-  const handleTouchStart = useCallback((event: TouchEvent) => {
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
     if (!enableGestures) return;
 
     const touches = getTouchData(event.touches);
@@ -343,7 +342,7 @@ const ZoomPanContainer: React.FC<ZoomPanContainerProps> = ({
     }
   }, [enableGestures, zoomPanState.scale, zoomTo, onZoomChange, setZoomPanState]);
 
-  const handleTouchMove = useCallback((event: TouchEvent) => {
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
     if (!enableGestures || !zoomPanState.isDragging) return;
 
     event.preventDefault();
@@ -421,7 +420,7 @@ const ZoomPanContainer: React.FC<ZoomPanContainerProps> = ({
     bounds
   ]);
 
-  const handleTouchEnd = useCallback((event: TouchEvent) => {
+  const handleTouchEnd = useCallback((event: React.TouchEvent) => {
     if (!enableGestures) return;
 
     setZoomPanState(prev => ({ ...prev, isDragging: false }));
@@ -463,7 +462,7 @@ const ZoomPanContainer: React.FC<ZoomPanContainerProps> = ({
   }, [enableGestures, setZoomPanState, bounds]);
 
   // Mouse drag handlers (for desktop)
-  const handleMouseDown = useCallback((event: MouseEvent) => {
+  const handleMouseDown = useCallback((event: React.MouseEvent) => {
     if (!enableGestures || config.isTouchDevice) return;
 
     setZoomPanState(prev => ({ ...prev, isDragging: true }));

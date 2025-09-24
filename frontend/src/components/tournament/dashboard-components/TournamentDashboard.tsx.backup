@@ -226,10 +226,10 @@ const TournamentDashboard: React.FC<TournamentDashboardProps> = ({
     return (
       <DashboardContainer className={className}>
         <PlaceholderContent>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant=\"h4\" gutterBottom>
             📱 모바일 지원 예정
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant=\"body1\" color=\"text.secondary\">
             토너먼트 대시보드는 현재 데스크톱과 태블릿에서만 지원됩니다.
             <br />
             모바일 버전은 향후 업데이트에서 제공될 예정입니다.
@@ -243,11 +243,11 @@ const TournamentDashboard: React.FC<TournamentDashboardProps> = ({
     <DashboardContainer className={className}>
       {/* Header Section */}
       <HeaderSection>
-        <Slide direction="down" in={true} timeout={800}>
-          <Box display="flex" alignItems="center" justifyContent="space-between" height="100%">
+        <Slide direction=\"down\" in={true} timeout={800}>
+          <Box display=\"flex\" alignItems=\"center\" justifyContent=\"space-between\" height=\"100%\">
             <Typography
-              variant="h4"
-              component="h1"
+              variant=\"h4\"
+              component=\"h1\"
               sx={{
                 color: 'white',
                 fontWeight: 600,
@@ -257,8 +257,8 @@ const TournamentDashboard: React.FC<TournamentDashboardProps> = ({
               {uiState.currentTournament?.title || '🏆 토너먼트 대시보드'}
             </Typography>
 
-            <Box display="flex" alignItems="center" gap={2}>
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+            <Box display=\"flex\" alignItems=\"center\" gap={2}>
+              <Typography variant=\"body2\" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                 {responsiveConfig.device === 'desktop' ? '데스크톱' :
                  responsiveConfig.device === 'tablet-landscape' ? '태블릿 가로' : '태블릿 세로'}
               </Typography>
@@ -273,10 +273,10 @@ const TournamentDashboard: React.FC<TournamentDashboardProps> = ({
           <PlaceholderContent>
             {uiState.currentTournament ? (
               <>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant=\"h5\" gutterBottom>
                   🏗️ 토너먼트 렌더링 준비 중
                 </Typography>
-                <Typography variant="body1" color="text.secondary">
+                <Typography variant=\"body1\" color=\"text.secondary\">
                   토너먼트: {uiState.currentTournament.title}
                   <br />
                   유형: {uiState.currentTournament.type}
@@ -288,10 +288,10 @@ const TournamentDashboard: React.FC<TournamentDashboardProps> = ({
               </>
             ) : (
               <>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant=\"h5\" gutterBottom>
                   🚀 토너먼트 대시보드
                 </Typography>
-                <Typography variant="body1" color="text.secondary">
+                <Typography variant=\"body1\" color=\"text.secondary\">
                   새로운 토너먼트를 생성하거나 기존 토너먼트를 선택하세요.
                   <br />
                   우측 하단의 + 버튼을 클릭하여 시작할 수 있습니다.
@@ -304,14 +304,14 @@ const TournamentDashboard: React.FC<TournamentDashboardProps> = ({
 
       {/* Control Panel Section */}
       <ControlPanelSection>
-        <Slide direction="up" in={true} timeout={800}>
-          <Box display="flex" alignItems="center" justifyContent="space-between" height="100%">
-            <Typography variant="body2" color="text.secondary">
+        <Slide direction=\"up\" in={true} timeout={800}>
+          <Box display=\"flex\" alignItems=\"center\" justifyContent=\"space-between\" height=\"100%\">
+            <Typography variant=\"body2\" color=\"text.secondary\">
               Ready for Tournament Management
             </Typography>
 
-            <Box display="flex" alignItems="center" gap={2}>
-              <Typography variant="caption" color="text.secondary">
+            <Box display=\"flex\" alignItems=\"center\" gap={2}>
+              <Typography variant=\"caption\" color=\"text.secondary\">
                 {tournaments.length}개 토너먼트
               </Typography>
             </Box>
@@ -322,8 +322,8 @@ const TournamentDashboard: React.FC<TournamentDashboardProps> = ({
       {/* Create Tournament FAB */}
       <Fade in={true} timeout={1200}>
         <CreateTournamentFab
-          color="secondary"
-          aria-label="새 토너먼트 생성"
+          color=\"secondary\"
+          aria-label=\"새 토너먼트 생성\"
           onClick={handleCreateTournament}
         >
           <AddIcon />

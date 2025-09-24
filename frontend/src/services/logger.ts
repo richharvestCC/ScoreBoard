@@ -29,7 +29,7 @@ class FrontendLogger {
 
   constructor() {
     this.sessionId = this.generateSessionId();
-    this.logLevel = (process.env.REACT_APP_LOG_LEVEL as LogLevel) || 'info';
+    this.logLevel = this.validateLogLevel(process.env.REACT_APP_LOG_LEVEL) || 'info';
 
     // Auto-flush logs periodically
     setInterval(() => this.flush(), this.flushInterval);
@@ -43,6 +43,24 @@ class FrontendLogger {
 
   private generateSessionId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private validateLogLevel(level: string | undefined): LogLevel | null {
+    if (!level) return null;
+
+    const validLevels: LogLevel[] = ['error', 'warn', 'info', 'debug'];
+    const normalizedLevel = level.toLowerCase() as LogLevel;
+
+    if (validLevels.includes(normalizedLevel)) {
+      return normalizedLevel;
+    }
+
+    // Log warning about invalid log level in development
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`Invalid log level '${level}' specified in REACT_APP_LOG_LEVEL. Valid levels: ${validLevels.join(', ')}. Falling back to 'info'.`);
+    }
+
+    return null;
   }
 
   private shouldLog(level: LogLevel): boolean {

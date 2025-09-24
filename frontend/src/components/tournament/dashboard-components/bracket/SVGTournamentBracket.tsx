@@ -76,7 +76,7 @@ const TeamRow = styled(Box)<{ isWinner?: boolean }>(({ theme, isWinner }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: theme.spacing(0.5, 1),
-  borderRadius: theme.shape.borderRadius / 2,
+  borderRadius: (theme.shape.borderRadius as number) / 2,
   background: isWinner
     ? alpha(theme.palette.primary.main, 0.1)
     : 'transparent',
@@ -293,7 +293,7 @@ const SVGTournamentBracket: React.FC<TournamentBracketProps> = ({
 
   // Generate connector lines between matches
   const renderConnectors = useCallback(() => {
-    const connectors: JSX.Element[] = [];
+    const connectors: React.ReactElement[] = [];
 
     bracketRounds.forEach((round, roundIndex) => {
       if (roundIndex === bracketRounds.length - 1) return; // Skip final round

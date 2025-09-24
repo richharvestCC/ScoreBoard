@@ -24,7 +24,8 @@ export const DEVICE_CONFIGS = {
     controlPanel: 'bottom-fixed',
     zoomDefault: 1.0,
     touchOptimized: false,
-    fullFeatures: true
+    fullFeatures: true,
+    supported: true
   },
   'tablet-landscape': {
     minWidth: BREAKPOINTS.lg,
@@ -33,7 +34,8 @@ export const DEVICE_CONFIGS = {
     controlPanel: 'bottom-sticky',
     zoomDefault: 0.8,
     touchOptimized: true,
-    fullFeatures: true
+    fullFeatures: true,
+    supported: true
   },
   'tablet-portrait': {
     minWidth: BREAKPOINTS.md,
@@ -42,7 +44,8 @@ export const DEVICE_CONFIGS = {
     controlPanel: 'collapsed',
     zoomDefault: 0.6,
     touchOptimized: true,
-    fullFeatures: false
+    fullFeatures: false,
+    supported: true
   },
   mobile: {
     maxWidth: BREAKPOINTS.md - 1,

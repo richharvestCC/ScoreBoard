@@ -291,19 +291,21 @@ export const ToggleGroup: React.FC<ToggleGroupProps> = ({
 
 // Tournament-specific Toggle Variants
 export const TournamentTypeToggle: React.FC<{
-  value: 'league' | 'tournament';
-  onChange: (value: 'league' | 'tournament') => void;
+  value: 'league' | 'tournament' | 'group_tournament';
+  onChange: (value: 'league' | 'tournament' | 'group_tournament') => void;
   disabled?: boolean;
 }> = ({ value, onChange, disabled }) => {
   return (
     <MaterialToggle
-      label={value === 'tournament' ? '토너먼트' : '리그'}
+      label={value === 'tournament' ? '토너먼트' : value === 'group_tournament' ? '조별토너먼트' : '리그'}
       description={
         value === 'tournament'
           ? '녹아웃 방식의 토너먼트 대회'
+          : value === 'group_tournament'
+          ? '조별예선과 토너먼트를 결합한 대회'
           : '리그 방식의 정규 시즌 대회'
       }
-      checked={value === 'tournament'}
+      checked={value === 'tournament' || value === 'group_tournament'}
       onChange={(e) => onChange(e.target.checked ? 'tournament' : 'league')}
       disabled={disabled}
     />

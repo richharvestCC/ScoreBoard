@@ -7,7 +7,7 @@
 export type TournamentType = 'league' | 'tournament' | 'group_tournament';
 export type TournamentStatus = 'draft' | 'registration' | 'active' | 'completed';
 export type MatchStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
-export type MatchType = 'friendly' | 'league' | 'cup' | 'tournament';
+export type MatchType = 'friendly' | 'league' | 'cup' | 'tournament' | 'group';
 
 // Core Entities
 export interface Tournament {
@@ -85,6 +85,7 @@ export interface TournamentCreationConfig {
   groupStageEnabled: boolean;
   teamsPerGroup?: number;
   qualifiersPerGroup?: number;
+  adminUserId: string;
   isCloneMode?: boolean;
   sourceId?: string;
 }

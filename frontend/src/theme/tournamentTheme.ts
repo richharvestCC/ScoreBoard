@@ -306,9 +306,27 @@ const getCommonThemeOptions = (): ThemeOptions => ({
     '0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px 0px rgba(0, 0, 0, 0.3)',
     // Elevation 5
     '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
-    // Additional elevations...
-    ...Array(19).fill('0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)')
-  ]
+    // Additional elevations 6-24...
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)',
+    '0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px 0px rgba(0, 0, 0, 0.3)'
+  ] as const
 });
 
 // Light Theme
@@ -327,12 +345,6 @@ export const lightTheme: Theme = createTheme({
       light: MD3_COLORS.secondary[80],
       dark: MD3_COLORS.secondary[20],
       contrastText: MD3_COLORS.secondary[100]
-    },
-    tertiary: {
-      main: MD3_COLORS.tertiary[40],
-      light: MD3_COLORS.tertiary[80],
-      dark: MD3_COLORS.tertiary[20],
-      contrastText: MD3_COLORS.tertiary[100]
     },
     error: {
       main: MD3_COLORS.error[40],
@@ -367,18 +379,7 @@ export const lightTheme: Theme = createTheme({
       secondary: MD3_COLORS.neutral[30],
       disabled: alpha(MD3_COLORS.neutral[10], 0.38)
     },
-    divider: alpha(MD3_COLORS.neutral[10], 0.12),
-    // Material Design 3 Surface Colors
-    surface: {
-      main: SURFACE_COLORS.surface,
-      dim: SURFACE_COLORS.surfaceDim,
-      bright: SURFACE_COLORS.surfaceBright,
-      containerLowest: SURFACE_COLORS.surfaceContainerLowest,
-      containerLow: SURFACE_COLORS.surfaceContainerLow,
-      container: SURFACE_COLORS.surfaceContainer,
-      containerHigh: SURFACE_COLORS.surfaceContainerHigh,
-      containerHighest: SURFACE_COLORS.surfaceContainerHighest
-    }
+    divider: alpha(MD3_COLORS.neutral[10], 0.12)
   }
 });
 
@@ -398,12 +399,6 @@ export const darkTheme: Theme = createTheme({
       light: MD3_COLORS.secondary[90],
       dark: MD3_COLORS.secondary[30],
       contrastText: MD3_COLORS.secondary[20]
-    },
-    tertiary: {
-      main: MD3_COLORS.tertiary[80],
-      light: MD3_COLORS.tertiary[90],
-      dark: MD3_COLORS.tertiary[30],
-      contrastText: MD3_COLORS.tertiary[20]
     },
     error: {
       main: MD3_COLORS.error[80],
@@ -438,18 +433,7 @@ export const darkTheme: Theme = createTheme({
       secondary: MD3_COLORS.neutral[80],
       disabled: alpha(MD3_COLORS.neutral[90], 0.38)
     },
-    divider: alpha(MD3_COLORS.neutral[90], 0.12),
-    // Material Design 3 Surface Colors (Dark)
-    surface: {
-      main: SURFACE_COLORS_DARK.surface,
-      dim: SURFACE_COLORS_DARK.surfaceDim,
-      bright: SURFACE_COLORS_DARK.surfaceBright,
-      containerLowest: SURFACE_COLORS_DARK.surfaceContainerLowest,
-      containerLow: SURFACE_COLORS_DARK.surfaceContainerLow,
-      container: SURFACE_COLORS_DARK.surfaceContainer,
-      containerHigh: SURFACE_COLORS_DARK.surfaceContainerHigh,
-      containerHighest: SURFACE_COLORS_DARK.surfaceContainerHighest
-    }
+    divider: alpha(MD3_COLORS.neutral[90], 0.12)
   }
 });
 
@@ -477,8 +461,8 @@ const getComponentOverrides = (theme: Theme) => ({
   MuiButton: {
     styleOverrides: {
       root: {
-        borderRadius: theme.shape.borderRadius * 2,
-        textTransform: 'none',
+        borderRadius: (theme.shape.borderRadius as number) * 2,
+        textTransform: 'none' as const,
         fontWeight: 500,
         fontSize: '0.875rem',
         padding: '12px 24px',

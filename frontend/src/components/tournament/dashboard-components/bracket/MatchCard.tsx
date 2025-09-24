@@ -48,7 +48,7 @@ const StyledMatchCard = styled(Card)<{ status: MatchStatus; isCompact?: boolean 
         ? alpha(theme.palette.warning.main, 0.3)
         : alpha(theme.palette.divider, 0.12)
     }`,
-    borderRadius: theme.shape.borderRadius * 1.5,
+    borderRadius: (theme.shape.borderRadius as number) * 1.5,
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     cursor: 'pointer',
     position: 'relative',
@@ -242,7 +242,7 @@ const ScoreEditDialog: React.FC<ScoreEditDialogProps> = ({
       </DialogTitle>
       <DialogContent>
         <Grid container spacing={3} sx={{ mt: 1 }}>
-          <Grid item xs={5}>
+          <Grid size={{ xs: 5 }}>
             <Box textAlign="center">
               <Typography variant="h6" gutterBottom>
                 {match.team1?.name || 'TBD'}
@@ -257,7 +257,7 @@ const ScoreEditDialog: React.FC<ScoreEditDialogProps> = ({
               />
             </Box>
           </Grid>
-          <Grid item xs={2}>
+          <Grid size={{ xs: 2 }}>
             <Box
               display="flex"
               alignItems="center"
@@ -269,7 +269,7 @@ const ScoreEditDialog: React.FC<ScoreEditDialogProps> = ({
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={5}>
+          <Grid size={{ xs: 5 }}>
             <Box textAlign="center">
               <Typography variant="h6" gutterBottom>
                 {match.team2?.name || 'TBD'}

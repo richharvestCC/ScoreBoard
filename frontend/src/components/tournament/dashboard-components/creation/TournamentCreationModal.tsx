@@ -59,7 +59,7 @@ const HeaderSection = styled(Box)(({ theme }) => ({
   color: theme.palette.primary.contrastText,
   padding: theme.spacing(3),
   margin: theme.spacing(-3, -3, 3, -3),
-  borderRadius: `${theme.shape.borderRadius * 2}px ${theme.shape.borderRadius * 2}px 0 0`,
+  borderRadius: `${(theme.shape.borderRadius as number) * 2}px ${(theme.shape.borderRadius as number) * 2}px 0 0`,
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(2)
@@ -326,7 +326,7 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({
             </Typography>
 
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <TextField
                   fullWidth
                   label="조당 팀 수"
@@ -337,14 +337,14 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({
                   helperText="3-6팀 권장"
                 />
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={{ xs: 6 }}>
                 <TextField
                   fullWidth
                   label="조별 통과팀"
                   type="number"
                   value={tournamentConfig.qualifiersPerGroup}
                   onChange={(e) => updateConfig({ qualifiersPerGroup: parseInt(e.target.value) || 2 })}
-                  inputProps={{ min: 1, max: tournamentConfig.teamsPerGroup - 1 }}
+                  inputProps={{ min: 1, max: (tournamentConfig.teamsPerGroup || 4) - 1 }}
                   helperText="조당 통과 팀 수"
                 />
               </Grid>
@@ -381,21 +381,21 @@ const TournamentCreationModal: React.FC<TournamentCreationModalProps> = ({
             토너먼트 요약
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
               <Typography variant="body2" color="text.secondary">이름</Typography>
               <Typography variant="body1" fontWeight={600}>{tournamentConfig.title}</Typography>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
               <Typography variant="body2" color="text.secondary">유형</Typography>
               <Typography variant="body1" fontWeight={600}>
                 {tournamentConfig.type === 'tournament' ? '토너먼트' : '리그'}
               </Typography>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
               <Typography variant="body2" color="text.secondary">참가 팀</Typography>
               <Typography variant="body1" fontWeight={600}>{tournamentConfig.teamCount}팀</Typography>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
               <Typography variant="body2" color="text.secondary">조별예선</Typography>
               <Typography variant="body1" fontWeight={600}>
                 {tournamentConfig.groupStageEnabled ? '활성화' : '비활성화'}

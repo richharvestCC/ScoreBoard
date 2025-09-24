@@ -54,7 +54,7 @@ const HeaderSection = styled(Box)(({ theme }) => ({
   color: theme.palette.warning.contrastText,
   padding: theme.spacing(3),
   margin: theme.spacing(-3, -3, 3, -3),
-  borderRadius: `${theme.shape.borderRadius * 2}px ${theme.shape.borderRadius * 2}px 0 0`,
+  borderRadius: `${(theme.shape.borderRadius as number) * 2}px ${(theme.shape.borderRadius as number) * 2}px 0 0`,
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(2)
