@@ -9,9 +9,11 @@ import {
   Chip
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ThemeVisualization = () => {
   const theme = useTheme();
+  const { t } = useLanguage();
 
   // Color extraction helper
   const extractColors = (colorNames) => {
@@ -51,7 +53,7 @@ const ThemeVisualization = () => {
             mb: 2
           }}
         >
-          ScoreBoard - Material Design 3 테마 시각화
+          {t({ ko: 'MatchCard - Material Design 3 테마 시각화', en: 'MatchCard - Material Design 3 Theme Visualization' })}
         </Typography>
         <Typography
           variant="h6"
@@ -59,10 +61,22 @@ const ThemeVisualization = () => {
           sx={{
             maxWidth: 600,
             mx: 'auto',
-            mb: 4
+            mb: 2
           }}
         >
-          ScoreBoard 플랫폼의 완전한 Material Design 3 색상 팔레트와 디자인 시스템을 확인하세요.
+          {t({ ko: 'MatchCard 플랫폼의 완전한 Material Design 3 색상 팔레트와 디자인 시스템을 확인하세요.', en: 'Explore the complete Material Design 3 color palette and design system of the MatchCard platform.' })}
+        </Typography>
+        <Typography
+          variant="h5"
+          sx={{
+            color: 'primary.600',
+            fontWeight: 600,
+            fontStyle: 'italic',
+            textAlign: 'center',
+            mb: 1
+          }}
+        >
+          {t({ ko: '"공 좀 차니?"', en: '"What about the score?"' })}
         </Typography>
       </Box>
 
@@ -79,7 +93,7 @@ const ThemeVisualization = () => {
             textAlign: 'left'
           }}
         >
-          디자인 토큰
+          {t({ ko: '디자인 토큰', en: 'Design Tokens' })}
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
@@ -94,15 +108,15 @@ const ThemeVisualization = () => {
               }}
             >
               <Typography variant="h6" gutterBottom color="primary.600">
-                글꼴
+                {t({ ko: '글꼴', en: 'Typography' })}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {theme.typography.fontFamily}
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Typography variant="h6">헤딩 예시</Typography>
-                <Typography variant="body1">본문 텍스트</Typography>
-                <Typography variant="body2">작은 텍스트</Typography>
+                <Typography variant="h6">{t({ ko: '헤딩 예시', en: 'Heading Example' })}</Typography>
+                <Typography variant="body1">{t({ ko: '본문 텍스트', en: 'Body Text' })}</Typography>
+                <Typography variant="body2">{t({ ko: '작은 텍스트', en: 'Small Text' })}</Typography>
               </Box>
             </Paper>
           </Grid>
@@ -119,10 +133,10 @@ const ThemeVisualization = () => {
               }}
             >
               <Typography variant="h6" gutterBottom color="primary.600">
-                둥근 모서리
+                {t({ ko: '둥근 모서리', en: 'Border Radius' })}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                기본: {theme.shape.borderRadius}px
+                {t({ ko: '기본', en: 'Default' })}: {theme.shape.borderRadius}px
               </Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Box sx={{ width: 40, height: 40, bgcolor: 'primary.100', borderRadius: 1 }} />
@@ -144,10 +158,10 @@ const ThemeVisualization = () => {
               }}
             >
               <Typography variant="h6" gutterBottom color="primary.600">
-                간격
+                {t({ ko: '간격', en: 'Spacing' })}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                기본 단위: {theme.spacing(1)}
+                {t({ ko: '기본 단위', en: 'Base Unit' })}: {theme.spacing(1)}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ width: 8, height: 20, bgcolor: 'secondary.400' }} />
@@ -172,7 +186,7 @@ const ThemeVisualization = () => {
             textAlign: 'left'
           }}
         >
-          Color Palette (50-900 Tones)
+          {t({ ko: '색상 팔레트 (50-900 톤)', en: 'Color Palette (50-900 Tones)' })}
         </Typography>
         {colorGroups.map((group) => (
           <Box key={group.name} sx={{ mb: 6 }}>
@@ -185,7 +199,7 @@ const ThemeVisualization = () => {
                 textAlign: 'left'
               }}
             >
-              {group.name} Colors
+              {t({ ko: `${group.name} 색상`, en: `${group.name} Colors` })}
             </Typography>
 
             {/* 50-900 Numeric Colors */}
@@ -286,7 +300,7 @@ const ThemeVisualization = () => {
             textAlign: 'left'
           }}
         >
-          간격 시스템
+          {t({ ko: '간격 시스템', en: 'Spacing System' })}
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {[1, 2, 3, 4, 6, 8].map((spacing) => (
@@ -320,7 +334,7 @@ const ThemeVisualization = () => {
             textAlign: 'left'
           }}
         >
-          타이포그래피
+          {t({ ko: '타이포그래피', en: 'Typography' })}
         </Typography>
         <Paper
           elevation={0}
@@ -332,22 +346,22 @@ const ThemeVisualization = () => {
           }}
         >
           <Typography variant="h1" gutterBottom>
-            H1 헤딩 (40px)
+            {t({ ko: 'H1 헤딩 (40px)', en: 'H1 Heading (40px)' })}
           </Typography>
           <Typography variant="h2" gutterBottom sx={{ textAlign: 'left' }}>
-            H2 헤딩 (32px)
+            {t({ ko: 'H2 헤딩 (32px)', en: 'H2 Heading (32px)' })}
           </Typography>
           <Typography variant="h3" gutterBottom>
-            H3 헤딩 (24px)
+            {t({ ko: 'H3 헤딩 (24px)', en: 'H3 Heading (24px)' })}
           </Typography>
           <Typography variant="h4" gutterBottom>
-            H4 헤딩 (20px)
+            {t({ ko: 'H4 헤딩 (20px)', en: 'H4 Heading (20px)' })}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Body1 본문 텍스트 (16px) - 기본 본문에 사용되는 텍스트입니다.
+            {t({ ko: 'Body1 본문 텍스트 (16px) - 기본 본문에 사용되는 텍스트입니다.', en: 'Body1 text (16px) - Used for main body content.' })}
           </Typography>
           <Typography variant="body2" gutterBottom sx={{ textAlign: 'left', margin: 0 }}>
-            Body2 작은 본문 텍스트 (14px) - 부가적인 정보에 사용됩니다.
+            {t({ ko: 'Body2 작은 본문 텍스트 (14px) - 부가적인 정보에 사용됩니다.', en: 'Body2 small text (14px) - Used for supplementary information.' })}
           </Typography>
         </Paper>
       </Box>
@@ -365,7 +379,7 @@ const ThemeVisualization = () => {
             textAlign: 'left'
           }}
         >
-          컴포넌트 예시
+          {t({ ko: '컴포넌트 예시', en: 'Component Examples' })}
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
@@ -379,13 +393,13 @@ const ThemeVisualization = () => {
               }}
             >
               <Typography variant="h6" gutterBottom>
-                칩/배지
+                {t({ ko: '칩/배지', en: 'Chips/Badges' })}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                <Chip label="성공" color="success" />
-                <Chip label="경고" color="warning" />
-                <Chip label="오류" color="error" />
-                <Chip label="정보" color="info" />
+                <Chip label={t({ ko: '성공', en: 'Success' })} color="success" />
+                <Chip label={t({ ko: '경고', en: 'Warning' })} color="warning" />
+                <Chip label={t({ ko: '오류', en: 'Error' })} color="error" />
+                <Chip label={t({ ko: '정보', en: 'Info' })} color="info" />
               </Box>
             </Paper>
           </Grid>
@@ -401,13 +415,13 @@ const ThemeVisualization = () => {
               }}
             >
               <Typography variant="h6" gutterBottom>
-                구분선
+                {t({ ko: '구분선', en: 'Divider' })}
               </Typography>
               <Box sx={{ py: 2 }}>
                 <Divider />
               </Box>
               <Typography variant="body2" color="text.secondary">
-                섹션 구분에 사용되는 요소
+                {t({ ko: '섹션 구분에 사용되는 요소', en: 'Element used for section separation' })}
               </Typography>
             </Paper>
           </Grid>

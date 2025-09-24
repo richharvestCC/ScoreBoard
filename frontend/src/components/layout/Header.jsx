@@ -9,17 +9,19 @@ import {
   MenuItem,
   IconButton,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Switch
 } from '@mui/material';
-import { AccountCircle, Sports, ExitToApp, Notifications, Menu as MenuIcon } from '@mui/icons-material';
-import { useAuth } from '../../hooks/useAuth';
+import { AccountCircle, ExitToApp, Notifications, Menu as MenuIcon } from '@mui/icons-material';
 import { useNavigation } from '../../contexts/NavigationContext';
 import { useSidebar } from '../../contexts/SidebarContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Header = () => {
   const theme = useTheme();
   const { navigate } = useNavigation();
   const { isOpen, toggleSidebar, sidebarWidth } = useSidebar();
+  const { language, toggleLanguage, t } = useLanguage();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -84,6 +86,29 @@ const Header = () => {
 
         {/* Right side actions */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* Language Toggle */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" sx={{ color: language === 'ko' ? 'primary.main' : 'text.secondary' }}>
+              KO
+            </Typography>
+            <Switch
+              checked={language === 'en'}
+              onChange={toggleLanguage}
+              size="small"
+              sx={{
+                '& .MuiSwitch-switchBase.Mui-checked': {
+                  color: 'primary.main',
+                },
+                '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                  backgroundColor: 'primary.main',
+                },
+              }}
+            />
+            <Typography variant="body2" sx={{ color: language === 'en' ? 'primary.main' : 'text.secondary' }}>
+              EN
+            </Typography>
+          </Box>
+
           {/* Notifications */}
           <IconButton
             color="inherit"
@@ -123,11 +148,11 @@ const Header = () => {
           >
             <MenuItem onClick={handleClose}>
               <AccountCircle sx={{ mr: 1 }} />
-              프로필
+              {t({ ko: '프로필', en: 'Profile' })}
             </MenuItem>
             <MenuItem onClick={() => navigate('/auth')}>
               <ExitToApp sx={{ mr: 1 }} />
-              로그인 페이지
+              {t({ ko: '로그인 페이지', en: 'Login Page' })}
             </MenuItem>
           </Menu>
         </Box>

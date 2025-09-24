@@ -6,7 +6,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Collapse,
   Chip,
   Typography,
   Avatar,
@@ -27,17 +26,13 @@ import {
   AdminPanelSettings,
   Palette,
   ColorLens,
-  ExpandLess,
-  ExpandMore,
-  AccountCircle,
-  Code,
-  ChevronLeft,
-  ChevronRight
+  AccountCircle
 } from '@mui/icons-material';
 import { useNavigation } from '../../contexts/NavigationContext';
 import { useSidebar } from '../../contexts/SidebarContext';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Sidebar = () => {
   const theme = useTheme();
@@ -45,18 +40,9 @@ const Sidebar = () => {
   const location = useLocation();
   const { isOpen, toggleSidebar, closeSidebar, sidebarWidth } = useSidebar();
   const { user } = useAuth();
-  const [openSubmenu, setOpenSubmenu] = useState({});
+  const { t } = useLanguage();
 
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
-  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
-
-  const handleSubmenuClick = (key) => {
-    setOpenSubmenu(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
 
   const isActive = (path) => location.pathname === path;
 
@@ -212,8 +198,7 @@ const Sidebar = () => {
     </ListItem>
   );
 
-  const MenuSection = ({ title, items, collapsible = false, defaultOpen = true }) => {
-    const [open, setOpen] = useState(defaultOpen);
+  const MenuSection = ({ title, items }) => {
 
     return (
       <Box sx={{ mb: 2 }}>
@@ -288,7 +273,7 @@ const Sidebar = () => {
               color: theme.palette.text.primary
             }}
           >
-            ScoreBoard
+            {t({ ko: '매치카드', en: 'MatchCard' })}
           </Typography>
           <Typography
             variant="caption"
@@ -297,7 +282,7 @@ const Sidebar = () => {
               fontSize: '0.75rem'
             }}
           >
-            Sports Management
+            {t({ ko: '풋볼 기록, 데이터 관리', en: 'Your Football Data' })}
           </Typography>
         </Box>
       </Box>

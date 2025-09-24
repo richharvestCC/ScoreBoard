@@ -8,6 +8,7 @@ import material3Theme from './theme/material3Theme';
 // Components
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
+import DocumentTitle from './components/layout/DocumentTitle';
 // import ProtectedRoute from './components/ProtectedRoute'; // BYPASSED FOR UI DEVELOPMENT
 
 // Pages
@@ -38,6 +39,7 @@ import useAuthStore from './stores/authStore';
 // Contexts
 import { NavigationProvider, useNavigation, setGlobalNavigationCallbacks } from './contexts/NavigationContext';
 import { SidebarProvider, useSidebar } from './contexts/SidebarContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 // Navigation setup component to initialize global navigation callbacks
 function NavigationSetup() {
@@ -160,8 +162,11 @@ function App() {
         <Router>
           <NavigationProvider>
             <SidebarProvider>
-              <NavigationSetup />
-              <AppContent />
+              <LanguageProvider>
+                <DocumentTitle />
+                <NavigationSetup />
+                <AppContent />
+              </LanguageProvider>
             </SidebarProvider>
           </NavigationProvider>
         </Router>

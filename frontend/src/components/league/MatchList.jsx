@@ -5,8 +5,6 @@ import {
   Box,
   List,
   ListItem,
-  ListItemAvatar,
-  ListItemText,
   Avatar,
   Chip,
   Divider,
