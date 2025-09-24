@@ -58,21 +58,11 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'user',
       comment: 'user: 일반사용자, admin: 관리자, moderator: 운영자, organizer: 대회주최자'
     },
-    is_active: {
-      type: DataTypes.BOOLEAN,
+    status: {
+      type: DataTypes.STRING(20),
       allowNull: false,
-      defaultValue: true,
-      comment: '계정 활성화 상태'
-    },
-    last_login_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      comment: '마지막 로그인 시간'
-    },
-    permissions: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      comment: '추가 권한 설정 (JSON format)'
+      defaultValue: 'active',
+      comment: '계정 상태'
     }
   }, {
     tableName: 'users',
@@ -90,7 +80,7 @@ module.exports = (sequelize, DataTypes) => {
         fields: ['role']
       },
       {
-        fields: ['is_active']
+        fields: ['status']
       }
     ]
   });

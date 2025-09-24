@@ -25,7 +25,7 @@ class FrontendLogger {
   private buffer: LogEntry[] = [];
   private maxBufferSize = 100;
   private flushInterval = 30000; // 30 seconds
-  private apiEndpoint = '/api/v1/logs/frontend';
+  private apiEndpoint = `${process.env.REACT_APP_API_URL}/logs/frontend`;
 
   constructor() {
     this.sessionId = this.generateSessionId();
