@@ -3,25 +3,27 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  Button,
   Box,
   Avatar,
   Menu,
   MenuItem,
   IconButton,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
-import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, Assignment, AdminPanelSettings, LiveTv, Stadium, Palette } from '@mui/icons-material';
-import { useAuth } from '../../hooks/useAuth'; // Auth hook with UI development bypass
+import { AccountCircle, Sports, ExitToApp, Notifications, Menu as MenuIcon } from '@mui/icons-material';
+import { useAuth } from '../../hooks/useAuth';
 import { useNavigation } from '../../contexts/NavigationContext';
+import { useSidebar } from '../../contexts/SidebarContext';
 
 const Header = () => {
-  const { user, isAuthenticated, logout } = useAuth();
-  const { navigate, navigateWithOptions } = useNavigation();
+  const theme = useTheme();
+  const { navigate } = useNavigation();
+  const { isOpen, toggleSidebar, sidebarWidth } = useSidebar();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
-  // Debug logging
-  console.log('Header - isAuthenticated:', isAuthenticated);
-  console.log('Header - user:', user);
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -31,102 +33,66 @@ const Header = () => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    logout();
-    handleClose();
-  };
-
   return (
     <AppBar
-      position="static"
+      position="fixed"
       sx={{
-        backgroundColor: '#282828',
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
+        boxShadow: '0 1px 0 rgba(0, 0, 0, 0.05)',
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        left: isMobile ? 0 : (isOpen ? sidebarWidth : 0),
+        width: isMobile ? '100%' : (isOpen ? `calc(100% - ${sidebarWidth}px)` : '100%'),
+        zIndex: theme.zIndex.drawer - 1,
+        transition: theme.transitions.create(['left', 'width'], {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
       }}
     >
       <Toolbar>
-        <Sports sx={{ mr: 2 }} />
+        {/* Mobile hamburger menu */}
+        {isMobile && (
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={toggleSidebar}
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+
+        {/* Tablet toggle button */}
+        {isTablet && (
+          <IconButton
+            color="inherit"
+            aria-label="toggle sidebar"
+            edge="start"
+            onClick={toggleSidebar}
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+
+        {/* Search and breadcrumbs could go here */}
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          ScoreBoard
+          {/* Dynamic page title could go here */}
         </Typography>
 
-        {/* AUTHENTICATION BYPASSED - ALWAYS SHOW NAVIGATION FOR UI DEVELOPMENT */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Button
+        {/* Right side actions */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* Notifications */}
+          <IconButton
             color="inherit"
-            startIcon={<Stadium />}
-            onClick={() => navigate('/competitions')}
-            sx={{ mr: 2 }}
+            aria-label="notifications"
           >
-            대회
-          </Button>
+            <Notifications />
+          </IconButton>
 
-          <Button
-            color="inherit"
-            startIcon={<Groups />}
-            onClick={() => navigateWithOptions('/clubs')}
-            sx={{ mr: 2 }}
-          >
-            클럽
-          </Button>
-
-          <Button
-            color="inherit"
-            startIcon={<Sports />}
-            onClick={() => navigateWithOptions('/matches')}
-            sx={{ mr: 2 }}
-          >
-            경기
-          </Button>
-
-          <Button
-            color="inherit"
-            startIcon={<EmojiEvents />}
-            onClick={() => navigateWithOptions('/tournaments')}
-            sx={{ mr: 2 }}
-          >
-            토너먼트
-          </Button>
-
-          <Button
-            color="inherit"
-            startIcon={<Assignment />}
-            onClick={() => navigate('/templates')}
-            sx={{ mr: 2 }}
-          >
-            템플릿
-          </Button>
-
-          <Button
-            color="inherit"
-            startIcon={<LiveTv />}
-            onClick={() => navigate('/live')}
-            sx={{ mr: 2 }}
-          >
-            라이브
-          </Button>
-
-          {/* Admin and Style Guide always visible for UI development */}
-          <Button
-            color="inherit"
-            startIcon={<AdminPanelSettings />}
-            onClick={() => navigate('/admin')}
-            sx={{ mr: 2 }}
-          >
-            관리자
-          </Button>
-          <Button
-            color="inherit"
-            startIcon={<Palette />}
-            onClick={() => navigate('/style-dash')}
-            sx={{ mr: 2 }}
-          >
-            스타일 가이드
-          </Button>
-
-          <Typography variant="body1" sx={{ mr: 2 }}>
-            안녕하세요, UI 개발자님!
-          </Typography>
-
+          {/* User Menu */}
           <IconButton
             size="large"
             aria-label="account of current user"
@@ -144,7 +110,7 @@ const Header = () => {
             id="menu-appbar"
             anchorEl={anchorEl}
             anchorOrigin={{
-              vertical: 'top',
+              vertical: 'bottom',
               horizontal: 'right',
             }}
             keepMounted
