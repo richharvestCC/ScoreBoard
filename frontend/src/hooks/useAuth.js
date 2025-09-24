@@ -15,8 +15,11 @@ export const useAuth = () => {
       clearError();
     },
     onSuccess: (response) => {
-      const { user, accessToken, refreshToken } = response.data.data;
-      setAuth(user, accessToken, refreshToken);
+      const data = response?.data?.data;
+      if (data?.user && data?.accessToken && data?.refreshToken) {
+        const { user, accessToken, refreshToken } = data;
+        setAuth(user, accessToken, refreshToken);
+      }
       setLoading(false);
     },
     onError: (error) => {
@@ -34,8 +37,11 @@ export const useAuth = () => {
       clearError();
     },
     onSuccess: (response) => {
-      const { user, accessToken, refreshToken } = response.data.data;
-      setAuth(user, accessToken, refreshToken);
+      const data = response?.data?.data;
+      if (data?.user && data?.accessToken && data?.refreshToken) {
+        const { user, accessToken, refreshToken } = data;
+        setAuth(user, accessToken, refreshToken);
+      }
       setLoading(false);
     },
     onError: (error) => {
@@ -71,8 +77,10 @@ export const useAuth = () => {
   // Handle profile query success/error with useEffect (React Query v5 pattern)
   useEffect(() => {
     if (profileQuery.isSuccess && profileQuery.data) {
-      const user = profileQuery.data.data.data.user;
-      useAuthStore.getState().setUser(user);
+      const user = profileQuery.data?.data?.data?.user;
+      if (user) {
+        useAuthStore.getState().setUser(user);
+      }
     }
   }, [profileQuery.isSuccess, profileQuery.data]);
 
