@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { authAPI } from '../services/api';
 import useAuthStore from '../stores/authStore';
 
@@ -65,14 +66,22 @@ export const useAuth = () => {
     queryFn: authAPI.getProfile,
     enabled: isLoggedIn,
     retry: false,
-    onSuccess: (response) => {
-      const user = response.data.data.user;
-      useAuthStore.getState().setUser(user);
-    },
-    onError: () => {
-      logout();
-    },
   });
+
+  // Handle profile query success/error with useEffect (React Query v5 pattern)
+  useEffect(() => {
+    if (profileQuery.isSuccess && profileQuery.data) {
+      const user = profileQuery.data.data.data.user;
+      useAuthStore.getState().setUser(user);
+    }
+  }, [profileQuery.isSuccess, profileQuery.data]);
+
+  useEffect(() => {
+    if (profileQuery.isError && isLoggedIn) {
+      // Use store's logout directly to avoid stale closure issues
+      useAuthStore.getState().logout();
+    }
+  }, [profileQuery.isError, isLoggedIn]);
 
   return {
     // State

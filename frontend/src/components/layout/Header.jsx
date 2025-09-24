@@ -16,7 +16,7 @@ import { useNavigation } from '../../contexts/NavigationContext';
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
-  const { navigateWithOptions } = useNavigation();
+  const { navigate, navigateWithOptions } = useNavigation();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   // Debug logging

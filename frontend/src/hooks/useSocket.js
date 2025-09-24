@@ -3,7 +3,8 @@ import { io } from 'socket.io-client';
 import useAuthStore from '../stores/authStore';
 
 const useSocket = () => {
-  const { token, isAuthenticated } = useAuthStore();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState(null);
@@ -11,9 +12,11 @@ const useSocket = () => {
   const maxReconnectAttempts = 5;
 
   useEffect(() => {
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated || !accessToken) {
       // 인증되지 않은 경우 소켓 연결 해제
       if (socket) {
+        // 메모리 누수 방지를 위해 모든 이벤트 리스너 제거
+        socket.removeAllListeners();
         socket.disconnect();
         setSocket(null);
         setIsConnected(false);
@@ -21,10 +24,16 @@ const useSocket = () => {
       return;
     }
 
+    // 기존 소켓이 있다면 정리
+    if (socket) {
+      socket.removeAllListeners();
+      socket.disconnect();
+    }
+
     // Socket.IO 클라이언트 생성
     const newSocket = io(process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001', {
       auth: {
-        token: token
+        token: accessToken
       },
       transports: ['websocket', 'polling'],
       timeout: 20000,
@@ -87,13 +96,14 @@ const useSocket = () => {
 
     setSocket(newSocket);
 
-    // 클린업
+    // 클린업 - 메모리 누수 방지
     return () => {
       if (newSocket) {
+        newSocket.removeAllListeners();
         newSocket.disconnect();
       }
     };
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, accessToken, socket]);
 
   // 경기 참여
   const joinMatch = (matchId) => {
