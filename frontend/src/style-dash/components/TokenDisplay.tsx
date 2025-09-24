@@ -23,7 +23,7 @@ interface SpacingTokenProps {
 }
 
 interface TypographyTokenProps {
-  variant: string;
+  variant: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2' | 'caption' | 'button' | 'overline' | 'subtitle1' | 'subtitle2';
   example: string;
   description?: string;
 }
@@ -155,8 +155,7 @@ export const TypographyToken: React.FC<TypographyTokenProps> = ({
   description,
 }) => {
   const theme = useTheme();
-  const variantKey = variant as keyof typeof theme.typography;
-  const typographyStyle = theme.typography[variantKey];
+  const typographyStyle = theme.typography[variant];
 
   return (
     <Card
@@ -184,7 +183,10 @@ export const TypographyToken: React.FC<TypographyTokenProps> = ({
         />
       </Box>
 
-      <Typography variant={variant as any} sx={{ mb: 2, lineHeight: 1.4 }}>
+      <Typography
+        variant={variant}
+        sx={{ mb: 2, lineHeight: 1.4 }}
+      >
         {example}
       </Typography>
 
@@ -241,7 +243,7 @@ export const TokenGrid: React.FC<TokenGridProps> = ({
       </Typography>
       <Grid container spacing={3}>
         {React.Children.map(children, (child, index) => (
-          <Grid item {...(columns as any)} key={index}>
+          <Grid key={index} size={{ xs: columns.xs || 12, sm: columns.sm || 6, md: columns.md || 4, lg: columns.lg || 3 }}>
             {child}
           </Grid>
         ))}

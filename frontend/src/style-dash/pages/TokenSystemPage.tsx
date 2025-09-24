@@ -40,7 +40,11 @@ const TokenSystemPage: React.FC = () => {
   ];
 
   // 타이포그래피 토큰들
-  const typographyTokens = [
+  const typographyTokens: Array<{
+    variant: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2' | 'caption' | 'button' | 'overline' | 'subtitle1' | 'subtitle2';
+    example: string;
+    description: string;
+  }> = [
     { variant: 'h1', example: 'Heading 1', description: '메인 제목, 브랜딩' },
     { variant: 'h2', example: 'Heading 2', description: '섹션 제목' },
     { variant: 'h3', example: 'Heading 3', description: '하위 섹션 제목' },

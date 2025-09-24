@@ -186,7 +186,7 @@ const StyleGuideDashboard: React.FC = () => {
           <TabPanel value={activeTab} index={0}>
             <Grid container spacing={3}>
               {guideCategories.map((category, index) => (
-                <Grid item xs={12} md={6} key={index} {...({} as any)}>
+                <Grid key={index} size={{ xs: 12, md: 6 }}>
                   <Card
                     sx={{
                       height: '100%',
