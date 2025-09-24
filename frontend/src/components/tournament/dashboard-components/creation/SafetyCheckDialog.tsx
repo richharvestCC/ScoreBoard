@@ -40,7 +40,7 @@ import {
 // Styled Components
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-paper': {
-    background: alpha(theme.palette.background.paper || theme.palette.background.paper, 0.95),
+    background: alpha(theme.palette.background.paper, 0.95),
     backdropFilter: 'blur(20px)',
     borderRadius: `${(theme.shape.borderRadius as number) * 2}px`,
     border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,

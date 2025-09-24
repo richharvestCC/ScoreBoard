@@ -39,7 +39,7 @@ import { useResponsive } from '../shared/ResponsiveLayout';
 // Styled Components
 const StyledMatchCard = styled(Card)<{ status: MatchStatus; isCompact?: boolean }>(
   ({ theme, status, isCompact }) => ({
-    background: alpha(theme.palette.background.paper || theme.palette.background.paper, 0.8),
+    background: alpha(theme.palette.background.paper, 0.8),
     backdropFilter: 'blur(10px)',
     border: `1px solid ${
       status === 'completed'
@@ -230,8 +230,14 @@ const ScoreEditDialog: React.FC<ScoreEditDialogProps> = ({
   }, [team1Score, team2Score, onSave, onClose]);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      aria-labelledby="score-edit-dialog-title"
+    >
+      <DialogTitle id="score-edit-dialog-title">
         경기 결과 입력
       </DialogTitle>
       <DialogContent>
@@ -246,7 +252,7 @@ const ScoreEditDialog: React.FC<ScoreEditDialogProps> = ({
                 type="number"
                 value={team1Score}
                 onChange={(e) => setTeam1Score(e.target.value)}
-                inputProps={{ min: 0 }}
+                inputProps={{ min: 0, 'aria-label': `${match.team1?.name || 'TBD'} 득점` }}
                 fullWidth
               />
             </Box>
@@ -273,7 +279,7 @@ const ScoreEditDialog: React.FC<ScoreEditDialogProps> = ({
                 type="number"
                 value={team2Score}
                 onChange={(e) => setTeam2Score(e.target.value)}
-                inputProps={{ min: 0 }}
+                inputProps={{ min: 0, 'aria-label': `${match.team2?.name || 'TBD'} 득점` }}
                 fullWidth
               />
             </Box>
@@ -310,6 +316,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const handleCardClick = useCallback(() => {
     onMatchClick?.(match);
   }, [match, onMatchClick]);
+
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleCardClick();
+    }
+  }, [handleCardClick]);
 
   const handleEditClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -364,7 +377,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
         status={match.status}
         isCompact={isCompact}
         onClick={handleCardClick}
+        onKeyDown={handleKeyPress}
         elevation={2}
+        role="button"
+        tabIndex={0}
+        aria-label={`경기: ${match.team1?.name || 'TBD'} vs ${match.team2?.name || 'TBD'}, 상태: ${getStatusConfig().text}`}
       >
         <CardContent sx={{ p: isCompact ? 1.5 : 2 }}>
           {/* Header with status and edit button */}
@@ -392,6 +409,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <IconButton
                   size="small"
                   onClick={handleEditClick}
+                  aria-label="경기 결과 수정"
                   sx={{
                     opacity: 0.7,
                     '&:hover': { opacity: 1 }

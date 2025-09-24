@@ -76,7 +76,7 @@ const ToggleContainer = styled(Box)(({ theme }) => ({
   gap: theme.spacing(2),
   padding: theme.spacing(1.5, 2),
   borderRadius: theme.shape.borderRadius,
-  background: alpha(theme.palette.surface?.main || theme.palette.background.paper, 0.8),
+  background: alpha((theme.palette as any).surface?.main || theme.palette.background.paper, 0.8),
   backdropFilter: 'blur(20px)',
   border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',

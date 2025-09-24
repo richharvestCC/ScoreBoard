@@ -77,7 +77,7 @@ const ControlPanelSection = styled(Box)(({ theme }) => ({
   left: 0,
   right: 0,
   zIndex: theme.zIndex.appBar,
-  background: theme.palette.surface?.main || theme.palette.background.paper,
+  background: (theme.palette as any).surface?.main || theme.palette.background.paper,
   backdropFilter: 'blur(20px)',
   borderTop: `1px solid ${theme.palette.divider}`,
   padding: theme.spacing(2, 3),
@@ -142,9 +142,9 @@ const useResponsiveConfig = (): ResponsiveConfig => {
   return {
     device: getDeviceType(),
     breakpoint: getBreakpoint(),
-    isTouchDevice: 'ontouchstart' in window,
-    supportsHover: window.matchMedia('(hover: hover)').matches,
-    orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+    isTouchDevice: typeof window !== 'undefined' ? 'ontouchstart' in window : false,
+    supportsHover: typeof window !== 'undefined' ? window.matchMedia('(hover: hover)').matches : true,
+    orientation: typeof window !== 'undefined' && window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
   };
 };
 
@@ -167,8 +167,8 @@ const TournamentDashboard: React.FC<TournamentDashboardProps> = ({
     isCloneMode: false,
     zoomLevel: 1.0,
     viewportDimensions: {
-      width: window.innerWidth,
-      height: window.innerHeight
+      width: typeof window !== 'undefined' ? window.innerWidth : 1920,
+      height: typeof window !== 'undefined' ? window.innerHeight : 1080
     }
   });
 
@@ -205,6 +205,8 @@ const TournamentDashboard: React.FC<TournamentDashboardProps> = ({
 
   // Responsive Updates
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleResize = () => {
       setUIState(prev => ({
         ...prev,
