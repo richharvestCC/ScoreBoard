@@ -27,6 +27,9 @@ import LiveMatchesPage from './pages/LiveMatchesPage';
 import LeagueDashboard from './pages/LeagueDashboard';
 import CompetitionPage from './pages/CompetitionPage';
 
+// Style Guide
+import StyleDashRoutes from './style-dash';
+
 // Hooks
 import useAuthStore from './stores/authStore';
 
@@ -259,6 +262,12 @@ function AppContent() {
                       <LeagueDashboard />
                     </ProtectedRoute>
                   }
+                />
+
+                {/* Style Guide Dashboard */}
+                <Route
+                  path="/style-dash/*"
+                  element={<StyleDashRoutes />}
                 />
 
                 {/* Catch-all redirect */}

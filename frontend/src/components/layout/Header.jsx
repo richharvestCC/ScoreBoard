@@ -10,7 +10,7 @@ import {
   MenuItem,
   IconButton,
 } from '@mui/material';
-import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, Assignment, AdminPanelSettings, LiveTv, Stadium } from '@mui/icons-material';
+import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, Assignment, AdminPanelSettings, LiveTv, Stadium, Palette } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigation } from '../../contexts/NavigationContext';
 
@@ -101,14 +101,24 @@ const Header = () => {
             </Button>
 
             {user && ['admin', 'moderator'].includes(user.role) && (
-              <Button
-                color="inherit"
-                startIcon={<AdminPanelSettings />}
-                onClick={() => navigate('/admin')}
-                sx={{ mr: 2 }}
-              >
-                관리자
-              </Button>
+              <>
+                <Button
+                  color="inherit"
+                  startIcon={<AdminPanelSettings />}
+                  onClick={() => navigate('/admin')}
+                  sx={{ mr: 2 }}
+                >
+                  관리자
+                </Button>
+                <Button
+                  color="inherit"
+                  startIcon={<Palette />}
+                  onClick={() => navigate('/style-dash')}
+                  sx={{ mr: 2 }}
+                >
+                  스타일 가이드
+                </Button>
+              </>
             )}
 
             <Typography variant="body1" sx={{ mr: 2 }}>
