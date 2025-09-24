@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Container,
   Typography,
   Box,
   Grid,
@@ -25,6 +24,7 @@ import {
   Search as SearchIcon,
   FilterList as FilterIcon
 } from '@mui/icons-material';
+import { designTokens } from '../theme/designTokens';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { competitionAPI } from '../services/api';
 import TemplateCard from '../components/competitions/TemplateCard';
@@ -169,7 +169,28 @@ const TemplateManagement = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box sx={{
+      width: '100%',
+      py: { xs: 2, md: 4 },
+      [designTokens.mediaQueries.maxMobile]: {
+        px: designTokens.spacing.scale.md
+      },
+      [designTokens.mediaQueries.minTablet]: {
+        px: designTokens.spacing.scale.lg
+      },
+      [designTokens.mediaQueries.minDesktop]: {
+        px: designTokens.spacing.scale.xl
+      },
+      maxWidth: {
+        xs: designTokens.containerMaxWidth.mobile,
+        sm: designTokens.containerMaxWidth.tablet,
+        md: designTokens.containerMaxWidth.desktop,
+        lg: designTokens.containerMaxWidth.largeDesktop,
+        xl: designTokens.containerMaxWidth.extraLarge
+      },
+      mx: 'auto',
+      color: designTokens.colors.text.light.primary
+    }}>
       {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Typography variant="h4" component="h1" fontWeight="bold">
@@ -437,7 +458,7 @@ const TemplateManagement = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 

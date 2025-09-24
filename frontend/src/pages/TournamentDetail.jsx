@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
-  Container,
   Typography,
   Card,
   CardContent,
@@ -43,6 +42,7 @@ import { tournamentAPI } from '../services/api';
 import { getClubTypeLabel } from '../constants/clubTypes';
 import ParticipantList from '../components/tournament/ParticipantList';
 import TournamentBracket from '../components/tournament/TournamentBracket';
+import { designTokens } from '../theme/designTokens';
 
 const TournamentDetail = () => {
   const { id } = useParams();
@@ -167,11 +167,17 @@ const TournamentDetail = () => {
 
   if (isError) {
     return (
-      <Container>
+      <Box sx={{
+        width: '100%',
+        py: { xs: 2, md: 4 },
+        px: { xs: 2, md: 3 },
+        maxWidth: designTokens.containerMaxWidth.desktop,
+        mx: 'auto'
+      }}>
         <Alert severity="error">
           {error?.response?.data?.message || '토너먼트 정보를 불러오는데 실패했습니다.'}
         </Alert>
-      </Container>
+      </Box>
     );
   }
 
@@ -181,8 +187,33 @@ const TournamentDetail = () => {
   const isAdmin = tournament?.admin_user_id === tournament?.current_user_id;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Card sx={{ mb: 3 }}>
+    <Box sx={{
+      width: '100%',
+      color: designTokens.colors.text.light.primary,
+      py: { xs: 2, md: 4 },
+      [designTokens.mediaQueries.maxMobile]: {
+        px: designTokens.spacing.scale.md
+      },
+      [designTokens.mediaQueries.minTablet]: {
+        px: designTokens.spacing.scale.lg
+      },
+      [designTokens.mediaQueries.minDesktop]: {
+        px: designTokens.spacing.scale.xl
+      },
+      maxWidth: {
+        xs: designTokens.containerMaxWidth.mobile,
+        sm: designTokens.containerMaxWidth.tablet,
+        md: designTokens.containerMaxWidth.desktop,
+        lg: designTokens.containerMaxWidth.largeDesktop,
+        xl: designTokens.containerMaxWidth.extraLarge
+      },
+      mx: 'auto'
+    }}>
+      <Card sx={{
+        mb: 3,
+        backgroundColor: designTokens.colors.background.light.surface,
+        boxShadow: designTokens.shadows.md
+      }}>
         <CardContent>
           <Box display="flex" alignItems="center" mb={3}>
             <Avatar
@@ -196,7 +227,15 @@ const TournamentDetail = () => {
               <TrophyIcon sx={{ fontSize: 40 }} />
             </Avatar>
             <Box flexGrow={1}>
-              <Typography variant="h4" component="h1" gutterBottom>
+              <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{
+                  ...designTokens.typography.headings.h4,
+                  color: designTokens.colors.text.light.primary
+                }}
+              >
                 {tournament.name}
               </Typography>
               <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
@@ -223,7 +262,12 @@ const TournamentDetail = () => {
               </Box>
               <Box display="flex" alignItems="center">
                 <PeopleIcon fontSize="small" color="action" />
-                <Typography variant="body1" color="text.secondary" ml={0.5}>
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  ml={0.5}
+                  sx={{ color: designTokens.colors.text.light.secondary }}
+                >
                   {participants.length}개 팀
                   {tournament.max_participants && ` / ${tournament.max_participants}`}
                 </Typography>
@@ -232,7 +276,14 @@ const TournamentDetail = () => {
           </Box>
 
           {tournament.description && (
-            <Typography variant="body1" paragraph>
+            <Typography
+              variant="body1"
+              paragraph
+              sx={{
+                color: designTokens.colors.text.light.primary,
+                ...designTokens.typography.body.body1
+              }}
+            >
               {tournament.description}
             </Typography>
           )}
@@ -243,10 +294,16 @@ const TournamentDetail = () => {
                 <Box display="flex" alignItems="center">
                   <CalendarIcon fontSize="small" color="action" />
                   <Box ml={1}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      sx={{ color: designTokens.colors.text.light.secondary }}
+                    >
                       시작일
                     </Typography>
-                    <Typography variant="body1">
+                    <Typography
+                      variant="body1"
+                      sx={{ color: designTokens.colors.text.light.primary }}
+                    >
                       {new Date(tournament.start_date).toLocaleDateString()}
                     </Typography>
                   </Box>
@@ -258,10 +315,16 @@ const TournamentDetail = () => {
                 <Box display="flex" alignItems="center">
                   <CalendarIcon fontSize="small" color="action" />
                   <Box ml={1}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      sx={{ color: designTokens.colors.text.light.secondary }}
+                    >
                       종료일
                     </Typography>
-                    <Typography variant="body1">
+                    <Typography
+                      variant="body1"
+                      sx={{ color: designTokens.colors.text.light.primary }}
+                    >
                       {new Date(tournament.end_date).toLocaleDateString()}
                     </Typography>
                   </Box>
@@ -273,10 +336,16 @@ const TournamentDetail = () => {
                 <Box display="flex" alignItems="center">
                   <MoneyIcon fontSize="small" color="action" />
                   <Box ml={1}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      sx={{ color: designTokens.colors.text.light.secondary }}
+                    >
                       참가비
                     </Typography>
-                    <Typography variant="body1">
+                    <Typography
+                      variant="body1"
+                      sx={{ color: designTokens.colors.text.light.primary }}
+                    >
                       {tournament.entry_fee.toLocaleString()}원
                     </Typography>
                   </Box>
@@ -287,10 +356,20 @@ const TournamentDetail = () => {
 
           {tournament.prize_description && (
             <Box mt={2}>
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{
+                  color: designTokens.colors.text.light.primary,
+                  ...designTokens.typography.headings.h6
+                }}
+              >
                 상금/상품
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{ color: designTokens.colors.text.light.secondary }}
+              >
                 {tournament.prize_description}
               </Typography>
             </Box>
@@ -298,10 +377,23 @@ const TournamentDetail = () => {
 
           {tournament.rules && (
             <Box mt={2}>
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{
+                  color: designTokens.colors.text.light.primary,
+                  ...designTokens.typography.headings.h6
+                }}
+              >
                 대회 규정
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: designTokens.colors.text.light.secondary,
+                  whiteSpace: 'pre-line'
+                }}
+              >
                 {tournament.rules}
               </Typography>
             </Box>
@@ -355,7 +447,11 @@ const TournamentDetail = () => {
         </CardActions>
       </Card>
 
-      <Paper sx={{ mb: 3 }}>
+      <Paper sx={{
+        mb: 3,
+        backgroundColor: designTokens.colors.background.light.surface,
+        boxShadow: designTokens.shadows.sm
+      }}>
         <Tabs value={activeTab} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tab label="참가팀" />
           <Tab label="대진표" />
@@ -383,9 +479,11 @@ const TournamentDetail = () => {
       </Paper>
 
       <Dialog open={joinDialogOpen} onClose={() => setJoinDialogOpen(false)}>
-        <DialogTitle>토너먼트 참가 신청</DialogTitle>
+        <DialogTitle sx={{ color: designTokens.colors.text.light.primary }}>
+          토너먼트 참가 신청
+        </DialogTitle>
         <DialogContent>
-          <Typography>
+          <Typography sx={{ color: designTokens.colors.text.light.primary }}>
             이 토너먼트에 참가하시겠습니까?
           </Typography>
         </DialogContent>
@@ -402,7 +500,7 @@ const TournamentDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Box>
   );
 };
 

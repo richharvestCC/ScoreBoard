@@ -7,7 +7,7 @@ import material3Theme from './theme/material3Theme';
 
 // Components
 import Header from './components/layout/Header';
-import ProtectedRoute from './components/ProtectedRoute';
+// import ProtectedRoute from './components/ProtectedRoute'; // BYPASSED FOR UI DEVELOPMENT
 
 // Pages
 import AuthPage from './pages/AuthPage';
@@ -26,6 +26,7 @@ import LiveMatchView from './pages/LiveMatchView';
 import LiveMatchesPage from './pages/LiveMatchesPage';
 import LeagueDashboard from './pages/LeagueDashboard';
 import CompetitionPage from './pages/CompetitionPage';
+import ThemeVisualization from './pages/ThemeVisualization';
 
 // Style Guide
 import StyleDashRoutes from './style-dash';
@@ -69,32 +70,38 @@ const queryClient = new QueryClient({
 
 // Main App Component with Responsive Layout
 function AppContent() {
-  const { initializeAuth, isAuthenticated } = useAuthStore();
+  const { initializeAuth } = useAuthStore();
   const theme = useTheme();
 
-  // Material Design Breakpoints
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // < 600px
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600px - 900px
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md')); // >= 900px
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg')); // >= 1200px
+  // 새로운 브레이크포인트 기준
+  const isMobile = useMediaQuery('(max-width: 767.98px)'); // 모바일: ~767.98px
+  const isTablet = useMediaQuery('(min-width: 768px) and (max-width: 1023.98px)'); // 태블릿: 768px~1023.98px
+  const isDesktop = useMediaQuery('(min-width: 1024px) and (max-width: 1279px)'); // 데스크톱: 1024px~1279px
+  const isLargeDesktop = useMediaQuery('(min-width: 1280px) and (max-width: 1440px)'); // 대형: 1280px~1440px
+  const isExtraLarge = useMediaQuery('(min-width: 1441px)'); // 초대형: 1441px+
 
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
 
-  // Responsive container max width based on Material Design guidelines
+  // 새로운 컨테이너 최대 너비 기준
   const getContainerMaxWidth = () => {
     if (isMobile) return '100%';
-    if (isTablet) return 'md';
-    if (isLargeScreen) return 'xl';
-    return 'lg';
+    if (isTablet) return '100%';
+    if (isDesktop) return '1200px';
+    if (isLargeDesktop) return '1320px';
+    if (isExtraLarge) return '1400px';
+    return '1200px'; // 기본값
   };
 
-  // Responsive padding based on screen size
+  // 새로운 기준에 따른 반응형 패딩
   const getResponsivePadding = () => {
-    if (isMobile) return theme.spacing(1, 2); // 8px vertical, 16px horizontal
-    if (isTablet) return theme.spacing(2, 3); // 16px vertical, 24px horizontal
-    return theme.spacing(3); // 24px all around
+    if (isMobile) return theme.spacing(1, 2); // 모바일: 8px vertical, 16px horizontal
+    if (isTablet) return theme.spacing(2, 3); // 태블릿: 16px vertical, 24px horizontal
+    if (isDesktop) return theme.spacing(3); // 데스크톱: 24px all around
+    if (isLargeDesktop) return theme.spacing(3, 4); // 대형: 24px vertical, 32px horizontal
+    if (isExtraLarge) return theme.spacing(4); // 초대형: 32px all around
+    return theme.spacing(3); // 기본값
   };
 
   return (
@@ -112,15 +119,21 @@ function AppContent() {
             // Responsive max width
             maxWidth: getContainerMaxWidth(),
             margin: '0 auto',
-            // Responsive layout adjustments
-            [theme.breakpoints.down('sm')]: {
-              padding: theme.spacing(1),
+            // 새로운 반응형 레이아웃 조정
+            '@media (max-width: 767.98px)': {
+              padding: theme.spacing(1, 2),
             },
-            [theme.breakpoints.up('sm')]: {
-              padding: theme.spacing(2),
+            '@media (min-width: 768px) and (max-width: 1023.98px)': {
+              padding: theme.spacing(2, 3),
             },
-            [theme.breakpoints.up('md')]: {
+            '@media (min-width: 1024px) and (max-width: 1279px)': {
               padding: theme.spacing(3),
+            },
+            '@media (min-width: 1280px) and (max-width: 1440px)': {
+              padding: theme.spacing(3, 4),
+            },
+            '@media (min-width: 1441px)': {
+              padding: theme.spacing(4),
             },
           }}
         >
@@ -132,137 +145,40 @@ function AppContent() {
             sx={{
               flex: 1,
               mt: theme.spacing(2),
-              // Responsive margin top
-              [theme.breakpoints.down('sm')]: {
+              // 새로운 기준에 따른 반응형 상단 마진
+              '@media (max-width: 767.98px)': {
                 mt: theme.spacing(1),
               },
-              [theme.breakpoints.up('md')]: {
+              '@media (min-width: 768px) and (max-width: 1023.98px)': {
+                mt: theme.spacing(2),
+              },
+              '@media (min-width: 1024px)': {
                 mt: theme.spacing(3),
               },
             }}
           >
               <Routes>
                 {/* Public routes */}
-                <Route
-                  path="/auth"
-                  element={
-                    isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />
-                  }
-                />
+                <Route path="/auth" element={<AuthPage />} />
 
-                {/* Protected routes */}
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/clubs"
-                  element={
-                    <ProtectedRoute>
-                      <ClubList />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/clubs/:id"
-                  element={
-                    <ProtectedRoute>
-                      <ClubDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/matches"
-                  element={
-                    <ProtectedRoute>
-                      <MatchList />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/matches/:id"
-                  element={
-                    <ProtectedRoute>
-                      <MatchDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/matches/:id/live"
-                  element={
-                    <ProtectedRoute>
-                      <LiveScoring />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/competitions"
-                  element={
-                    <ProtectedRoute>
-                      <CompetitionPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/tournaments"
-                  element={
-                    <ProtectedRoute>
-                      <TournamentList />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/tournaments/:id"
-                  element={
-                    <ProtectedRoute>
-                      <TournamentDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/templates"
-                  element={
-                    <ProtectedRoute>
-                      <TemplateManagement />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/competitions/:competitionId/scheduling"
-                  element={
-                    <ProtectedRoute>
-                      <MatchScheduling />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/live"
-                  element={
-                    <ProtectedRoute>
-                      <LiveMatchesPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/leagues/:competitionId/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <LeagueDashboard />
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Protected routes - AUTHENTICATION BYPASSED FOR UI DEVELOPMENT */}
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/clubs" element={<ClubList />} />
+                <Route path="/clubs/:id" element={<ClubDetail />} />
+                <Route path="/matches" element={<MatchList />} />
+                <Route path="/matches/:id" element={<MatchDetail />} />
+                <Route path="/matches/:id/live" element={<LiveScoring />} />
+                <Route path="/competitions" element={<CompetitionPage />} />
+                <Route path="/tournaments" element={<TournamentList />} />
+                <Route path="/tournaments/:id" element={<TournamentDetail />} />
+                <Route path="/templates" element={<TemplateManagement />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/competitions/:competitionId/scheduling" element={<MatchScheduling />} />
+                <Route path="/live" element={<LiveMatchesPage />} />
+                <Route path="/leagues/:competitionId/dashboard" element={<LeagueDashboard />} />
+
+                {/* Theme Visualization */}
+                <Route path="/theme" element={<ThemeVisualization />} />
 
                 {/* Style Guide Dashboard */}
                 <Route

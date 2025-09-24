@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Container,
   Typography,
   Box,
   Grid,
@@ -11,6 +10,7 @@ import {
   Paper,
   Stack,
 } from '@mui/material';
+import { designTokens } from '../theme/designTokens';
 import {
   Group,
   Sports,
@@ -50,17 +50,36 @@ const Dashboard = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Box sx={{
+      width: '100%',
+      color: designTokens.colors.text.light.primary,
+      py: { xs: 2, md: 4 },
+      [designTokens.mediaQueries.maxMobile]: {
+        px: designTokens.spacing.scale.md
+      },
+      [designTokens.mediaQueries.minTablet]: {
+        px: designTokens.spacing.scale.lg
+      },
+      [designTokens.mediaQueries.minDesktop]: {
+        px: designTokens.spacing.scale.xl
+      },
+      maxWidth: {
+        xs: designTokens.containerMaxWidth.mobile,
+        sm: designTokens.containerMaxWidth.tablet,
+        md: designTokens.containerMaxWidth.desktop,
+        lg: designTokens.containerMaxWidth.largeDesktop,
+        xl: designTokens.containerMaxWidth.extraLarge
+      },
+      mx: 'auto'
+    }}>
       <Box sx={{ mb: 6 }}>
         <Typography
           variant="h3"
           component="h1"
           sx={{
-            fontWeight: 800,
-            fontSize: { xs: '2rem', md: '2.5rem' },
-            color: 'rgba(255, 255, 255, 0.95)',
-            lineHeight: 1,
-            letterSpacing: '-0.02em',
+            ...designTokens.typography.headings.h1,
+            fontSize: { xs: designTokens.typography.headings.h2.fontSize, md: designTokens.typography.headings.h1.fontSize },
+            color: designTokens.colors.text.light.primary,
             mb: 1,
           }}
         >
@@ -69,8 +88,8 @@ const Dashboard = () => {
         <Typography
           variant="body1"
           sx={{
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontSize: '1rem',
+            color: designTokens.colors.text.light.secondary,
+            fontSize: designTokens.typography.body.body1.fontSize,
             fontWeight: 500,
           }}
         >
@@ -568,7 +587,7 @@ const Dashboard = () => {
           </Typography>
         </Paper>
       </Box>
-    </Container>
+    </Box>
   );
 };
 

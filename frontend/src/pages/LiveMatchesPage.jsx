@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Container,
   Box,
   Typography,
   Tabs,
@@ -16,6 +15,7 @@ import {
   Assessment as StatsIcon,
   AdminPanelSettings as AdminIcon
 } from '@mui/icons-material';
+import { designTokens } from '../theme/designTokens';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { liveScoringAPI } from '../services/api';
@@ -72,7 +72,28 @@ const LiveMatchesPage = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box sx={{
+      width: '100%',
+      py: { xs: 2, md: 4 },
+      [designTokens.mediaQueries.maxMobile]: {
+        px: designTokens.spacing.scale.md
+      },
+      [designTokens.mediaQueries.minTablet]: {
+        px: designTokens.spacing.scale.lg
+      },
+      [designTokens.mediaQueries.minDesktop]: {
+        px: designTokens.spacing.scale.xl
+      },
+      maxWidth: {
+        xs: designTokens.containerMaxWidth.mobile,
+        sm: designTokens.containerMaxWidth.tablet,
+        md: designTokens.containerMaxWidth.desktop,
+        lg: designTokens.containerMaxWidth.largeDesktop,
+        xl: designTokens.containerMaxWidth.extraLarge
+      },
+      mx: 'auto',
+      color: designTokens.colors.text.light.primary
+    }}>
       {/* 헤더 */}
       <Box mb={4}>
         <Typography variant="h4" component="h1" gutterBottom>
@@ -217,7 +238,7 @@ const LiveMatchesPage = () => {
           </Grid>
         </TabPanel>
       )}
-    </Container>
+    </Box>
   );
 };
 

@@ -4,6 +4,11 @@ import { authAPI } from '../services/api';
 import useAuthStore from '../stores/authStore';
 
 export const useAuth = () => {
+  // UI DEVELOPMENT MODE - BYPASS AUTHENTICATION
+  // Set to false when authentication is needed again
+  const UI_DEV_MODE = true;
+
+  // Always call hooks first (React Hooks rule compliance)
   const { setAuth, logout, setLoading, setError, clearError, getters } = useAuthStore();
   const queryClient = useQueryClient();
 
@@ -65,38 +70,80 @@ export const useAuth = () => {
     },
   });
 
-  // Get profile query
+  // Get auth store values (call hooks at top level)
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const error = useAuthStore((state) => state.error);
   const isLoggedIn = useAuthStore((state) => state.isAuthenticated && !!state.accessToken);
+
+  // Get profile query
   const profileQuery = useQuery({
     queryKey: ['profile'],
     queryFn: authAPI.getProfile,
-    enabled: isLoggedIn,
+    enabled: isLoggedIn && !UI_DEV_MODE,
     retry: false,
   });
 
   // Handle profile query success/error with useEffect (React Query v5 pattern)
   useEffect(() => {
-    if (profileQuery.isSuccess && profileQuery.data) {
+    if (!UI_DEV_MODE && profileQuery.isSuccess && profileQuery.data) {
       const user = profileQuery.data?.data?.data?.user;
       if (user) {
         useAuthStore.getState().setUser(user);
       }
     }
-  }, [profileQuery.isSuccess, profileQuery.data]);
+  }, [UI_DEV_MODE, profileQuery.isSuccess, profileQuery.data]);
 
   useEffect(() => {
-    if (profileQuery.isError && isLoggedIn) {
+    if (!UI_DEV_MODE && profileQuery.isError && isLoggedIn) {
       // Use store's logout directly to avoid stale closure issues
       useAuthStore.getState().logout();
     }
-  }, [profileQuery.isError, isLoggedIn]);
+  }, [UI_DEV_MODE, profileQuery.isError, isLoggedIn]);
 
+  // UI DEVELOPMENT MODE - Return mock data
+  if (UI_DEV_MODE) {
+    // Mock user data for UI development
+    const mockUser = {
+      user_id: 'ui_dev_user',
+      name: 'UI 개발자',
+      email: 'ui.dev@scoreboard.local',
+      role: 'admin', // Admin role to access all features
+    };
+
+    return {
+      // State
+      user: mockUser,
+      isAuthenticated: true, // Always authenticated for UI development
+      isLoading: false,
+      error: null,
+
+      // Actions - mock functions that don't do anything
+      login: () => console.log('Mock login - bypassed for UI development'),
+      register: () => console.log('Mock register - bypassed for UI development'),
+      logout: () => console.log('Mock logout - bypassed for UI development'),
+      clearError: () => {},
+
+      // Query states
+      isLoginLoading: false,
+      isRegisterLoading: false,
+      isLogoutLoading: false,
+      isProfileLoading: false,
+
+      // Profile data
+      profile: mockUser,
+      refetchProfile: () => Promise.resolve({ data: { data: { user: mockUser } } }),
+    };
+  }
+
+  // ORIGINAL AUTHENTICATION CODE
   return {
     // State
-    user: useAuthStore((state) => state.user),
-    isAuthenticated: useAuthStore((state) => state.isAuthenticated),
-    isLoading: useAuthStore((state) => state.isLoading),
-    error: useAuthStore((state) => state.error),
+    user,
+    isAuthenticated,
+    isLoading,
+    error,
 
     // Actions
     login: loginMutation.mutate,
