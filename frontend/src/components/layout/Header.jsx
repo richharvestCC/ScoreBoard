@@ -12,11 +12,11 @@ import {
 } from '@mui/material';
 import { AccountCircle, Sports, ExitToApp, Groups, EmojiEvents, Assignment, AdminPanelSettings, LiveTv, Stadium } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigation } from '../../contexts/NavigationContext';
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const { navigateWithOptions } = useNavigation();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   // Debug logging
@@ -58,7 +58,7 @@ const Header = () => {
             <Button
               color="inherit"
               startIcon={<Groups />}
-              onClick={() => navigate('/clubs')}
+              onClick={() => navigateWithOptions('/clubs')}
               sx={{ mr: 2 }}
             >
               클럽
@@ -67,7 +67,7 @@ const Header = () => {
             <Button
               color="inherit"
               startIcon={<Sports />}
-              onClick={() => navigate('/matches')}
+              onClick={() => navigateWithOptions('/matches')}
               sx={{ mr: 2 }}
             >
               경기
@@ -76,7 +76,7 @@ const Header = () => {
             <Button
               color="inherit"
               startIcon={<EmojiEvents />}
-              onClick={() => navigate('/tournaments')}
+              onClick={() => navigateWithOptions('/tournaments')}
               sx={{ mr: 2 }}
             >
               토너먼트
