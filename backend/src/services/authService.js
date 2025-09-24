@@ -60,7 +60,7 @@ class AuthService {
     const tokens = this.generateTokens(user.id);
 
     // Update last access time (touch updatedAt timestamp)
-    await user.save({ silent: true });
+    await user.save();
 
     // Return user without password
     const userResponse = user.toJSON();
@@ -73,39 +73,25 @@ class AuthService {
   }
 
   static async login(user_id, password) {
-    console.log('=== LOGIN DEBUG ===');
-    console.log('Input user_id:', user_id);
-    console.log('Input password:', password);
-
     // Find user by user_id
     const user = await User.findOne({ where: { user_id } });
-    console.log('Found user:', user ? 'Yes' : 'No');
-    console.log('User data:', user ? { id: user.id, user_id: user.user_id, role: user.role } : null);
 
     if (!user) {
-      console.log('User not found - throwing error');
       throw new Error('Invalid user_id or password');
     }
-
-    console.log('Stored password hash:', user.password_hash);
 
     // Check password
     const isValidPassword = await this.comparePassword(password, user.password_hash);
-    console.log('Password validation result:', isValidPassword);
 
     if (!isValidPassword) {
-      console.log('Password invalid - throwing error');
       throw new Error('Invalid user_id or password');
     }
-
-    console.log('Login successful - generating tokens');
-    console.log('==================');
 
     // Generate tokens
     const tokens = this.generateTokens(user.id);
 
     // Update last access time (touch updatedAt timestamp)
-    await user.save({ silent: true });
+    await user.save();
 
     // Return user without password
     const userResponse = user.toJSON();
