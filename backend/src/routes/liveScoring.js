@@ -3,7 +3,7 @@ const router = express.Router();
 const liveScoringController = require('../controllers/liveScoringController');
 const { requireAuth } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac');
-const { rateLimiter } = require('../middleware/rateLimiter');
+const { rateLimiter, createLimiter } = require('../middleware/rateLimiter');
 
 // 모든 라우트에 인증 필요
 router.use(requireAuth);
@@ -15,7 +15,7 @@ router.use(requireAuth);
 router.post(
   '/:matchId/start',
   requireRole(['admin', 'moderator', 'organizer']),
-  rateLimiter('live_action', 10, 60), // 10 requests per minute
+  createLimiter, // Use createLimiter for live scoring actions
   liveScoringController.startLiveMatch
 );
 
@@ -26,7 +26,7 @@ router.post(
 router.post(
   '/:matchId/end',
   requireRole(['admin', 'moderator', 'organizer']),
-  rateLimiter('live_action', 10, 60),
+  rateLimiter,
   liveScoringController.endLiveMatch
 );
 
@@ -37,7 +37,7 @@ router.post(
 router.put(
   '/:matchId/score',
   requireRole(['admin', 'moderator', 'organizer']),
-  rateLimiter('live_update', 30, 60), // 30 requests per minute
+  rateLimiter,
   liveScoringController.updateLiveScore
 );
 
@@ -48,7 +48,7 @@ router.put(
 router.post(
   '/:matchId/event',
   requireRole(['admin', 'moderator', 'organizer']),
-  rateLimiter('live_update', 30, 60),
+  rateLimiter,
   liveScoringController.addLiveEvent
 );
 
@@ -59,7 +59,7 @@ router.post(
 router.put(
   '/:matchId/stats',
   requireRole(['admin', 'moderator', 'organizer']),
-  rateLimiter('live_update', 20, 60), // 20 requests per minute
+  rateLimiter,
   liveScoringController.updateLiveStats
 );
 

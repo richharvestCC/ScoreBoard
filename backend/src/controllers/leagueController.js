@@ -1,17 +1,17 @@
 const leagueService = require('../services/leagueService');
-const { validationResult } = require('express-validator');
+// const { validationResult } = require('express-validator');
 
 // 리그 순위표 조회
 const getLeagueStandings = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '입력 데이터가 유효하지 않습니다.',
-        errors: errors.array()
-      });
-    }
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: '입력 데이터가 유효하지 않습니다.',
+    //     errors: errors.array()
+    //   });
+    // }
 
     const { competitionId } = req.params;
 
@@ -34,14 +34,14 @@ const getLeagueStandings = async (req, res) => {
 // 리그 통계 정보 조회
 const getLeagueStatistics = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '입력 데이터가 유효하지 않습니다.',
-        errors: errors.array()
-      });
-    }
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: '입력 데이터가 유효하지 않습니다.',
+    //     errors: errors.array()
+    //   });
+    // }
 
     const { competitionId } = req.params;
 
@@ -64,14 +64,14 @@ const getLeagueStatistics = async (req, res) => {
 // 리그 최근 경기 결과 조회
 const getRecentMatches = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '입력 데이터가 유효하지 않습니다.',
-        errors: errors.array()
-      });
-    }
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: '입력 데이터가 유효하지 않습니다.',
+    //     errors: errors.array()
+    //   });
+    // }
 
     const { competitionId } = req.params;
     const limit = parseInt(req.query.limit) || 10;
@@ -102,14 +102,14 @@ const getRecentMatches = async (req, res) => {
 // 리그 다음 경기 일정 조회
 const getUpcomingMatches = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '입력 데이터가 유효하지 않습니다.',
-        errors: errors.array()
-      });
-    }
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: '입력 데이터가 유효하지 않습니다.',
+    //     errors: errors.array()
+    //   });
+    // }
 
     const { competitionId } = req.params;
     const limit = parseInt(req.query.limit) || 10;
@@ -140,14 +140,14 @@ const getUpcomingMatches = async (req, res) => {
 // 리그 시즌별 비교 분석
 const compareSeasons = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '입력 데이터가 유효하지 않습니다.',
-        errors: errors.array()
-      });
-    }
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: '입력 데이터가 유효하지 않습니다.',
+    //     errors: errors.array()
+    //   });
+    // }
 
     const { currentSeasonId, previousSeasonId } = req.params;
 
@@ -177,14 +177,14 @@ const compareSeasons = async (req, res) => {
 // 리그 대시보드 종합 정보 조회
 const getLeagueDashboard = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '입력 데이터가 유효하지 않습니다.',
-        errors: errors.array()
-      });
-    }
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: '입력 데이터가 유효하지 않습니다.',
+    //     errors: errors.array()
+    //   });
+    // }
 
     const { competitionId } = req.params;
 

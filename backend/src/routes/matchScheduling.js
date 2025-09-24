@@ -3,7 +3,7 @@ const router = express.Router();
 const matchSchedulingController = require('../controllers/matchSchedulingController');
 const { requireAuth } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac');
-const { rateLimiter } = require('../middleware/rateLimiter');
+const { rateLimiter, createLimiter } = require('../middleware/rateLimiter');
 
 // 모든 라우트에 인증 필요
 router.use(requireAuth);
@@ -26,7 +26,7 @@ router.post(
 router.post(
   '/matches/:matchId/schedule',
   requireRole(['admin', 'moderator', 'organizer']),
-  rateLimiter('scheduling', 20, 60), // 20 requests per minute
+  createLimiter, // Use createLimiter for scheduling actions
   matchSchedulingController.scheduleMatch
 );
 
@@ -37,7 +37,7 @@ router.post(
 router.put(
   '/matches/:matchId/reschedule',
   requireRole(['admin', 'moderator', 'organizer']),
-  rateLimiter('scheduling', 20, 60),
+  createLimiter, // Use createLimiter for rescheduling actions
   matchSchedulingController.rescheduleMatch
 );
 

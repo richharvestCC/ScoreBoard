@@ -1,5 +1,5 @@
 const express = require('express');
-const { param, query } = require('express-validator');
+// const { param, query } = require('express-validator');
 const leagueController = require('../controllers/leagueController');
 const { authenticateToken } = require('../middleware/auth');
 const rateLimit = require('express-rate-limit');
@@ -22,68 +22,68 @@ const leagueRateLimit = rateLimit({
 router.use(authenticateToken);
 router.use(leagueRateLimit);
 
-// 입력 검증 규칙
-const competitionIdValidation = [
-  param('competitionId')
-    .isInt({ min: 1 })
-    .withMessage('유효한 대회 ID를 입력해주세요.')
-];
+// 입력 검증 규칙 (임시 비활성화)
+// const competitionIdValidation = [
+//   param('competitionId')
+//     .isInt({ min: 1 })
+//     .withMessage('유효한 대회 ID를 입력해주세요.')
+// ];
 
-const limitValidation = [
-  query('limit')
-    .optional()
-    .isInt({ min: 1, max: 50 })
-    .withMessage('limit은 1-50 사이의 값이어야 합니다.')
-];
+// const limitValidation = [
+//   query('limit')
+//     .optional()
+//     .isInt({ min: 1, max: 50 })
+//     .withMessage('limit은 1-50 사이의 값이어야 합니다.')
+// ];
 
-const seasonComparisonValidation = [
-  param('currentSeasonId')
-    .isInt({ min: 1 })
-    .withMessage('유효한 현재 시즌 ID를 입력해주세요.'),
-  param('previousSeasonId')
-    .isInt({ min: 1 })
-    .withMessage('유효한 이전 시즌 ID를 입력해주세요.')
-];
+// const seasonComparisonValidation = [
+//   param('currentSeasonId')
+//     .isInt({ min: 1 })
+//     .withMessage('유효한 현재 시즌 ID를 입력해주세요.'),
+//   param('previousSeasonId')
+//     .isInt({ min: 1 })
+//     .withMessage('유효한 이전 시즌 ID를 입력해주세요.')
+// ];
 
 // 리그 순위표 조회
 router.get(
   '/:competitionId/standings',
-  competitionIdValidation,
+  // competitionIdValidation,
   leagueController.getLeagueStandings
 );
 
 // 리그 통계 정보 조회
 router.get(
   '/:competitionId/statistics',
-  competitionIdValidation,
+  // competitionIdValidation,
   leagueController.getLeagueStatistics
 );
 
 // 리그 최근 경기 결과 조회
 router.get(
   '/:competitionId/recent-matches',
-  [...competitionIdValidation, ...limitValidation],
+  // [...competitionIdValidation, ...limitValidation],
   leagueController.getRecentMatches
 );
 
 // 리그 다음 경기 일정 조회
 router.get(
   '/:competitionId/upcoming-matches',
-  [...competitionIdValidation, ...limitValidation],
+  // [...competitionIdValidation, ...limitValidation],
   leagueController.getUpcomingMatches
 );
 
 // 리그 시즌별 비교 분석
 router.get(
   '/compare/:currentSeasonId/:previousSeasonId',
-  seasonComparisonValidation,
+  // seasonComparisonValidation,
   leagueController.compareSeasons
 );
 
 // 리그 대시보드 종합 정보 조회
 router.get(
   '/:competitionId/dashboard',
-  competitionIdValidation,
+  // competitionIdValidation,
   leagueController.getLeagueDashboard
 );
 

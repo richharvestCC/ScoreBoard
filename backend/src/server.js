@@ -17,6 +17,12 @@ const xssProtection = require('./middleware/xss-protection');
 
 const app = express();
 const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(','),
+    credentials: true
+  }
+});
 
 // Live Socket Service
 const liveSocketService = require('./services/liveSocketService');
