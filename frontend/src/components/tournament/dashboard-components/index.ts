@@ -29,27 +29,23 @@ export type * from '../../../types/tournament';
 // Component Placeholders (will be implemented in subsequent tasks)
 // These exports will be uncommented as components are implemented
 
-// Task 2: Material Design 3 Theme
-// export { default as TournamentTheme } from './shared/TournamentTheme';
-// export { default as MaterialToggle } from './shared/MaterialToggle';
+// Task 2: Material Design 3 Theme ✅
+export { default as MaterialToggle, TournamentTypeToggle, GroupStageToggle, IconToggle, ToggleGroup } from './shared/MaterialToggle';
 
 // Task 3: Responsive Layout (Already implemented)
 // ✅ ResponsiveProvider and related utilities
 
-// Task 4: SVG Bracket Rendering
-// export { default as SVGTournamentBracket } from './bracket/SVGTournamentBracket';
-// export { default as GroupStageGrid } from './bracket/GroupStageGrid';
-// export { default as MatchCard } from './bracket/MatchCard';
+// Task 4: SVG Bracket Rendering ✅
+export { default as SVGTournamentBracket } from './bracket/SVGTournamentBracket';
+export { default as GroupStageGrid } from './bracket/GroupStageGrid';
+export { default as MatchCard } from './bracket/MatchCard';
 
-// Task 5: Zoom/Pinch Gestures
-// export { default as ZoomPanContainer } from './bracket/ZoomPanContainer';
-// export { useZoomPan } from './bracket/ZoomPanContainer';
+// Task 5: Zoom/Pinch Gestures ✅
+export { default as ZoomPanContainer, useZoomPan } from './bracket/ZoomPanContainer';
 
-// Task 6: Safety & Modal System
-// export { default as TournamentCreationModal } from './creation/TournamentCreationModal';
-// export { default as CompetitionTypeToggle } from './creation/CompetitionTypeToggle';
-// export { default as SafetyCheckDialog } from './creation/SafetyCheckDialog';
-// export { default as TournamentConfigForm } from './creation/TournamentConfigForm';
+// Task 6: Safety & Modal System ✅
+export { default as TournamentCreationModal } from './creation/TournamentCreationModal';
+export { default as SafetyCheckDialog } from './creation/SafetyCheckDialog';
 
 // Task 7: Animation & Motion Graphics
 // export { default as AnimatedModal } from './shared/AnimatedModal';

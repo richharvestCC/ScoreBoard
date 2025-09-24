@@ -24,7 +24,8 @@ export const DEVICE_CONFIGS = {
     controlPanel: 'bottom-fixed',
     zoomDefault: 1.0,
     touchOptimized: false,
-    fullFeatures: true
+    fullFeatures: true,
+    supported: true
   },
   'tablet-landscape': {
     minWidth: BREAKPOINTS.lg,
@@ -33,7 +34,8 @@ export const DEVICE_CONFIGS = {
     controlPanel: 'bottom-sticky',
     zoomDefault: 0.8,
     touchOptimized: true,
-    fullFeatures: true
+    fullFeatures: true,
+    supported: true
   },
   'tablet-portrait': {
     minWidth: BREAKPOINTS.md,
@@ -42,7 +44,8 @@ export const DEVICE_CONFIGS = {
     controlPanel: 'collapsed',
     zoomDefault: 0.6,
     touchOptimized: true,
-    fullFeatures: false
+    fullFeatures: false,
+    supported: true
   },
   mobile: {
     maxWidth: BREAKPOINTS.md - 1,
@@ -96,14 +99,17 @@ export const getBreakpoint = (width: number): BreakpointKey => {
 };
 
 export const isTouchDevice = (): boolean => {
+  if (typeof window === 'undefined') return false;
   return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 };
 
 export const supportsHover = (): boolean => {
+  if (typeof window === 'undefined') return true;
   return window.matchMedia('(hover: hover)').matches;
 };
 
 export const getOrientation = (): 'landscape' | 'portrait' => {
+  if (typeof window === 'undefined') return 'landscape';
   return window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
 };
 
@@ -115,9 +121,10 @@ interface ResponsiveProviderProps {
 export const ResponsiveProvider: React.FC<ResponsiveProviderProps> = ({ children }) => {
   const theme = useTheme();
   const [dimensions, setDimensions] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
-    height: typeof window !== 'undefined' ? window.innerHeight : 1080
+    width: 1920, // Default SSR-safe values
+    height: 1080
   });
+  const [isClient, setIsClient] = useState(false);
 
   const deviceType = getDeviceType(dimensions.width);
   const breakpoint = getBreakpoint(dimensions.width);
@@ -127,19 +134,30 @@ export const ResponsiveProvider: React.FC<ResponsiveProviderProps> = ({ children
   const config: ResponsiveConfig = {
     device: deviceType,
     breakpoint,
-    isTouchDevice: isTouchDevice(),
-    supportsHover: supportsHover(),
-    orientation: getOrientation()
+    isTouchDevice: isClient ? isTouchDevice() : false,
+    supportsHover: isClient ? supportsHover() : true, // Default to hover support for SSR
+    orientation: isClient ? getOrientation() : 'landscape' // Default orientation for SSR
   };
 
   const updateDimensions = () => {
-    setDimensions({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
+    if (typeof window !== 'undefined') {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    }
   };
 
+  // Client-side initialization effect
   useEffect(() => {
+    setIsClient(true);
+    updateDimensions(); // Set actual dimensions once client-side
+  }, []);
+
+  // Resize and orientation change effects
+  useEffect(() => {
+    if (!isClient) return;
+
     const handleResize = () => {
       updateDimensions();
     };
@@ -156,7 +174,7 @@ export const ResponsiveProvider: React.FC<ResponsiveProviderProps> = ({ children
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleOrientationChange);
     };
-  }, []);
+  }, [isClient]);
 
   const contextValue: ResponsiveContextValue = {
     config,
