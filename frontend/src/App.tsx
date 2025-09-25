@@ -40,6 +40,7 @@ import useAuthStore from './stores/authStore';
 import { NavigationProvider, useNavigation, setGlobalNavigationCallbacks } from './contexts/NavigationContext';
 import { SidebarProvider, useSidebar } from './contexts/SidebarContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Navigation setup component to initialize global navigation callbacks
 function NavigationSetup() {
@@ -158,17 +159,25 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={material3Theme}>
         <CssBaseline />
-        <Router>
-          <NavigationProvider>
-            <SidebarProvider>
-              <LanguageProvider>
-                <DocumentTitle />
-                <NavigationSetup />
-                <AppContent />
-              </LanguageProvider>
-            </SidebarProvider>
-          </NavigationProvider>
-        </Router>
+        <ErrorBoundary
+          showDetails={process.env.NODE_ENV === 'development'}
+          onError={(error, errorInfo) => {
+            // In production, send to error reporting service
+            console.error('Global Error Boundary:', error, errorInfo);
+          }}
+        >
+          <Router>
+            <NavigationProvider>
+              <SidebarProvider>
+                <LanguageProvider>
+                  <DocumentTitle />
+                  <NavigationSetup />
+                  <AppContent />
+                </LanguageProvider>
+              </SidebarProvider>
+            </NavigationProvider>
+          </Router>
+        </ErrorBoundary>
       </ThemeProvider>
     </QueryClientProvider>
   );

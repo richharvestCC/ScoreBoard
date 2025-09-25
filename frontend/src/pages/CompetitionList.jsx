@@ -11,7 +11,6 @@ import {
   TextField,
   InputAdornment,
   Fab,
-  CircularProgress,
   Chip,
   Avatar
 } from '@mui/material';
@@ -26,6 +25,8 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { competitionAPI } from '../services/api';
 import CreateTournamentDialog from '../components/tournaments/CreateTournamentDialog';
+import LoadingSkeleton from '../components/common/LoadingSkeleton';
+import EmptyState from '../components/common/EmptyState';
 
 const CompetitionList = () => {
   const navigate = useNavigate();
@@ -101,18 +102,27 @@ const CompetitionList = () => {
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-        <CircularProgress />
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <LoadingSkeleton variant="page" container />
+      </Container>
     );
   }
 
   if (isError) {
     return (
-      <Container>
-        <Typography variant="h6" color="error" align="center">
-          대회 목록을 불러오는데 실패했습니다.
-        </Typography>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <EmptyState
+          variant="error"
+          title="대회 목록을 불러올 수 없습니다"
+          description="네트워크 연결을 확인하고 다시 시도해주세요."
+          actions={[
+            {
+              label: '다시 시도',
+              onClick: () => window.location.reload(),
+              variant: 'contained'
+            }
+          ]}
+        />
       </Container>
     );
   }
@@ -143,21 +153,28 @@ const CompetitionList = () => {
       </Box>
 
       {competitions.length === 0 ? (
-        <Box textAlign="center" py={8}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            {search ? '검색 결과가 없습니다.' : '등록된 대회가 없습니다.'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" mb={3}>
-            새로운 대회를 만들어보세요!
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setCreateDialogOpen(true)}
-          >
-            대회 만들기
-          </Button>
-        </Box>
+        <EmptyState
+          variant={search ? 'search' : 'create'}
+          title={search ? '검색 결과가 없습니다' : '등록된 대회가 없습니다'}
+          description={search ?
+            '다른 검색어를 사용하거나 필터를 조정해보세요.' :
+            '새로운 대회를 만들어 참가자들과 함께 경기를 시작해보세요!'
+          }
+          actions={search ? [
+            {
+              label: '검색 초기화',
+              onClick: () => setSearch(''),
+              variant: 'outlined'
+            }
+          ] : [
+            {
+              label: '대회 만들기',
+              onClick: () => setCreateDialogOpen(true),
+              variant: 'contained',
+              startIcon: <AddIcon />
+            }
+          ]}
+        />
       ) : (
         <Grid container spacing={3}>
           {competitions.map((competition) => (
