@@ -1,4 +1,4 @@
-// ScoreBoard 디자인 토큰 정의
+// MatchCard 디자인 토큰 정의
 // Material Design 3 기반 스포츠 플랫폼용 통합 스타일 시스템
 
 export const designTokens = {

@@ -1,10 +1,10 @@
-# ⚽ ScoreBoard - 축구 경기 기록/운영 서비스
+# ⚽ MatchCard - 축구 경기 기록/운영 서비스
 
 실시간 축구 경기 기록 및 관리를 위한 현대적인 웹 플랫폼
 
 ## 🚀 프로젝트 개요
 
-ScoreBoard는 아마추어 및 유소년 축구 경기의 실시간 기록과 관리를 위한 풀스택 웹 애플리케이션입니다. 경기 중 발생하는 모든 이벤트를 실시간으로 기록하고 공유할 수 있는 현대적인 플랫폼을 제공합니다.
+MatchCard는 아마추어 및 유소년 축구 경기의 실시간 기록과 관리를 위한 풀스택 웹 애플리케이션입니다. 경기 중 발생하는 모든 이벤트를 실시간으로 기록하고 공유할 수 있는 현대적인 플랫폼을 제공합니다.
 
 ### 주요 기능
 - 🔐 **사용자 인증**: JWT 기반 보안 인증 시스템
@@ -43,8 +43,8 @@ ScoreBoard는 아마추어 및 유소년 축구 경기의 실시간 기록과 �
 
 ### 1. 저장소 클론
 ```bash
-git clone https://github.com/richharvestCC/ScoreBoard.git
-cd ScoreBoard
+git clone https://github.com/richharvestCC/MatchCard.git
+cd MatchCard
 ```
 
 ### 2. 백엔드 설정
@@ -200,7 +200,7 @@ PostgreSQL 데이터베이스를 생성하고 `.env` 파일의 연결 정보를 
 ```env
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=scoreboard
+DB_NAME=matchcard
 DB_USER=your_username
 DB_PASSWORD=your_password
 ```
@@ -323,7 +323,7 @@ JWT_REFRESH_SECRET=your_refresh_token_secret
 
 ## 📞 연락처
 
-프로젝트 링크: [https://github.com/richharvestCC/ScoreBoard](https://github.com/richharvestCC/ScoreBoard)
+프로젝트 링크: [https://github.com/richharvestCC/MatchCard](https://github.com/richharvestCC/MatchCard)
 
 ---
 

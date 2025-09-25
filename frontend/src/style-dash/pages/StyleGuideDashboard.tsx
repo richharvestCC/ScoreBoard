@@ -101,7 +101,7 @@ const StyleGuideDashboard: React.FC = () => {
         <Toolbar>
           <Code sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            ScoreBoard Style Guide
+            MatchCard Style Guide
           </Typography>
           <Chip
             label="Material 3"
@@ -252,7 +252,7 @@ const StyleGuideDashboard: React.FC = () => {
               시작하기
             </Typography>
             <Typography variant="body1" paragraph>
-              ScoreBoard 스타일 가이드를 프로젝트에 적용하는 방법을 안내합니다.
+              MatchCard 스타일 가이드를 프로젝트에 적용하는 방법을 안내합니다.
             </Typography>
             <Box component="pre" sx={{
               backgroundColor: alpha(theme.palette.text.primary, 0.05),

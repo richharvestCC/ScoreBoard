@@ -1,5 +1,5 @@
 /**
- * Tournament Types for ScoreBoard Dashboard Components
+ * Tournament Types for MatchCard Dashboard Components
  * Material Design 3 + React 18 + TypeScript
  */
 

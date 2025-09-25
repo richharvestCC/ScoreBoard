@@ -103,16 +103,14 @@ function AppContent() {
             duration: theme.transitions.duration.enteringScreen,
           }),
 
-          // 반응형 패딩
-          '@media (max-width: 767.98px)': {
-            padding: theme.spacing(1, 2),
-            marginLeft: 0,
+          // 반응형 패딩 - MUI 객체 형식 사용
+          padding: {
+            xs: theme.spacing(1, 2),
+            sm: theme.spacing(2, 3),
+            lg: theme.spacing(3, 4),
           },
-          '@media (min-width: 768px) and (max-width: 1023.98px)': {
-            padding: theme.spacing(2, 3),
-          },
-          '@media (min-width: 1280px)': {
-            padding: theme.spacing(3, 4),
+          marginLeft: {
+            xs: 0,
           },
         }}
       >

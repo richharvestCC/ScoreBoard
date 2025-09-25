@@ -117,7 +117,7 @@ const material3Theme = createTheme({
         },
         text: {
           primary: '#282828',
-          secondary: '#282828',
+          secondary: '#666666',
         },
         divider: 'rgba(0, 0, 0, 0.08)',
       },
