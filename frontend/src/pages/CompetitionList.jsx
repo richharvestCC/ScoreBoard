@@ -42,7 +42,7 @@ const CompetitionList = () => {
   } = useQuery({
     queryKey: ['competitions', { search, page }],
     queryFn: () => competitionAPI.getAll({ search, page, limit: 12 }),
-    keepPreviousData: true
+    placeholderData: (previousData) => previousData
   });
 
   const handleSearchChange = (event) => {

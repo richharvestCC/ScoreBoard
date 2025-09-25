@@ -63,7 +63,7 @@ const MatchList = () => {
       page,
       limit: 12
     }),
-    keepPreviousData: true
+    placeholderData: (previousData) => previousData
   });
 
   const handleSearchChange = (event) => {

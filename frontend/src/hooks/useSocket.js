@@ -103,7 +103,8 @@ const useSocket = () => {
         newSocket.disconnect();
       }
     };
-  }, [isAuthenticated, accessToken, socket]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, accessToken]); // socket dependency 제거로 무한 루프 방지
 
   // 경기 참여
   const joinMatch = (matchId) => {

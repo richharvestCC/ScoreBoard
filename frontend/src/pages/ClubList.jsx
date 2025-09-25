@@ -43,7 +43,7 @@ const ClubList = () => {
   } = useQuery({
     queryKey: ['clubs', { search, page }],
     queryFn: () => clubAPI.getAll({ search, page, limit: 12 }),
-    keepPreviousData: true
+    placeholderData: (previousData) => previousData
   });
 
   const handleSearchChange = (event) => {
