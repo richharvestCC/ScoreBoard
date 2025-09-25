@@ -40,6 +40,8 @@ import {
   getStatusColor,
   getStageLabel
 } from '../utils/matchUtils';
+import LoadingSkeleton from '../components/common/LoadingSkeleton';
+import EmptyState from '../components/common/EmptyState';
 
 const MatchList = () => {
   const navigate = useNavigate();
@@ -97,18 +99,27 @@ const MatchList = () => {
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-        <CircularProgress />
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <LoadingSkeleton variant="page" container />
+      </Container>
     );
   }
 
   if (isError) {
     return (
-      <Container>
-        <Typography variant="h6" color="error" align="center">
-          경기 목록을 불러오는데 실패했습니다.
-        </Typography>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <EmptyState
+          variant="error"
+          title="경기 목록을 불러올 수 없습니다"
+          description="네트워크 연결을 확인하고 다시 시도해주세요."
+          actions={[
+            {
+              label: '다시 시도',
+              onClick: () => window.location.reload(),
+              variant: 'contained'
+            }
+          ]}
+        />
       </Container>
     );
   }
@@ -178,21 +189,32 @@ const MatchList = () => {
       </Box>
 
       {matches.length === 0 ? (
-        <Box textAlign="center" py={8}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            {search || statusFilter || typeFilter ? '검색 결과가 없습니다.' : '등록된 경기가 없습니다.'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" mb={3}>
-            새로운 경기를 만들어보세요!
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setCreateDialogOpen(true)}
-          >
-            경기 만들기
-          </Button>
-        </Box>
+        <EmptyState
+          variant={search || statusFilter || typeFilter ? 'search' : 'create'}
+          title={search || statusFilter || typeFilter ? '검색 결과가 없습니다' : '등록된 경기가 없습니다'}
+          description={search || statusFilter || typeFilter ?
+            '다른 검색어를 사용하거나 필터를 조정해보세요.' :
+            '새로운 경기를 만들어 팀들과 함께 스포츠를 즐겨보세요!'
+          }
+          actions={search || statusFilter || typeFilter ? [
+            {
+              label: '필터 초기화',
+              onClick: () => {
+                setSearch('');
+                setStatusFilter('');
+                setTypeFilter('');
+              },
+              variant: 'outlined'
+            }
+          ] : [
+            {
+              label: '경기 만들기',
+              onClick: () => setCreateDialogOpen(true),
+              variant: 'contained',
+              startIcon: <AddIcon />
+            }
+          ]}
+        />
       ) : (
         <Grid container spacing={3}>
           {matches.map((match) => (

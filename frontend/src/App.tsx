@@ -1,37 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline, Box, useMediaQuery, useTheme } from '@mui/material';
+import { CssBaseline, Box, useMediaQuery, useTheme, CircularProgress } from '@mui/material';
 import material3Theme from './theme/material3Theme';
-
-// Components
-import Header from './components/layout/Header';
-import Sidebar from './components/layout/Sidebar';
-import DocumentTitle from './components/layout/DocumentTitle';
-// import ProtectedRoute from './components/ProtectedRoute'; // BYPASSED FOR UI DEVELOPMENT
-
-// Pages
-import AuthPage from './pages/AuthPage';
-import Dashboard from './pages/Dashboard';
-import ClubList from './pages/ClubList';
-import ClubDetail from './pages/ClubDetail';
-import MatchList from './pages/MatchList';
-import MatchDetail from './pages/MatchDetail';
-import LiveScoring from './pages/LiveScoring';
-import CompetitionList from './pages/CompetitionList';
-import TournamentDetail from './pages/TournamentDetail';
-import TemplateManagement from './pages/TemplateManagement';
-import AdminDashboard from './pages/AdminDashboard';
-import MatchScheduling from './pages/MatchScheduling';
-// import LiveMatchView from './pages/LiveMatchView';
-import LiveMatchesPage from './pages/LiveMatchesPage';
-import LeagueDashboard from './pages/LeagueDashboard';
-import CompetitionPage from './pages/CompetitionPage';
-import ThemeVisualization from './pages/ThemeVisualization';
-
-// Style Guide
-import StyleDashRoutes from './style-dash';
 
 // Hooks
 import useAuthStore from './stores/authStore';
@@ -41,6 +13,34 @@ import { NavigationProvider, useNavigation, setGlobalNavigationCallbacks } from 
 import { SidebarProvider, useSidebar } from './contexts/SidebarContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
+
+// Components
+import Header from './components/layout/Header';
+import Sidebar from './components/layout/Sidebar';
+import DocumentTitle from './components/layout/DocumentTitle';
+// import ProtectedRoute from './components/ProtectedRoute'; // BYPASSED FOR UI DEVELOPMENT
+
+// Pages - Lazy Loading for Code Splitting
+const AuthPage = React.lazy(() => import('./pages/AuthPage'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const ClubList = React.lazy(() => import('./pages/ClubList'));
+const ClubDetail = React.lazy(() => import('./pages/ClubDetail'));
+const MatchList = React.lazy(() => import('./pages/MatchList'));
+const MatchDetail = React.lazy(() => import('./pages/MatchDetail'));
+const LiveScoring = React.lazy(() => import('./pages/LiveScoring'));
+const CompetitionList = React.lazy(() => import('./pages/CompetitionList'));
+const TournamentDetail = React.lazy(() => import('./pages/TournamentDetail'));
+const TemplateManagement = React.lazy(() => import('./pages/TemplateManagement'));
+const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
+const MatchScheduling = React.lazy(() => import('./pages/MatchScheduling'));
+// const LiveMatchView = React.lazy(() => import('./pages/LiveMatchView'));
+const LiveMatchesPage = React.lazy(() => import('./pages/LiveMatchesPage'));
+const LeagueDashboard = React.lazy(() => import('./pages/LeagueDashboard'));
+const CompetitionPage = React.lazy(() => import('./pages/CompetitionPage'));
+const ThemeVisualization = React.lazy(() => import('./pages/ThemeVisualization'));
+
+// Style Guide
+const StyleDashRoutes = React.lazy(() => import('./style-dash'));
 
 // Navigation setup component to initialize global navigation callbacks
 function NavigationSetup() {
@@ -114,9 +114,22 @@ function AppContent() {
           },
         }}
       >
-        <Routes>
-          {/* Public routes */}
-          <Route path="/auth" element={<AuthPage />} />
+        <Suspense fallback={
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '300px',
+            flexDirection: 'column',
+            gap: 2
+          }}>
+            <CircularProgress size={40} />
+            <Box sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>Loading page...</Box>
+          </Box>
+        }>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/auth" element={<AuthPage />} />
 
           {/* Protected routes - AUTHENTICATION BYPASSED FOR UI DEVELOPMENT */}
           <Route path="/" element={<Dashboard />} />
@@ -147,7 +160,8 @@ function AppContent() {
 
           {/* Catch-all redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+          </Routes>
+        </Suspense>
       </Box>
     </Box>
   );

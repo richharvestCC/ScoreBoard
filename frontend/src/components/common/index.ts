@@ -14,3 +14,7 @@ export {
   FilterEmptyState
 } from './EmptyState';
 export type { EmptyStateProps, EmptyStateAction } from './EmptyState';
+
+export { default as SecureForm } from './SecureForm';
+export { default as AccessibleSearchField } from './AccessibleSearchField';
+export { default as AccessiblePagination } from './AccessiblePagination';

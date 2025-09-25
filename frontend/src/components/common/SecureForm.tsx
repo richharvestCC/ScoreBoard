@@ -26,12 +26,12 @@ const secureFormSchema = yup.object({
 
   description: yup.string()
     .max(1000, '설명은 1000자 이하로 입력해주세요')
-    .optional(),
+    .transform((value) => value || ''),
 
   website: yup.string()
     .url('올바른 웹사이트 URL을 입력해주세요')
     .matches(/^https?:\/\//, 'http:// 또는 https://로 시작하는 URL만 허용됩니다')
-    .optional()
+    .transform((value) => value || '')
 });
 
 interface SecureFormData {
@@ -62,7 +62,7 @@ const SecureForm: React.FC<SecureFormProps> = ({
     watch,
     setValue
   } = useForm<SecureFormData>({
-    resolver: yupResolver(secureFormSchema),
+    resolver: yupResolver(secureFormSchema) as any,
     defaultValues: {
       name: initialData.name || '',
       email: initialData.email || '',
@@ -76,8 +76,7 @@ const SecureForm: React.FC<SecureFormProps> = ({
   const sanitizeInput = (value: string): string => {
     return DOMPurify.sanitize(value, {
       ALLOWED_TAGS: [],
-      ALLOWED_ATTR: [],
-      STRIP_COMMENTS: true
+      ALLOWED_ATTR: []
     });
   };
 
