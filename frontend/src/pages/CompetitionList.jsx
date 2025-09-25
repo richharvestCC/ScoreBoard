@@ -20,28 +20,27 @@ import {
   Add as AddIcon,
   EmojiEvents as TrophyIcon,
   CalendarToday as CalendarIcon,
-  People as PeopleIcon,
-  LocationOn as LocationIcon
+  People as PeopleIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { tournamentAPI } from '../services/api';
+import { competitionAPI } from '../services/api';
 import CreateTournamentDialog from '../components/tournaments/CreateTournamentDialog';
 
-const TournamentList = () => {
+const CompetitionList = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const {
-    data: tournamentsData,
+    data: competitionsData,
     isLoading,
     isError,
     refetch
   } = useQuery({
-    queryKey: ['tournaments', { search, page }],
-    queryFn: () => tournamentAPI.getAll({ search, page, limit: 12 }),
+    queryKey: ['competitions', { search, page }],
+    queryFn: () => competitionAPI.getAll({ search, page, limit: 12 }),
     keepPreviousData: true
   });
 
@@ -50,8 +49,8 @@ const TournamentList = () => {
     setPage(1);
   };
 
-  const handleTournamentClick = (tournamentId) => {
-    navigate(`/tournaments/${tournamentId}`);
+  const handleCompetitionClick = (competitionId) => {
+    navigate(`/competitions/${competitionId}`);
   };
 
   const handleCreateSuccess = () => {
@@ -59,11 +58,11 @@ const TournamentList = () => {
     refetch();
   };
 
-  const getTournamentTypeLabel = (type) => {
-    return type === 'league' ? '리그' : '토너먼트';
+  const getCompetitionTypeLabel = (type) => {
+    return type === 'league' ? '리그' : '대회';
   };
 
-  const getTournamentTypeColor = (type) => {
+  const getCompetitionTypeColor = (type) => {
     return type === 'league' ? 'primary' : 'secondary';
   };
 
@@ -112,24 +111,24 @@ const TournamentList = () => {
     return (
       <Container>
         <Typography variant="h6" color="error" align="center">
-          토너먼트 목록을 불러오는데 실패했습니다.
+          대회 목록을 불러오는데 실패했습니다.
         </Typography>
       </Container>
     );
   }
 
-  const tournaments = tournamentsData?.data?.data || [];
+  const competitions = competitionsData?.data?.data || [];
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box mb={4}>
         <Typography variant="h4" component="h1" gutterBottom>
-          토너먼트 목록
+          대회 목록
         </Typography>
 
         <TextField
           fullWidth
-          placeholder="토너먼트 이름, 형식으로 검색..."
+          placeholder="대회 이름, 형식으로 검색..."
           value={search}
           onChange={handleSearchChange}
           InputProps={{
@@ -143,26 +142,26 @@ const TournamentList = () => {
         />
       </Box>
 
-      {tournaments.length === 0 ? (
+      {competitions.length === 0 ? (
         <Box textAlign="center" py={8}>
           <Typography variant="h6" color="text.secondary" gutterBottom>
-            {search ? '검색 결과가 없습니다.' : '등록된 토너먼트가 없습니다.'}
+            {search ? '검색 결과가 없습니다.' : '등록된 대회가 없습니다.'}
           </Typography>
           <Typography variant="body2" color="text.secondary" mb={3}>
-            새로운 토너먼트를 만들어보세요!
+            새로운 대회를 만들어보세요!
           </Typography>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setCreateDialogOpen(true)}
           >
-            토너먼트 만들기
+            대회 만들기
           </Button>
         </Box>
       ) : (
         <Grid container spacing={3}>
-          {tournaments.map((tournament) => (
-            <Grid item xs={12} sm={6} md={4} key={tournament.id}>
+          {competitions.map((competition) => (
+            <Grid item xs={12} sm={6} md={4} key={competition.id}>
               <Card
                 sx={{
                   height: '100%',
@@ -175,7 +174,7 @@ const TournamentList = () => {
                     boxShadow: 4
                   }
                 }}
-                onClick={() => handleTournamentClick(tournament.id)}
+                onClick={() => handleCompetitionClick(competition.id)}
               >
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Box display="flex" alignItems="center" mb={2}>
@@ -191,15 +190,15 @@ const TournamentList = () => {
                     </Avatar>
                     <Box>
                       <Typography variant="h6" component="h2" noWrap>
-                        {tournament.name}
+                        {competition.name}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        by {tournament.admin?.name || '관리자'}
+                        by {competition.admin?.name || '관리자'}
                       </Typography>
                     </Box>
                   </Box>
 
-                  {tournament.description && (
+                  {competition.description && (
                     <Typography
                       variant="body2"
                       color="text.secondary"
@@ -212,35 +211,35 @@ const TournamentList = () => {
                         WebkitBoxOrient: 'vertical'
                       }}
                     >
-                      {tournament.description}
+                      {competition.description}
                     </Typography>
                   )}
 
                   <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
                     <Chip
-                      label={getTournamentTypeLabel(tournament.tournament_type)}
+                      label={getCompetitionTypeLabel(competition.competition_type)}
                       size="small"
-                      color={getTournamentTypeColor(tournament.tournament_type)}
+                      color={getCompetitionTypeColor(competition.competition_type)}
                     />
                     <Chip
-                      label={getFormatLabel(tournament.format)}
+                      label={getFormatLabel(competition.format)}
                       size="small"
                       variant="outlined"
                     />
                     <Chip
-                      label={getStatusLabel(tournament.status)}
+                      label={getStatusLabel(competition.status)}
                       size="small"
-                      color={getStatusColor(tournament.status)}
+                      color={getStatusColor(competition.status)}
                       variant="outlined"
                     />
                   </Box>
 
                   <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
-                    {tournament.start_date && (
+                    {competition.start_date && (
                       <Box display="flex" alignItems="center">
                         <CalendarIcon fontSize="small" color="action" />
                         <Typography variant="body2" color="text.secondary" ml={0.5}>
-                          {new Date(tournament.start_date).toLocaleDateString()}
+                          {new Date(competition.start_date).toLocaleDateString()}
                         </Typography>
                       </Box>
                     )}
@@ -249,11 +248,11 @@ const TournamentList = () => {
                   <Box display="flex" alignItems="center">
                     <PeopleIcon fontSize="small" color="action" />
                     <Typography variant="body2" color="text.secondary" ml={0.5}>
-                      {tournament.participants?.length || 0}개 팀
+                      {competition.participants?.length || 0}개 팀
                     </Typography>
-                    {tournament.max_participants && (
+                    {competition.max_participants && (
                       <Typography variant="body2" color="text.secondary">
-                        / {tournament.max_participants}
+                        / {competition.max_participants}
                       </Typography>
                     )}
                   </Box>
@@ -262,7 +261,7 @@ const TournamentList = () => {
                 <CardActions>
                   <Button size="small" onClick={(e) => {
                     e.stopPropagation();
-                    handleTournamentClick(tournament.id);
+                    handleCompetitionClick(competition.id);
                   }}>
                     자세히 보기
                   </Button>
@@ -276,14 +275,14 @@ const TournamentList = () => {
       {/* Floating Action Button */}
       <Fab
         color="primary"
-        aria-label="add tournament"
+        aria-label="add competition"
         sx={{ position: 'fixed', bottom: 16, right: 16 }}
         onClick={() => setCreateDialogOpen(true)}
       >
         <AddIcon />
       </Fab>
 
-      {/* Create Tournament Dialog */}
+      {/* Create Competition Dialog */}
       <CreateTournamentDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
@@ -293,4 +292,4 @@ const TournamentList = () => {
   );
 };
 
-export default TournamentList;
+export default CompetitionList;

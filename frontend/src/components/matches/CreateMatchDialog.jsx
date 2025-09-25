@@ -18,7 +18,7 @@ import {
   Typography
 } from '@mui/material';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { matchAPI, clubAPI, tournamentAPI } from '../../services/api';
+import { matchAPI, clubAPI, competitionAPI } from '../../services/api';
 import { removeEmptyFields } from '../../utils/formHelpers';
 
 const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
@@ -52,7 +52,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
   // Fetch tournaments for selection
   const { data: tournamentsData } = useQuery({
     queryKey: ['tournaments-list'],
-    queryFn: () => tournamentAPI.getAll({ limit: 100 }),
+    queryFn: () => competitionAPI.getAll({ limit: 100 }),
     select: (response) => response.data.data
   });
 

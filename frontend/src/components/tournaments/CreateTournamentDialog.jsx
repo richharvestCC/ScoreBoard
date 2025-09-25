@@ -18,7 +18,7 @@ import {
   Checkbox
 } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { tournamentAPI } from '../../services/api';
+import { competitionAPI } from '../../services/api';
 import { removeEmptyFields } from '../../utils/formHelpers';
 
 const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
@@ -41,7 +41,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
   const [errors, setErrors] = useState({});
 
   const createMutation = useMutation({
-    mutationFn: tournamentAPI.create,
+    mutationFn: competitionAPI.create,
     onSuccess: () => {
       queryClient.invalidateQueries(['tournaments']);
       onSuccess();

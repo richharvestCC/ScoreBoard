@@ -19,7 +19,7 @@ import ClubDetail from './pages/ClubDetail';
 import MatchList from './pages/MatchList';
 import MatchDetail from './pages/MatchDetail';
 import LiveScoring from './pages/LiveScoring';
-import TournamentList from './pages/TournamentList';
+import CompetitionList from './pages/CompetitionList';
 import TournamentDetail from './pages/TournamentDetail';
 import TemplateManagement from './pages/TemplateManagement';
 import AdminDashboard from './pages/AdminDashboard';
@@ -125,8 +125,10 @@ function AppContent() {
           <Route path="/matches/:id" element={<MatchDetail />} />
           <Route path="/matches/:id/live" element={<LiveScoring />} />
           <Route path="/competitions" element={<CompetitionPage />} />
-          <Route path="/tournaments" element={<TournamentList />} />
+          <Route path="/competitions" element={<CompetitionList />} />
+          <Route path="/tournaments" element={<CompetitionList />} />
           <Route path="/tournaments/:id" element={<TournamentDetail />} />
+          <Route path="/competitions/:id" element={<TournamentDetail />} />
           <Route path="/templates" element={<TemplateManagement />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/competitions/:competitionId/scheduling" element={<MatchScheduling />} />

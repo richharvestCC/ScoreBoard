@@ -21,7 +21,6 @@ import {
   Dashboard,
   Sports,
   Groups,
-  Stadium,
   EmojiEvents,
   Assignment,
   LiveTv,
@@ -43,6 +42,8 @@ interface MenuItemData {
   icon: React.ReactElement;
   path: string;
   badge: number | null;
+  adminOnly?: boolean;
+  requiredRoles?: string[];
 }
 
 interface MenuItemProps {
@@ -217,13 +218,6 @@ const Sidebar: React.FC = React.memo(() => {
       badge: null
     },
     {
-      id: 'competitions',
-      text: '대회',
-      icon: <Stadium />,
-      path: '/competitions',
-      badge: null
-    },
-    {
       id: 'matches',
       text: '경기',
       icon: <Sports />,
@@ -238,25 +232,28 @@ const Sidebar: React.FC = React.memo(() => {
       badge: null
     },
     {
-      id: 'tournaments',
-      text: '토너먼트',
+      id: 'competitions',
+      text: '대회',
       icon: <EmojiEvents />,
-      path: '/tournaments',
-      badge: null
+      path: '/competitions',
+      badge: null,
+      requiredRoles: ['admin', 'moderator', 'organizer']
     },
     {
       id: 'live',
       text: '라이브',
       icon: <LiveTv />,
       path: '/live',
-      badge: 3
+      badge: 3,
+      requiredRoles: ['admin', 'moderator']
     },
     {
       id: 'templates',
       text: '템플릿',
       icon: <Assignment />,
       path: '/templates',
-      badge: null
+      badge: null,
+      adminOnly: true
     }
   ], []);
 
@@ -266,14 +263,16 @@ const Sidebar: React.FC = React.memo(() => {
       text: '테마',
       icon: <ColorLens />,
       path: '/theme',
-      badge: null
+      badge: null,
+      adminOnly: true
     },
     {
       id: 'style-guide',
       text: '스타일 가이드',
       icon: <Palette />,
       path: '/style-dash',
-      badge: null
+      badge: null,
+      adminOnly: true
     }
   ], []);
 
@@ -283,9 +282,35 @@ const Sidebar: React.FC = React.memo(() => {
       text: '관리자',
       icon: <AdminPanelSettings />,
       path: '/admin',
-      badge: 4
+      badge: 4,
+      adminOnly: true
     }
   ], []);
+
+  // Role-based menu filtering
+  const visibleMenuItems = useMemo(() => {
+    return menuItems.filter(item => {
+      if (item.adminOnly && !['admin', 'moderator'].includes(user?.role)) return false;
+      if (item.requiredRoles && !item.requiredRoles.includes(user?.role)) return false;
+      return true;
+    });
+  }, [menuItems, user?.role]);
+
+  const visibleDevelopmentItems = useMemo(() => {
+    return developmentItems.filter(item => {
+      if (item.adminOnly && !['admin', 'moderator'].includes(user?.role)) return false;
+      if (item.requiredRoles && !item.requiredRoles.includes(user?.role)) return false;
+      return true;
+    });
+  }, [developmentItems, user?.role]);
+
+  const visibleAdminItems = useMemo(() => {
+    return adminItems.filter(item => {
+      if (item.adminOnly && !['admin', 'moderator'].includes(user?.role)) return false;
+      if (item.requiredRoles && !item.requiredRoles.includes(user?.role)) return false;
+      return true;
+    });
+  }, [adminItems, user?.role]);
 
   // Memoized sx objects for main container elements
   const sidebarContainerSx = useMemo<SxProps<Theme>>(() => ({
@@ -420,15 +445,19 @@ const Sidebar: React.FC = React.memo(() => {
 
       {/* Navigation Menu */}
       <Box sx={navSx}>
-        <MenuSection items={menuItems} />
-        <MenuSection
-          title="Development"
-          items={developmentItems}
-        />
-        <MenuSection
-          title="Administration"
-          items={adminItems}
-        />
+        <MenuSection items={visibleMenuItems} />
+        {visibleDevelopmentItems.length > 0 && (
+          <MenuSection
+            title="Development"
+            items={visibleDevelopmentItems}
+          />
+        )}
+        {visibleAdminItems.length > 0 && (
+          <MenuSection
+            title="Administration"
+            items={visibleAdminItems}
+          />
+        )}
       </Box>
 
       {/* User Profile Section */}
@@ -450,7 +479,7 @@ const Sidebar: React.FC = React.memo(() => {
     </Box>
   ), [
     sidebarContainerSx, headerSx, handleToggleSidebar, logoButtonSx, titleSx, t, subtitleSx,
-    navSx, menuItems, developmentItems, adminItems, profileSectionSx, profileBoxSx,
+    navSx, visibleMenuItems, visibleDevelopmentItems, visibleAdminItems, profileSectionSx, profileBoxSx,
     avatarSx, userBoxSx, usernameSx, user?.username, user?.email, user?.role, roleSx
   ]);
 

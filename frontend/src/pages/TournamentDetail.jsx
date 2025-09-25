@@ -38,11 +38,14 @@ import {
   TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { tournamentAPI } from '../services/api';
+import { competitionAPI } from '../services/api';
 import { getClubTypeLabel } from '../constants/clubTypes';
 import ParticipantList from '../components/tournament/ParticipantList';
 import TournamentBracket from '../components/tournament/TournamentBracket';
 import { designTokens } from '../theme/designTokens';
+
+// Legacy support - TODO: Remove when backend tournament API is fully deprecated
+const tournamentAPI = competitionAPI;
 
 const TournamentDetail = () => {
   const { id } = useParams();
