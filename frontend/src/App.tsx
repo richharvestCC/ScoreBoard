@@ -93,9 +93,7 @@ function AppContent() {
         component="main"
         sx={{
           flexGrow: 1,
-          marginLeft: isMobile ? 0 : (isOpen ? `${sidebarWidth}px` : 0),
           marginTop: '64px', // Account for header height
-          padding: theme.spacing(3),
           minHeight: 'calc(100vh - 64px)',
           backgroundColor: theme.palette.background.default,
           transition: theme.transitions.create('margin-left', {
@@ -111,6 +109,7 @@ function AppContent() {
           },
           marginLeft: {
             xs: 0,
+            md: isMobile ? 0 : (isOpen ? `${sidebarWidth}px` : 0),
           },
         }}
       >

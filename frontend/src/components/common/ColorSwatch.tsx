@@ -20,7 +20,7 @@ const ColorSwatch: React.FC<ColorSwatchProps> = React.memo(({
   const theme = useTheme();
 
   const getTextColor = (toneValue: string): string => {
-    return parseInt(toneValue) >= 500 ? '#fff' : theme.palette.primary[800];
+    return parseInt(toneValue) >= 500 ? '#fff' : (theme.palette.primary[800] || '#212121');
   };
 
   const textColor = getTextColor(tone);

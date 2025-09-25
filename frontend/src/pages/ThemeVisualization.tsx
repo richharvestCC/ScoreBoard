@@ -6,7 +6,6 @@ import {
   Paper,
   Divider,
   Chip,
-  Grid,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -67,7 +66,6 @@ const ThemeVisualization: React.FC = React.memo(() => {
       };
     }).filter((group): group is ColorGroup => group !== null);
   }, [theme.palette]);
-
 
   // Handle color click for clipboard copy
   const handleColorClick = useCallback((color: string) => {
@@ -154,9 +152,9 @@ const ThemeVisualization: React.FC = React.memo(() => {
                 <Typography variant="body2">{t({ ko: '작은 텍스트', en: 'Small Text' })}</Typography>
               </Box>
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} md={4}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -179,9 +177,9 @@ const ThemeVisualization: React.FC = React.memo(() => {
                 <Box sx={{ width: 40, height: 40, bgcolor: 'primary.300', borderRadius: 3 }} />
               </Box>
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} md={4}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -204,8 +202,8 @@ const ThemeVisualization: React.FC = React.memo(() => {
                 <Box sx={{ width: 24, height: 20, bgcolor: 'secondary.600' }} />
               </Box>
             </Paper>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Box>
 
       {/* Color Palette */}
@@ -370,8 +368,8 @@ const ThemeVisualization: React.FC = React.memo(() => {
         >
           {t({ ko: '컴포넌트 예시', en: 'Component Examples' })}
         </Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -391,9 +389,9 @@ const ThemeVisualization: React.FC = React.memo(() => {
                 <Chip label={t({ ko: '정보', en: 'Info' })} color="info" />
               </Box>
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} md={6}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -413,8 +411,8 @@ const ThemeVisualization: React.FC = React.memo(() => {
                 {t({ ko: '섹션 구분에 사용되는 요소', en: 'Element used for section separation' })}
               </Typography>
             </Paper>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Box>
     </Container>
   );
