@@ -1,48 +1,91 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   Container,
   Typography,
   Box,
-  Grid,
   Paper,
   Divider,
-  Chip
+  Chip,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useLanguage } from '../contexts/LanguageContext';
+import ColorSwatch from '../components/common/ColorSwatch';
 
-const ThemeVisualization = () => {
+// Type definitions
+interface ColorItem {
+  tone: string;
+  color: string;
+}
+
+interface ColorGroup {
+  name: string;
+  colors: ColorItem[];
+}
+
+type PaletteColorKey = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
+
+// Extend MUI theme type for custom palette properties
+declare module '@mui/material/styles' {
+  interface PaletteColor {
+    50?: string;
+    100?: string;
+    200?: string;
+    300?: string;
+    400?: string;
+    500?: string;
+    600?: string;
+    700?: string;
+    800?: string;
+    900?: string;
+  }
+}
+
+const ThemeVisualization: React.FC = React.memo(() => {
   const theme = useTheme();
   const { t } = useLanguage();
 
-  // Color extraction helper
-  const extractColors = (colorNames) => {
-    const tones = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
+  // Memoized color extraction for performance
+  const colorGroups = useMemo<ColorGroup[]>(() => {
+    const tones = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
+    const colorNames: PaletteColorKey[] = ['primary', 'secondary', 'success', 'warning', 'error', 'info'];
 
     return colorNames.map(colorName => {
       const paletteColor = theme.palette[colorName];
-      if (!paletteColor) return null;
+      if (!paletteColor || typeof paletteColor === 'string') return null;
 
-      const colors = tones
+      const colors: ColorItem[] = tones
         .filter(tone => paletteColor[tone])
         .map(tone => ({
           tone,
-          color: paletteColor[tone]
+          color: paletteColor[tone] as string
         }));
 
       return {
         name: colorName.charAt(0).toUpperCase() + colorName.slice(1),
         colors
       };
-    }).filter(Boolean);
-  };
+    }).filter((group): group is ColorGroup => group !== null);
+  }, [theme.palette]);
 
-  const colorGroups = extractColors(['primary', 'secondary', 'success', 'warning', 'error', 'info']);
+  // Handle color click for clipboard copy
+  const handleColorClick = useCallback((color: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(color);
+    }
+  }, []);
+
+  // Handle keyboard events for color swatches
+  const handleColorKeyDown = useCallback((event: React.KeyboardEvent, color: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleColorClick(color);
+    }
+  }, [handleColorClick]);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
-      <Box sx={{ textAlign: 'center', mb: 8 }}>
+      <Box sx={{ mb: 8 }}>
         <Typography
           variant="h1"
           component="h1"
@@ -50,33 +93,23 @@ const ThemeVisualization = () => {
           sx={{
             color: 'primary.700',
             fontWeight: 700,
+            textAlign: 'left',
             mb: 2
           }}
         >
-          {t({ ko: 'MatchCard - Material Design 3 테마 시각화', en: 'MatchCard - Material Design 3 Theme Visualization' })}
+          {t({ ko: '매치카드 디자인 에셋', en: 'MatchCard Design Assets' })}
         </Typography>
         <Typography
           variant="h6"
           color="text.secondary"
           sx={{
             maxWidth: 600,
-            mx: 'auto',
+            color: 'primary.400',
+            textAlign: 'left',
             mb: 2
           }}
         >
-          {t({ ko: 'MatchCard 플랫폼의 완전한 Material Design 3 색상 팔레트와 디자인 시스템을 확인하세요.', en: 'Explore the complete Material Design 3 color palette and design system of the MatchCard platform.' })}
-        </Typography>
-        <Typography
-          variant="h5"
-          sx={{
-            color: 'primary.600',
-            fontWeight: 600,
-            fontStyle: 'italic',
-            textAlign: 'center',
-            mb: 1
-          }}
-        >
-          {t({ ko: '"공 좀 차니?"', en: '"What about the score?"' })}
+          {t({ ko: '매치카드는 머티리얼 디자인3를 이용하여 구축하였습니다.', en: 'MatchCard is built on Material Design 3.' })}
         </Typography>
       </Box>
 
@@ -95,8 +128,8 @@ const ThemeVisualization = () => {
         >
           {t({ ko: '디자인 토큰', en: 'Design Tokens' })}
         </Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3 }}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -119,9 +152,9 @@ const ThemeVisualization = () => {
                 <Typography variant="body2">{t({ ko: '작은 텍스트', en: 'Small Text' })}</Typography>
               </Box>
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} md={4}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -144,9 +177,9 @@ const ThemeVisualization = () => {
                 <Box sx={{ width: 40, height: 40, bgcolor: 'primary.300', borderRadius: 3 }} />
               </Box>
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} md={4}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -169,8 +202,8 @@ const ThemeVisualization = () => {
                 <Box sx={{ width: 24, height: 20, bgcolor: 'secondary.600' }} />
               </Box>
             </Paper>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Box>
 
       {/* Color Palette */}
@@ -202,76 +235,30 @@ const ThemeVisualization = () => {
               {t({ ko: `${group.name} 색상`, en: `${group.name} Colors` })}
             </Typography>
 
-            {/* 50-900 Numeric Colors */}
+            {/* Color Grid - CSS Grid for better responsiveness */}
             <Box
+              role="grid"
+              aria-label={t({ ko: '색상 견본', en: 'Color swatches' })}
               sx={{
-                display: 'flex',
-                flexWrap: 'wrap',
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: 'repeat(3, 1fr)',
+                  sm: 'repeat(5, 1fr)',
+                  md: 'repeat(10, 1fr)'
+                },
                 gap: 1,
-                justifyContent: 'flex-start'
+                minChildWidth: '80px'
               }}
             >
               {group.colors.map((colorItem) => (
-                <Box
+                <ColorSwatch
                   key={colorItem.tone}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 1,
-                    flex: '0 0 calc(10% - 8px)',
-                    minWidth: 80,
-                    '@media (max-width: 900px)': {
-                      flex: '0 0 calc(20% - 8px)'
-                    },
-                    '@media (max-width: 600px)': {
-                      flex: '0 0 calc(33.333% - 8px)'
-                    }
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: '100%',
-                      aspectRatio: '1/1',
-                      bgcolor: colorItem.color,
-                      borderRadius: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'flex-end',
-                      p: 1,
-                      boxShadow: 'rgba(0, 0, 0, 0.02) 0px 1px 3px',
-                      transition: 'all 0.2s ease-in-out',
-                      '&:hover': {
-                        transform: 'scale(1.02)',
-                        boxShadow: 'rgba(0, 0, 0, 0.05) 0px 2px 6px'
-                      }
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 700,
-                        color: parseInt(colorItem.tone) >= 500 ? '#fff' : 'primary.800',
-                        textAlign: 'center',
-                        fontSize: '1em'
-                      }}
-                    >
-                      {colorItem.tone}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: '1em',
-                        color: parseInt(colorItem.tone) >= 500 ? '#fff' : 'primary.800',
-                        textAlign: 'center',
-                        wordBreak: 'break-all',
-                        lineHeight: 1.2
-                      }}
-                    >
-                      {colorItem.color.toUpperCase()}
-                    </Typography>
-                  </Box>
-                </Box>
+                  tone={colorItem.tone}
+                  color={colorItem.color}
+                  groupName={group.name}
+                  onClick={handleColorClick}
+                  onKeyDown={handleColorKeyDown}
+                />
               ))}
             </Box>
           </Box>
@@ -348,7 +335,7 @@ const ThemeVisualization = () => {
           <Typography variant="h1" gutterBottom>
             {t({ ko: 'H1 헤딩 (40px)', en: 'H1 Heading (40px)' })}
           </Typography>
-          <Typography variant="h2" gutterBottom sx={{ textAlign: 'left' }}>
+          <Typography variant="h2" gutterBottom>
             {t({ ko: 'H2 헤딩 (32px)', en: 'H2 Heading (32px)' })}
           </Typography>
           <Typography variant="h3" gutterBottom>
@@ -360,7 +347,7 @@ const ThemeVisualization = () => {
           <Typography variant="body1" gutterBottom>
             {t({ ko: 'Body1 본문 텍스트 (16px) - 기본 본문에 사용되는 텍스트입니다.', en: 'Body1 text (16px) - Used for main body content.' })}
           </Typography>
-          <Typography variant="body2" gutterBottom sx={{ textAlign: 'left', margin: 0 }}>
+          <Typography variant="body2" sx={{ m: 0 }}>
             {t({ ko: 'Body2 작은 본문 텍스트 (14px) - 부가적인 정보에 사용됩니다.', en: 'Body2 small text (14px) - Used for supplementary information.' })}
           </Typography>
         </Paper>
@@ -381,8 +368,8 @@ const ThemeVisualization = () => {
         >
           {t({ ko: '컴포넌트 예시', en: 'Component Examples' })}
         </Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -402,9 +389,9 @@ const ThemeVisualization = () => {
                 <Chip label={t({ ko: '정보', en: 'Info' })} color="info" />
               </Box>
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} md={6}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -424,11 +411,13 @@ const ThemeVisualization = () => {
                 {t({ ko: '섹션 구분에 사용되는 요소', en: 'Element used for section separation' })}
               </Typography>
             </Paper>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Box>
     </Container>
   );
-};
+});
+
+ThemeVisualization.displayName = 'ThemeVisualization';
 
 export default ThemeVisualization;
