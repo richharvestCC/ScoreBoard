@@ -29,6 +29,8 @@
 - React Query v5 호환성 정리: `useMutation` 호출부 전반에서 `isPending`으로 상태 동기화하고 `queryClient.invalidateQueries({ queryKey })` 서식을 도입.
 - UI 개발 모드 대비 헤더/사이드바 정비: `frontend/src/components/layout/Header.tsx`에서 `useAuth` 연동, UI Dev 배지 표시, 로그아웃 핸들러 추가. `Sidebar.tsx`는 사용자 네임/역할 표기를 모드에 맞게 보강.
 - Material 3 페이지 컨테이너 기초: `frontend/src/components/layout/PageContainer.tsx` 신설 후 `TemplateManagement`와 `LiveMatchesPage`에 적용해 토큰 기반 레이아웃을 통일.
+- PageContainer 확장 적용: `TournamentDetail`, `ClubDetail`, `LiveScoring`, `MatchDetail` 화면에 공통 컨테이너를 도입해 레이아웃을 표준화.
 
 ## ✅ 실행한 검증
 - `frontend`: `npm run typecheck`
+- `frontend`: `CI=1 npm test -- --watch=false` (jest 설정 이슈로 `react-router-dom` 모듈 해석 실패)

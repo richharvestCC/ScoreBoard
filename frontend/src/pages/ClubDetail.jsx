@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
-  Container,
   Typography,
   Card,
   CardContent,
@@ -43,6 +42,7 @@ import {
   ExitToApp as ExitIcon
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import PageContainer from '../components/layout/PageContainer';
 import { clubAPI } from '../services/api';
 import { getClubTypeLabel } from '../constants/clubTypes';
 
@@ -129,11 +129,11 @@ const ClubDetail = () => {
 
   if (isError) {
     return (
-      <Container>
+      <PageContainer>
         <Alert severity="error">
           {error?.response?.data?.message || '클럽 정보를 불러오는데 실패했습니다.'}
         </Alert>
-      </Container>
+      </PageContainer>
     );
   }
 
@@ -168,7 +168,7 @@ const ClubDetail = () => {
 
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <PageContainer sx={{ maxWidth: '1200px' }}>
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Box display="flex" alignItems="center" mb={3}>
@@ -435,7 +435,7 @@ const ClubDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </PageContainer>
   );
 };
 

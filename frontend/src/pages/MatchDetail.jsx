@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Container,
   Typography,
   Grid,
   Card,
@@ -49,6 +48,7 @@ import {
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import PageContainer from '../components/layout/PageContainer';
 import { matchAPI } from '../services/api';
 import {
   getMatchTypeLabel,
@@ -157,11 +157,11 @@ const MatchDetail = () => {
 
   if (isError || !matchData) {
     return (
-      <Container>
+      <PageContainer>
         <Typography variant="h6" color="error" align="center">
           경기 정보를 불러오는데 실패했습니다.
         </Typography>
-      </Container>
+      </PageContainer>
     );
   }
 
@@ -169,7 +169,7 @@ const MatchDetail = () => {
   const events = eventsData || [];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <PageContainer sx={{ maxWidth: '1200px' }}>
       {/* 매치 헤더 */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
@@ -564,7 +564,7 @@ const MatchDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </PageContainer>
   );
 };
 

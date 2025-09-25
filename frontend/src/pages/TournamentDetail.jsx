@@ -42,6 +42,7 @@ import { competitionAPI } from '../services/api';
 import { getClubTypeLabel } from '../constants/clubTypes';
 import ParticipantList from '../components/tournament/ParticipantList';
 import TournamentBracket from '../components/tournament/TournamentBracket';
+import PageContainer from '../components/layout/PageContainer';
 import { designTokens } from '../theme/designTokens';
 
 // Legacy support - TODO: Remove when backend tournament API is fully deprecated
@@ -170,17 +171,11 @@ const TournamentDetail = () => {
 
   if (isError) {
     return (
-      <Box sx={{
-        width: '100%',
-        py: { xs: 2, md: 4 },
-        px: { xs: 2, md: 3 },
-        maxWidth: designTokens.containerMaxWidth.desktop,
-        mx: 'auto'
-      }}>
+      <PageContainer>
         <Alert severity="error">
           {error?.response?.data?.message || '토너먼트 정보를 불러오는데 실패했습니다.'}
         </Alert>
-      </Box>
+      </PageContainer>
     );
   }
 
@@ -190,28 +185,7 @@ const TournamentDetail = () => {
   const isAdmin = tournament?.admin_user_id === tournament?.current_user_id;
 
   return (
-    <Box sx={{
-      width: '100%',
-      color: designTokens.colors.text.light.primary,
-      py: { xs: 2, md: 4 },
-      [designTokens.mediaQueries.maxMobile]: {
-        px: designTokens.spacing.scale.md
-      },
-      [designTokens.mediaQueries.minTablet]: {
-        px: designTokens.spacing.scale.lg
-      },
-      [designTokens.mediaQueries.minDesktop]: {
-        px: designTokens.spacing.scale.xl
-      },
-      maxWidth: {
-        xs: designTokens.containerMaxWidth.mobile,
-        sm: designTokens.containerMaxWidth.tablet,
-        md: designTokens.containerMaxWidth.desktop,
-        lg: designTokens.containerMaxWidth.largeDesktop,
-        xl: designTokens.containerMaxWidth.extraLarge
-      },
-      mx: 'auto'
-    }}>
+    <PageContainer sx={{ color: designTokens.colors.text.light.primary }}>
       <Card sx={{
         mb: 3,
         backgroundColor: designTokens.colors.background.light.surface,
@@ -503,7 +477,7 @@ const TournamentDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageContainer>
   );
 };
 

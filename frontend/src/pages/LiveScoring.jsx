@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
-  Container,
   Typography,
   Card,
   CardContent,
@@ -37,6 +36,7 @@ import {
   Edit as EditIcon
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import PageContainer from '../components/layout/PageContainer';
 import { matchAPI } from '../services/api';
 import { getMatchTypeLabel, getStatusLabel, getEventIcon } from '../utils/matchUtils';
 
@@ -187,24 +187,24 @@ const LiveScoring = () => {
 
   if (matchLoading) {
     return (
-      <Container>
+      <PageContainer>
         <Typography>경기 정보를 불러오는 중...</Typography>
-      </Container>
+      </PageContainer>
     );
   }
 
   if (matchError || !match) {
     return (
-      <Container>
+      <PageContainer>
         <Alert severity="error">
           경기 정보를 불러올 수 없습니다.
         </Alert>
-      </Container>
+      </PageContainer>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <PageContainer sx={{ maxWidth: '1200px' }}>
       {/* Match Header */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -506,7 +506,7 @@ const LiveScoring = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </PageContainer>
   );
 };
 
