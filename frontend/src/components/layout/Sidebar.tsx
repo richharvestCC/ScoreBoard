@@ -97,7 +97,7 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(({ item, isSubmenu = false,
   }), [isActive, theme.palette.text.secondary]);
 
   const primaryTypographyProps = useMemo(() => ({
-    fontSize: '0.875rem',
+    fontSize: '1em',
     fontWeight: isActive ? 600 : 400
   }), [isActive]);
 
