@@ -11,7 +11,6 @@ import {
   Avatar,
   useTheme,
   Drawer,
-  IconButton,
   useMediaQuery,
   Backdrop,
   SxProps,
@@ -34,6 +33,8 @@ import { useSidebar } from '../../contexts/SidebarContext';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useLanguage } from '../../contexts/LanguageContext';
+import logoNormal from '../../assets/images/logos/logo-normal.png';
+import logoWhite from '../../assets/images/logos/logo-white.png';
 
 // Type definitions
 interface MenuItemData {
@@ -327,19 +328,32 @@ const Sidebar: React.FC = React.memo(() => {
     borderBottom: `1px solid ${theme.palette.divider}`,
     display: 'flex',
     alignItems: 'center',
-    gap: 2,
+    gap: 1,
     minHeight: 72
   }), [theme.palette.divider]);
 
-  const logoButtonSx = useMemo<SxProps<Theme>>(() => ({
-    width: 40,
-    height: 40,
-    backgroundColor: theme.palette.primary.main,
-    color: 'white',
+  const logoContainerSx = useMemo<SxProps<Theme>>(() => ({
+    width: 56,
+    height: 56,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '8px',
+    padding: '8px',
+    transition: theme.transitions.create(['background-color'], {
+      duration: theme.transitions.duration.shortest,
+    }),
     '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
+      backgroundColor: theme.palette.action.hover,
     }
-  }), [theme.palette.primary.main, theme.palette.primary.dark]);
+  }), [theme.palette.action.hover, theme.transitions]);
+
+  const logoImageSx = useMemo<SxProps<Theme>>(() => ({
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain' as const,
+  }), []);
 
   const titleSx = useMemo<SxProps<Theme>>(() => ({
     fontWeight: 700,
@@ -427,18 +441,23 @@ const Sidebar: React.FC = React.memo(() => {
     <Box sx={sidebarContainerSx}>
       {/* Logo/Brand Section */}
       <Box sx={headerSx}>
-        <IconButton
+        <Box
           onClick={handleToggleSidebar}
-          sx={logoButtonSx}
+          sx={logoContainerSx}
         >
-          <Sports />
-        </IconButton>
+          <Box
+            component="img"
+            src={theme.palette.mode === 'dark' ? logoWhite : logoNormal}
+            alt="ScoreBoard Logo"
+            sx={logoImageSx}
+          />
+        </Box>
         <Box>
           <Typography variant="h6" sx={titleSx}>
-            {t({ ko: '매치카드', en: 'MatchCard' })}
+            {t({ ko: '스코어보드', en: 'ScoreBoard' })}
           </Typography>
           <Typography variant="caption" sx={subtitleSx}>
-            {t({ ko: '풋볼 기록, 데이터 관리', en: 'Your Football Data' })}
+            {t({ ko: '스포츠 경기 관리 플랫폼', en: 'Sports Match Management' })}
           </Typography>
         </Box>
       </Box>
@@ -478,7 +497,7 @@ const Sidebar: React.FC = React.memo(() => {
       </Box>
     </Box>
   ), [
-    sidebarContainerSx, headerSx, handleToggleSidebar, logoButtonSx, titleSx, t, subtitleSx,
+    sidebarContainerSx, headerSx, handleToggleSidebar, logoContainerSx, logoImageSx, titleSx, t, subtitleSx, theme.palette.mode,
     navSx, visibleMenuItems, visibleDevelopmentItems, visibleAdminItems, profileSectionSx, profileBoxSx,
     avatarSx, userBoxSx, usernameSx, user?.username, user?.email, user?.role, roleSx
   ]);

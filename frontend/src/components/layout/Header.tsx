@@ -18,6 +18,8 @@ import { AccountCircle, ExitToApp, Notifications, Menu as MenuIcon } from '@mui/
 import { useNavigation } from '../../contexts/NavigationContext';
 import { useSidebar } from '../../contexts/SidebarContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import logoNormal from '../../assets/images/logos/logo-normal.png';
+import logoWhite from '../../assets/images/logos/logo-white.png';
 
 interface HeaderProps {
   // Future extensibility for header customization
@@ -91,6 +93,25 @@ const Header: React.FC<HeaderProps> = React.memo(() => {
     height: 32
   }), []);
 
+  const logoContainerSx = useMemo<SxProps<Theme>>(() => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1.5,
+    marginRight: 2
+  }), []);
+
+  const logoImageSx = useMemo<SxProps<Theme>>(() => ({
+    width: 40,
+    height: 40,
+    objectFit: 'contain' as const,
+  }), []);
+
+  const brandTextSx = useMemo<SxProps<Theme>>(() => ({
+    fontWeight: 600,
+    color: theme.palette.text.primary,
+    fontSize: '1.1rem'
+  }), [theme.palette.text.primary]);
+
   // Memoized menu anchor origin and transform origin
   const menuAnchorOrigin = useMemo(() => ({
     vertical: 'bottom' as const,
@@ -157,6 +178,21 @@ const Header: React.FC<HeaderProps> = React.memo(() => {
           >
             <MenuIcon />
           </IconButton>
+        )}
+
+        {/* Brand Logo - only show when sidebar is closed on mobile */}
+        {(isMobile && !isOpen) && (
+          <Box sx={logoContainerSx}>
+            <Box
+              component="img"
+              src={theme.palette.mode === 'dark' ? logoWhite : logoNormal}
+              alt="ScoreBoard Logo"
+              sx={logoImageSx}
+            />
+            <Typography variant="h6" sx={brandTextSx}>
+              ScoreBoard
+            </Typography>
+          </Box>
         )}
 
         {/* Search and breadcrumbs could go here */}
