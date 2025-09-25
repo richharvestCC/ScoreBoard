@@ -226,11 +226,11 @@ const Dashboard = React.memo(() => {
                         width: 48,
                         height: 48,
                         borderRadius: '12px',
-                        background: glassmorphism.glassColors.surface.medium,
+                        background: glassmorphism.colors.surface.medium,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        border: `1px solid ${glassmorphism.glassColors.surface.light}`,
+                        border: `1px solid ${glassmorphism.colors.surface.light}`,
                       }}>
                         {React.cloneElement(stat.icon, {
                           sx: { color: stat.color, fontSize: 24 }
@@ -334,11 +334,11 @@ const Dashboard = React.memo(() => {
                           width: 56,
                           height: 56,
                           borderRadius: '16px',
-                          background: glassmorphism.glassColors.surface.strong,
+                          background: glassmorphism.colors.surface.strong,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          border: `1px solid ${glassmorphism.glassColors.surface.medium}`,
+                          border: `1px solid ${glassmorphism.colors.surface.medium}`,
                         }}>
                           {React.cloneElement(card.icon, {
                             sx: { color: card.color, fontSize: 32 }
