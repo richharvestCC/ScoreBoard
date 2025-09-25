@@ -28,27 +28,42 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = React.memo(() => {
   const theme = useTheme();
   const { navigate } = useNavigation();
-  const { isOpen, toggleSidebar, sidebarWidth } = useSidebar();
+  const { isOpen, isCollapsed, toggleSidebar, sidebarWidth, collapsedWidth } = useSidebar();
   const { language, toggleLanguage, t } = useLanguage();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+  const isMobile = useMediaQuery('(max-width: 767px)');
+  const isTablet = useMediaQuery('(min-width: 768px) and (max-width: 1199px)');
 
   // Memoized sx objects for performance
-  const appBarSx = useMemo<SxProps<Theme>>(() => ({
-    backgroundColor: theme.palette.background.paper,
-    color: theme.palette.text.primary,
-    boxShadow: '0 1px 0 rgba(0, 0, 0, 0.05)',
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    left: isMobile ? 0 : (isOpen ? sidebarWidth : 0),
-    width: isMobile ? '100%' : (isOpen ? `calc(100% - ${sidebarWidth}px)` : '100%'),
-    zIndex: theme.zIndex.drawer - 1,
-    transition: theme.transitions.create(['left', 'width'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }), [
+  const appBarSx = useMemo<SxProps<Theme>>(() => {
+    let leftOffset = 0;
+    let widthCalc = '100%';
+
+    if (!isMobile && isOpen) {
+      if (isCollapsed) {
+        leftOffset = collapsedWidth;
+        widthCalc = `calc(100% - ${collapsedWidth}px)`;
+      } else {
+        leftOffset = sidebarWidth;
+        widthCalc = `calc(100% - ${sidebarWidth}px)`;
+      }
+    }
+
+    return {
+      backgroundColor: theme.palette.background.paper,
+      color: theme.palette.text.primary,
+      boxShadow: '0 1px 0 rgba(0, 0, 0, 0.05)',
+      borderBottom: `1px solid ${theme.palette.divider}`,
+      left: leftOffset,
+      width: widthCalc,
+      zIndex: theme.zIndex.drawer - 1,
+      transition: theme.transitions.create(['left', 'width'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    };
+  }, [
     theme.palette.background.paper,
     theme.palette.text.primary,
     theme.palette.divider,
@@ -56,7 +71,9 @@ const Header: React.FC<HeaderProps> = React.memo(() => {
     theme.transitions,
     isMobile,
     isOpen,
-    sidebarWidth
+    isCollapsed,
+    sidebarWidth,
+    collapsedWidth
   ]);
 
   const rightActionsSx = useMemo<SxProps<Theme>>(() => ({
@@ -154,24 +171,11 @@ const Header: React.FC<HeaderProps> = React.memo(() => {
   return (
     <AppBar position="fixed" sx={appBarSx}>
       <Toolbar>
-        {/* Mobile hamburger menu */}
-        {isMobile && (
+        {/* Mobile and Tablet hamburger menu */}
+        {(isMobile || isTablet) && (
           <IconButton
             color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleToggleSidebar}
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-        )}
-
-        {/* Tablet toggle button */}
-        {isTablet && (
-          <IconButton
-            color="inherit"
-            aria-label="toggle sidebar"
+            aria-label={isMobile ? "open drawer" : "toggle sidebar"}
             edge="start"
             onClick={handleToggleSidebar}
             sx={{ mr: 2 }}

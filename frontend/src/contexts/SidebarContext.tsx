@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useMediaQuery, useTheme } from '@mui/material';
 
+type SidebarMode = 'expanded' | 'collapsed' | 'hidden';
+
 interface SidebarContextType {
   isOpen: boolean;
   isCollapsed: boolean;
+  mode: SidebarMode;
   toggleSidebar: () => void;
   closeSidebar: () => void;
   openSidebar: () => void;
@@ -22,24 +25,27 @@ export const useSidebar = () => {
 };
 
 export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('lg')); // >= 1200px
-  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg')); // 900px - 1199px
-  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // < 900px
+  const isDesktop = useMediaQuery('(min-width: 1200px)'); // >= 1200px (expanded)
+  const isTablet = useMediaQuery('(min-width: 768px) and (max-width: 1199px)'); // 768px - 1199px (collapsed)
+  const isMobile = useMediaQuery('(max-width: 767px)'); // <= 767px (hidden)
 
   const [isOpen, setIsOpen] = useState(true);
+  const [mode, setMode] = useState<SidebarMode>('expanded');
 
   const sidebarWidth = 280;
   const collapsedWidth = 72;
 
-  // Auto-manage sidebar state based on screen size
+  // Auto-manage sidebar mode and state based on screen size
   useEffect(() => {
     if (isDesktop) {
-      setIsOpen(true); // Always open on desktop
+      setMode('expanded');
+      setIsOpen(true); // Always open and expanded on desktop
     } else if (isTablet) {
-      setIsOpen(false); // Hidden by default on tablet
+      setMode('collapsed');
+      setIsOpen(true); // Always open but collapsed on tablet
     } else if (isMobile) {
-      setIsOpen(false); // Closed by default on mobile
+      setMode('hidden');
+      setIsOpen(false); // Hidden by default on mobile (overlay when opened)
     }
   }, [isDesktop, isTablet, isMobile]);
 
@@ -55,12 +61,13 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsOpen(true);
   };
 
-  // Sidebar is never collapsed - always 280px width when open
-  const isCollapsed = false;
+  // isCollapsed is true when in collapsed mode (tablet view)
+  const isCollapsed = mode === 'collapsed';
 
   const value: SidebarContextType = {
     isOpen,
     isCollapsed,
+    mode,
     toggleSidebar,
     closeSidebar,
     openSidebar,

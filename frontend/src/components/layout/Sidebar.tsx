@@ -62,6 +62,7 @@ interface MenuSectionProps {
 // Memoized MenuItem component with optimized sx objects
 const MenuItem: React.FC<MenuItemProps> = React.memo(({ item, isSubmenu = false, isActive, onClick }) => {
   const theme = useTheme();
+  const { isCollapsed } = useSidebar();
 
   // Memoized sx objects for performance
   const listItemSx = useMemo<SxProps<Theme>>(() => ({
@@ -71,9 +72,11 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(({ item, isSubmenu = false,
 
   const listItemButtonSx = useMemo<SxProps<Theme>>(() => ({
     borderRadius: 2,
-    mx: 1,
+    mx: isCollapsed ? 0.5 : 1,
     py: 1.5,
+    px: isCollapsed ? 1 : 2,
     minHeight: 48,
+    justifyContent: isCollapsed ? 'center' : 'flex-start',
     '&.Mui-selected': {
       backgroundColor: theme.palette.primary.main,
       color: 'white',
@@ -87,7 +90,7 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(({ item, isSubmenu = false,
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
     }
-  }), [theme.palette.primary.main, theme.palette.primary.dark, theme.palette.action.hover]);
+  }), [theme.palette.primary.main, theme.palette.primary.dark, theme.palette.action.hover, isCollapsed]);
 
   const listItemIconSx = useMemo<SxProps<Theme>>(() => ({
     minWidth: 40,
@@ -124,11 +127,13 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(({ item, isSubmenu = false,
         <ListItemIcon sx={listItemIconSx}>
           {item.icon}
         </ListItemIcon>
-        <ListItemText
-          primary={item.text}
-          primaryTypographyProps={primaryTypographyProps}
-        />
-        {item.badge && (
+        {!isCollapsed && (
+          <ListItemText
+            primary={item.text}
+            primaryTypographyProps={primaryTypographyProps}
+          />
+        )}
+        {!isCollapsed && item.badge && (
           <Chip
             label={item.badge}
             size="small"
@@ -147,8 +152,8 @@ const MenuSection: React.FC<MenuSectionProps> = React.memo(({ title, items }) =>
   const theme = useTheme();
   const location = useLocation();
   const { navigate } = useNavigation();
-  const { closeSidebar } = useSidebar();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { closeSidebar, isCollapsed } = useSidebar();
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   // Memoized sx objects
   const sectionSx = useMemo<SxProps<Theme>>(() => ({ mb: 2 }), []);
@@ -177,7 +182,7 @@ const MenuSection: React.FC<MenuSectionProps> = React.memo(({ title, items }) =>
 
   return (
     <Box sx={sectionSx}>
-      {title && (
+      {!isCollapsed && title && (
         <Typography
           variant="caption"
           sx={titleSx}
@@ -203,11 +208,11 @@ MenuSection.displayName = 'MenuSection';
 
 const Sidebar: React.FC = React.memo(() => {
   const theme = useTheme();
-  const { isOpen, toggleSidebar, closeSidebar, sidebarWidth } = useSidebar();
+  const { isOpen, isCollapsed, toggleSidebar, closeSidebar, sidebarWidth, collapsedWidth } = useSidebar();
   const { user } = useAuth();
   const { t } = useLanguage();
 
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   // Memoized menu arrays for performance
   const menuItems = useMemo<MenuItemData[]>(() => [
@@ -323,14 +328,15 @@ const Sidebar: React.FC = React.memo(() => {
   }), [theme.palette.background.paper]);
 
   const headerSx = useMemo<SxProps<Theme>>(() => ({
-    p: 3,
-    pb: 2,
+    p: isCollapsed ? 1.5 : 3,
+    pb: isCollapsed ? 1.5 : 2,
     borderBottom: `1px solid ${theme.palette.divider}`,
     display: 'flex',
     alignItems: 'center',
-    gap: 1,
+    justifyContent: isCollapsed ? 'center' : 'flex-start',
+    gap: isCollapsed ? 0 : 1,
     minHeight: 72
-  }), [theme.palette.divider]);
+  }), [theme.palette.divider, isCollapsed]);
 
   const logoContainerSx = useMemo<SxProps<Theme>>(() => ({
     width: 56,
@@ -412,7 +418,7 @@ const Sidebar: React.FC = React.memo(() => {
   const backdropSx = useMemo<SxProps<Theme>>(() => ({ zIndex: theme.zIndex.drawer - 1 }), [theme.zIndex.drawer]);
 
   const desktopSidebarSx = useMemo<SxProps<Theme>>(() => ({
-    width: sidebarWidth,
+    width: isCollapsed ? collapsedWidth : sidebarWidth,
     height: '100vh',
     borderRight: `1px solid ${theme.palette.divider}`,
     position: 'fixed',
@@ -421,11 +427,11 @@ const Sidebar: React.FC = React.memo(() => {
     zIndex: theme.zIndex.drawer,
     boxShadow: '0 0 10px rgba(0,0,0,0.05)',
     transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
-    transition: theme.transitions.create('transform', {
+    transition: theme.transitions.create(['transform', 'width'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-  }), [sidebarWidth, theme.palette.divider, theme.zIndex.drawer, isOpen, theme.transitions]);
+  }), [isCollapsed, collapsedWidth, sidebarWidth, theme.palette.divider, theme.zIndex.drawer, isOpen, theme.transitions]);
 
   // Memoized event handlers
   const handleToggleSidebar = useCallback(() => {
@@ -452,14 +458,16 @@ const Sidebar: React.FC = React.memo(() => {
             sx={logoImageSx}
           />
         </Box>
-        <Box>
-          <Typography variant="h6" sx={titleSx}>
-            {t({ ko: '스코어보드', en: 'ScoreBoard' })}
-          </Typography>
-          <Typography variant="caption" sx={subtitleSx}>
-            {t({ ko: '스포츠 경기 관리 플랫폼', en: 'Sports Match Management' })}
-          </Typography>
-        </Box>
+        {!isCollapsed && (
+          <Box>
+            <Typography variant="h6" sx={titleSx}>
+              {t({ ko: '스코어보드', en: 'ScoreBoard' })}
+            </Typography>
+            <Typography variant="caption" sx={subtitleSx}>
+              {t({ ko: '스포츠 경기 관리 플랫폼', en: 'Sports Match Management' })}
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       {/* Navigation Menu */}
@@ -480,24 +488,26 @@ const Sidebar: React.FC = React.memo(() => {
       </Box>
 
       {/* User Profile Section */}
-      <Box sx={profileSectionSx}>
-        <Box sx={profileBoxSx}>
-          <Avatar sx={avatarSx}>
-            <AccountCircle />
-          </Avatar>
-          <Box sx={userBoxSx}>
-            <Typography variant="body2" sx={usernameSx}>
-              {user?.username || user?.email || 'UI 개발자'}
-            </Typography>
-            <Typography variant="caption" sx={roleSx}>
-              {user?.role || 'Development Mode'}
-            </Typography>
+      {!isCollapsed && (
+        <Box sx={profileSectionSx}>
+          <Box sx={profileBoxSx}>
+            <Avatar sx={avatarSx}>
+              <AccountCircle />
+            </Avatar>
+            <Box sx={userBoxSx}>
+              <Typography variant="body2" sx={usernameSx}>
+                {user?.username || user?.email || 'UI 개발자'}
+              </Typography>
+              <Typography variant="caption" sx={roleSx}>
+                {user?.role || 'Development Mode'}
+              </Typography>
+            </Box>
           </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   ), [
-    sidebarContainerSx, headerSx, handleToggleSidebar, logoContainerSx, logoImageSx, titleSx, t, subtitleSx, theme.palette.mode,
+    sidebarContainerSx, headerSx, handleToggleSidebar, logoContainerSx, logoImageSx, titleSx, t, subtitleSx, theme.palette.mode, isCollapsed,
     navSx, visibleMenuItems, visibleDevelopmentItems, visibleAdminItems, profileSectionSx, profileBoxSx,
     avatarSx, userBoxSx, usernameSx, user?.username, user?.email, user?.role, roleSx
   ]);

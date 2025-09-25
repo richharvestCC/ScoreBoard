@@ -77,8 +77,8 @@ const queryClient = new QueryClient({
 function AppContent() {
   const { initializeAuth } = useAuthStore();
   const theme = useTheme();
-  const { isOpen, sidebarWidth } = useSidebar();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { isOpen, isCollapsed, sidebarWidth, collapsedWidth } = useSidebar();
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   useEffect(() => {
     initializeAuth();
@@ -102,16 +102,22 @@ function AppContent() {
             duration: theme.transitions.duration.enteringScreen,
           }),
 
-          // 반응형 패딩 - MUI 객체 형식 사용
+          // Responsive padding
           padding: {
-            xs: theme.spacing(1, 2),
-            sm: theme.spacing(2, 3),
-            lg: theme.spacing(3, 4),
+            xs: theme.spacing(1, 2), // Mobile
+            sm: theme.spacing(2, 3), // Small tablet
+            lg: theme.spacing(3, 4), // Desktop
           },
-          marginLeft: {
-            xs: 0,
-            md: isMobile ? 0 : (isOpen ? `${sidebarWidth}px` : 0),
-          },
+
+          // Responsive margin based on sidebar state and screen size
+          marginLeft: (() => {
+            if (isMobile) return 0; // Mobile: no sidebar offset
+            if (!isOpen) return 0; // Sidebar closed: no offset
+
+            // Sidebar is open on tablet/desktop
+            if (isCollapsed) return `${collapsedWidth}px`;  // Collapsed mode
+            return `${sidebarWidth}px`; // Expanded mode
+          })(),
         }}
       >
         <Suspense fallback={
