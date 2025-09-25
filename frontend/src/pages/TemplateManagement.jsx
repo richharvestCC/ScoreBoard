@@ -24,7 +24,7 @@ import {
   Search as SearchIcon,
   FilterList as FilterIcon
 } from '@mui/icons-material';
-import { designTokens } from '../theme/designTokens';
+import PageContainer from '../components/layout/PageContainer';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { competitionAPI } from '../services/api';
 import TemplateCard from '../components/competitions/TemplateCard';
@@ -62,7 +62,7 @@ const TemplateManagement = () => {
   const deleteMutation = useMutation({
     mutationFn: competitionAPI.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries(['templates']);
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
       setSnackbar({
         open: true,
         message: '템플릿이 성공적으로 삭제되었습니다.',
@@ -169,28 +169,7 @@ const TemplateManagement = () => {
   };
 
   return (
-    <Box sx={{
-      width: '100%',
-      py: { xs: 2, md: 4 },
-      [designTokens.mediaQueries.maxMobile]: {
-        px: designTokens.spacing.scale.md
-      },
-      [designTokens.mediaQueries.minTablet]: {
-        px: designTokens.spacing.scale.lg
-      },
-      [designTokens.mediaQueries.minDesktop]: {
-        px: designTokens.spacing.scale.xl
-      },
-      maxWidth: {
-        xs: designTokens.containerMaxWidth.mobile,
-        sm: designTokens.containerMaxWidth.tablet,
-        md: designTokens.containerMaxWidth.desktop,
-        lg: designTokens.containerMaxWidth.largeDesktop,
-        xl: designTokens.containerMaxWidth.extraLarge
-      },
-      mx: 'auto',
-      color: designTokens.colors.text.light.primary
-    }}>
+    <PageContainer>
       {/* Header */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Typography variant="h4" component="h1" fontWeight="bold">
@@ -330,7 +309,7 @@ const TemplateManagement = () => {
         <DialogActions>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
-            disabled={deleteMutation.isLoading}
+            disabled={deleteMutation.isPending}
           >
             취소
           </Button>
@@ -338,8 +317,8 @@ const TemplateManagement = () => {
             onClick={confirmDelete}
             color="error"
             variant="contained"
-            disabled={deleteMutation.isLoading}
-            startIcon={deleteMutation.isLoading ? <CircularProgress size={16} /> : null}
+            disabled={deleteMutation.isPending}
+            startIcon={deleteMutation.isPending ? <CircularProgress size={16} /> : null}
           >
             삭제
           </Button>
@@ -458,7 +437,7 @@ const TemplateManagement = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </PageContainer>
   );
 };
 

@@ -90,7 +90,7 @@ const UserManagement = () => {
   const updateUserMutation = useMutation({
     mutationFn: ({ id, data }) => adminAPI.updateUser(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['adminUsers']);
+      queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
       setEditUserDialog(false);
       setSnackbar({
         open: true,
@@ -396,9 +396,9 @@ const UserManagement = () => {
           <Button
             onClick={handleSaveUser}
             variant="contained"
-            disabled={updateUserMutation.isLoading}
+            disabled={updateUserMutation.isPending}
           >
-            {updateUserMutation.isLoading ? '저장 중...' : '저장'}
+            {updateUserMutation.isPending ? '저장 중...' : '저장'}
           </Button>
         </DialogActions>
       </Dialog>

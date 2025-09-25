@@ -57,7 +57,7 @@ const AutoSchedulingDialog = ({ open, onClose, competitionId, competitionName })
     onSuccess: (response) => {
       setSchedulingResult(response.data.data);
       setActiveStep(2);
-      queryClient.invalidateQueries(['competitionSchedule']);
+      queryClient.invalidateQueries({ queryKey: ['competitionSchedule'] });
     },
     onError: (error) => {
       console.error('Auto scheduling failed:', error);

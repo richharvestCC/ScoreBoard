@@ -88,8 +88,8 @@ const TournamentDetail = () => {
   const joinMutation = useMutation({
     mutationFn: (clubId) => tournamentAPI.join(id, { club_id: clubId }),
     onSuccess: () => {
-      queryClient.invalidateQueries(['tournament', id]);
-      queryClient.invalidateQueries(['tournament-participants', id]);
+      queryClient.invalidateQueries({ queryKey: ['tournament', id] });
+      queryClient.invalidateQueries({ queryKey: ['tournament-participants', id] });
       setJoinDialogOpen(false);
     }
   });
@@ -97,8 +97,8 @@ const TournamentDetail = () => {
   const leaveMutation = useMutation({
     mutationFn: () => tournamentAPI.leave(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['tournament', id]);
-      queryClient.invalidateQueries(['tournament-participants', id]);
+      queryClient.invalidateQueries({ queryKey: ['tournament', id] });
+      queryClient.invalidateQueries({ queryKey: ['tournament-participants', id] });
     }
   });
 
@@ -420,7 +420,7 @@ const TournamentDetail = () => {
                 variant="contained"
                 startIcon={<JoinIcon />}
                 onClick={() => setJoinDialogOpen(true)}
-                disabled={joinMutation.isLoading}
+                disabled={joinMutation.isPending}
               >
                 참가 신청
               </Button>
@@ -440,7 +440,7 @@ const TournamentDetail = () => {
                   color="error"
                   startIcon={<LeaveIcon />}
                   onClick={() => leaveMutation.mutate()}
-                  disabled={leaveMutation.isLoading}
+                  disabled={leaveMutation.isPending}
                 >
                   참가 취소
                 </Button>
@@ -497,7 +497,7 @@ const TournamentDetail = () => {
           <Button
             variant="contained"
             onClick={() => joinMutation.mutate()}
-            disabled={joinMutation.isLoading}
+            disabled={joinMutation.isPending}
           >
             참가 신청
           </Button>

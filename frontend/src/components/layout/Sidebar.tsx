@@ -496,10 +496,10 @@ const Sidebar: React.FC = React.memo(() => {
             </Avatar>
             <Box sx={userBoxSx}>
               <Typography variant="body2" sx={usernameSx}>
-                {user?.username || user?.email || 'UI 개발자'}
+                {user?.name || user?.username || user?.email || 'UI 개발자'}
               </Typography>
               <Typography variant="caption" sx={roleSx}>
-                {user?.role || 'Development Mode'}
+                {user?.role || 'UI Dev Mode'}
               </Typography>
             </Box>
           </Box>

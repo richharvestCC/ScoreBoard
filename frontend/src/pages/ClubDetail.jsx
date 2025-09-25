@@ -82,8 +82,8 @@ const ClubDetail = () => {
   const joinMutation = useMutation({
     mutationFn: (data) => clubAPI.join(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['club', id]);
-      queryClient.invalidateQueries(['club-members', id]);
+      queryClient.invalidateQueries({ queryKey: ['club', id] });
+      queryClient.invalidateQueries({ queryKey: ['club-members', id] });
       setJoinDialogOpen(false);
       setJoinData({ role: 'player', jersey_number: '', position: '' });
     }
@@ -92,8 +92,8 @@ const ClubDetail = () => {
   const leaveMutation = useMutation({
     mutationFn: () => clubAPI.leave(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['club', id]);
-      queryClient.invalidateQueries(['club-members', id]);
+      queryClient.invalidateQueries({ queryKey: ['club', id] });
+      queryClient.invalidateQueries({ queryKey: ['club-members', id] });
     }
   });
 
@@ -242,11 +242,11 @@ const ClubDetail = () => {
           {!isClubMember ? (
             <Button
               variant="contained"
-              startIcon={joinMutation.isLoading ? <CircularProgress size={16} /> : <AddIcon />}
+              startIcon={joinMutation.isPending ? <CircularProgress size={16} /> : <AddIcon />}
               onClick={() => setJoinDialogOpen(true)}
-              disabled={joinMutation.isLoading}
+              disabled={joinMutation.isPending}
             >
-              {joinMutation.isLoading ? '가입 중...' : '클럽 가입'}
+              {joinMutation.isPending ? '가입 중...' : '클럽 가입'}
             </Button>
           ) : (
             <Box display="flex" gap={1}>
@@ -262,11 +262,11 @@ const ClubDetail = () => {
               <Button
                 variant="outlined"
                 color="error"
-                startIcon={leaveMutation.isLoading ? <CircularProgress size={16} /> : <ExitIcon />}
+                startIcon={leaveMutation.isPending ? <CircularProgress size={16} /> : <ExitIcon />}
                 onClick={() => leaveMutation.mutate()}
-                disabled={leaveMutation.isLoading}
+                disabled={leaveMutation.isPending}
               >
-                {leaveMutation.isLoading ? '탈퇴 중...' : '클럽 탈퇴'}
+                {leaveMutation.isPending ? '탈퇴 중...' : '클럽 탈퇴'}
               </Button>
             </Box>
           )}
@@ -429,7 +429,7 @@ const ClubDetail = () => {
           <Button
             variant="contained"
             onClick={handleJoinSubmit}
-            disabled={joinMutation.isLoading}
+            disabled={joinMutation.isPending}
           >
             가입하기
           </Button>

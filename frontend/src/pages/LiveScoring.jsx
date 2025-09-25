@@ -85,8 +85,8 @@ const LiveScoring = () => {
   const addEventMutation = useMutation({
     mutationFn: (eventData) => matchAPI.addEvent(id, eventData),
     onSuccess: () => {
-      queryClient.invalidateQueries(['match-events', id]);
-      queryClient.invalidateQueries(['match', id]);
+      queryClient.invalidateQueries({ queryKey: ['match-events', id] });
+      queryClient.invalidateQueries({ queryKey: ['match', id] });
       setEventDialogOpen(false);
       resetEventForm();
     }
@@ -252,7 +252,7 @@ const LiveScoring = () => {
               variant="contained"
               startIcon={<StartIcon />}
               onClick={handleStartMatch}
-              disabled={addEventMutation.isLoading}
+              disabled={addEventMutation.isPending}
             >
               경기 시작
             </Button>
@@ -283,7 +283,7 @@ const LiveScoring = () => {
                 color="error"
                 startIcon={<StopIcon />}
                 onClick={handleEndMatch}
-                disabled={addEventMutation.isLoading}
+                disabled={addEventMutation.isPending}
               >
                 경기 종료
               </Button>
@@ -500,9 +500,9 @@ const LiveScoring = () => {
           <Button
             variant="contained"
             onClick={handleEventSubmit}
-            disabled={addEventMutation.isLoading}
+            disabled={addEventMutation.isPending}
           >
-            {addEventMutation.isLoading ? '추가 중...' : '이벤트 추가'}
+            {addEventMutation.isPending ? '추가 중...' : '이벤트 추가'}
           </Button>
         </DialogActions>
       </Dialog>

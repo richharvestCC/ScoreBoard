@@ -101,14 +101,14 @@ const MatchDetail = () => {
   const updateMatchMutation = useMutation({
     mutationFn: ({ id, data }) => matchAPI.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['match', id]);
+      queryClient.invalidateQueries({ queryKey: ['match', id] });
     }
   });
 
   const addEventMutation = useMutation({
     mutationFn: (eventData) => matchAPI.addEvent(id, eventData),
     onSuccess: () => {
-      queryClient.invalidateQueries(['match-events', id]);
+      queryClient.invalidateQueries({ queryKey: ['match-events', id] });
       setEventDialogOpen(false);
       setEventFormData({
         event_type: '',
@@ -296,7 +296,7 @@ const MatchDetail = () => {
                     color="success"
                     startIcon={<PlayIcon />}
                     onClick={handleStartMatch}
-                    disabled={updateMatchMutation.isLoading}
+                    disabled={updateMatchMutation.isPending}
                   >
                     경기 시작
                   </Button>
@@ -307,7 +307,7 @@ const MatchDetail = () => {
                     color="error"
                     startIcon={<StopIcon />}
                     onClick={handleEndMatch}
-                    disabled={updateMatchMutation.isLoading}
+                    disabled={updateMatchMutation.isPending}
                   >
                     경기 종료
                   </Button>
@@ -558,7 +558,7 @@ const MatchDetail = () => {
           <Button
             onClick={handleAddEvent}
             variant="contained"
-            disabled={!eventFormData.event_type || !eventFormData.minute || addEventMutation.isLoading}
+            disabled={!eventFormData.event_type || !eventFormData.minute || addEventMutation.isPending}
           >
             추가
           </Button>

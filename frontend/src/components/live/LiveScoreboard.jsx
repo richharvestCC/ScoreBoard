@@ -66,7 +66,7 @@ const LiveScoreboard = ({ matchId, isManager = false }) => {
   const startMatchMutation = useMutation({
     mutationFn: () => liveScoringAPI.startLiveMatch(matchId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['liveMatch', matchId]);
+      queryClient.invalidateQueries({ queryKey: ['liveMatch', matchId] });
     }
   });
 
@@ -74,7 +74,7 @@ const LiveScoreboard = ({ matchId, isManager = false }) => {
   const endMatchMutation = useMutation({
     mutationFn: () => liveScoringAPI.endLiveMatch(matchId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['liveMatch', matchId]);
+      queryClient.invalidateQueries({ queryKey: ['liveMatch', matchId] });
     }
   });
 
@@ -281,7 +281,7 @@ const LiveScoreboard = ({ matchId, isManager = false }) => {
                     color="success"
                     startIcon={<PlayIcon />}
                     onClick={handleStartMatch}
-                    disabled={startMatchMutation.isLoading}
+                    disabled={startMatchMutation.isPending}
                   >
                     경기 시작
                   </Button>
@@ -307,7 +307,7 @@ const LiveScoreboard = ({ matchId, isManager = false }) => {
                       color="error"
                       startIcon={<StopIcon />}
                       onClick={handleEndMatch}
-                      disabled={endMatchMutation.isLoading}
+                      disabled={endMatchMutation.isPending}
                     >
                       경기 종료
                     </Button>

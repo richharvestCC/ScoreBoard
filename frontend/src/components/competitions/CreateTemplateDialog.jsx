@@ -52,8 +52,8 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
       ? (data) => competitionAPI.update(editingTemplate.id, data)
       : competitionAPI.create,
     onSuccess: () => {
-      queryClient.invalidateQueries(['competitions']);
-      queryClient.invalidateQueries(['templates']);
+      queryClient.invalidateQueries({ queryKey: ['competitions'] });
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
       onSuccess();
       handleReset();
     },
@@ -125,7 +125,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
   };
 
   const handleClose = () => {
-    if (!createMutation.isLoading) {
+    if (!createMutation.isPending) {
       handleReset();
       onClose();
     }
@@ -155,7 +155,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
                 onChange={handleChange('name')}
                 error={!!errors.name}
                 helperText={errors.name}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="예: 지역 리그전 템플릿"
               />
             </Grid>
@@ -168,7 +168,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
             </Grid>
 
             <Grid item xs={12} sm={4}>
-              <FormControl fullWidth required disabled={createMutation.isLoading}>
+              <FormControl fullWidth required disabled={createMutation.isPending}>
                 <InputLabel>대회 종류</InputLabel>
                 <Select
                   value={formData.competition_type}
@@ -183,7 +183,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
             </Grid>
 
             <Grid item xs={12} sm={4}>
-              <FormControl fullWidth required disabled={createMutation.isLoading}>
+              <FormControl fullWidth required disabled={createMutation.isPending}>
                 <InputLabel>대회 형식</InputLabel>
                 <Select
                   value={formData.format}
@@ -199,7 +199,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
             </Grid>
 
             <Grid item xs={12} sm={4}>
-              <FormControl fullWidth disabled={createMutation.isLoading}>
+              <FormControl fullWidth disabled={createMutation.isPending}>
                 <InputLabel>대회 규모</InputLabel>
                 <Select
                   value={formData.level}
@@ -220,7 +220,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
                   <Checkbox
                     checked={formData.has_group_stage}
                     onChange={handleChange('has_group_stage')}
-                    disabled={createMutation.isLoading}
+                    disabled={createMutation.isPending}
                   />
                 }
                 label="조별 예선 진행"
@@ -229,7 +229,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
 
             {formData.has_group_stage && (
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth disabled={createMutation.isLoading}>
+                <FormControl fullWidth disabled={createMutation.isPending}>
                   <InputLabel>조별 예선 방식</InputLabel>
                   <Select
                     value={formData.group_stage_format}
@@ -245,7 +245,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
 
             {(formData.format === 'knockout' || formData.format === 'mixed' || formData.format === 'group_knockout') && (
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth disabled={createMutation.isLoading}>
+                <FormControl fullWidth disabled={createMutation.isPending}>
                   <InputLabel>결승 토너먼트 방식</InputLabel>
                   <Select
                     value={formData.knockout_stage_format}
@@ -275,7 +275,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
                 onChange={handleChange('min_participants')}
                 error={!!errors.min_participants}
                 helperText={errors.min_participants}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 inputProps={{ min: 2 }}
               />
             </Grid>
@@ -289,7 +289,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
                 onChange={handleChange('max_participants')}
                 error={!!errors.max_participants}
                 helperText={errors.max_participants}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 inputProps={{ min: 2, max: 128 }}
               />
             </Grid>
@@ -303,7 +303,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
                 onChange={handleChange('entry_fee')}
                 error={!!errors.entry_fee}
                 helperText={errors.entry_fee}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 inputProps={{ min: 0, step: 1000 }}
               />
             </Grid>
@@ -315,7 +315,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
                     <Checkbox
                       checked={formData.is_public}
                       onChange={handleChange('is_public')}
-                      disabled={createMutation.isLoading}
+                      disabled={createMutation.isPending}
                     />
                   }
                   label="공개 대회 (누구나 참가 신청 가능)"
@@ -340,7 +340,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
                 onChange={handleChange('description')}
                 error={!!errors.description}
                 helperText={errors.description}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="대회의 목적과 특징을 설명해주세요"
               />
             </Grid>
@@ -355,7 +355,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
                 onChange={handleChange('rules')}
                 error={!!errors.rules}
                 helperText={errors.rules}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="경기 시간, 선수 교체 규정, 반칙 규정 등..."
               />
             </Grid>
@@ -370,7 +370,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
                 onChange={handleChange('prize_description')}
                 error={!!errors.prize_description}
                 helperText={errors.prize_description}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="우승팀: 100만원, 준우승팀: 50만원..."
               />
             </Grid>
@@ -385,7 +385,7 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
                 onChange={handleChange('venue_info')}
                 error={!!errors.venue_info}
                 helperText={errors.venue_info}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="경기장 위치, 시설 안내, 주차 정보 등..."
               />
             </Grid>
@@ -395,17 +395,17 @@ const CreateTemplateDialog = ({ open, onClose, onSuccess, editingTemplate = null
         <DialogActions>
           <Button
             onClick={handleClose}
-            disabled={createMutation.isLoading}
+            disabled={createMutation.isPending}
           >
             취소
           </Button>
           <Button
             type="submit"
             variant="contained"
-            disabled={createMutation.isLoading || !formData.name.trim()}
-            startIcon={createMutation.isLoading ? <CircularProgress size={16} /> : null}
+            disabled={createMutation.isPending || !formData.name.trim()}
+            startIcon={createMutation.isPending ? <CircularProgress size={16} /> : null}
           >
-            {createMutation.isLoading
+            {createMutation.isPending
               ? (isEditing ? '수정 중...' : '생성 중...')
               : (isEditing ? '템플릿 수정' : '템플릿 만들기')
             }

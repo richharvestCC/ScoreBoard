@@ -11,13 +11,15 @@ import {
   useTheme,
   useMediaQuery,
   Switch,
+  Chip,
   SxProps,
   Theme
 } from '@mui/material';
-import { AccountCircle, ExitToApp, Notifications, Menu as MenuIcon } from '@mui/icons-material';
+import { AccountCircle, ExitToApp, Notifications, Menu as MenuIcon, Login } from '@mui/icons-material';
 import { useNavigation } from '../../contexts/NavigationContext';
 import { useSidebar } from '../../contexts/SidebarContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '../../hooks/useAuth';
 import logoNormal from '../../assets/images/logos/logo-normal.png';
 import logoWhite from '../../assets/images/logos/logo-white.png';
 
@@ -30,10 +32,21 @@ const Header: React.FC<HeaderProps> = React.memo(() => {
   const { navigate } = useNavigation();
   const { isOpen, isCollapsed, toggleSidebar, sidebarWidth, collapsedWidth } = useSidebar();
   const { language, toggleLanguage, t } = useLanguage();
+  const { user, isAuthenticated, logout } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const isMobile = useMediaQuery('(max-width: 767px)');
   const isTablet = useMediaQuery('(min-width: 768px) and (max-width: 1199px)');
+  const isUiDevUser = user?.user_id === 'ui_dev_user';
+
+  const displayName = useMemo(() => {
+    return user?.name || user?.username || user?.email || t({ ko: 'UI 개발자', en: 'UI Developer' });
+  }, [user?.name, user?.username, user?.email, t]);
+
+  const userInitials = useMemo(() => {
+    const source = user?.name || user?.username || user?.email;
+    return source ? source.slice(0, 1).toUpperCase() : null;
+  }, [user?.name, user?.username, user?.email]);
 
   // Memoized sx objects for performance
   const appBarSx = useMemo<SxProps<Theme>>(() => {
@@ -166,6 +179,14 @@ const Header: React.FC<HeaderProps> = React.memo(() => {
     handleClose();
   }, [handleClose]);
 
+  const handleLogout = useCallback(() => {
+    handleClose();
+    if (isAuthenticated) {
+      logout();
+    }
+    navigate('/auth');
+  }, [handleClose, isAuthenticated, logout, navigate]);
+
   const isMenuOpen = Boolean(anchorEl);
 
   return (
@@ -238,11 +259,16 @@ const Header: React.FC<HeaderProps> = React.memo(() => {
             aria-haspopup="true"
             onClick={handleMenu}
             color="inherit"
+            title={displayName}
           >
             <Avatar sx={avatarSx}>
-              <AccountCircle />
+              {userInitials || <AccountCircle fontSize="small" />}
             </Avatar>
           </IconButton>
+
+          {isUiDevUser && (
+            <Chip label="UI DEV" size="small" color="primary" variant="outlined" />
+          )}
 
           <Menu
             id="menu-appbar"
@@ -257,8 +283,14 @@ const Header: React.FC<HeaderProps> = React.memo(() => {
               <AccountCircle sx={{ mr: 1 }} />
               {t({ ko: '프로필', en: 'Profile' })}
             </MenuItem>
+            {isAuthenticated && (
+              <MenuItem onClick={handleLogout}>
+                <ExitToApp sx={{ mr: 1 }} />
+                {t({ ko: '로그아웃', en: 'Log out' })}
+              </MenuItem>
+            )}
             <MenuItem onClick={handleNavigateToAuth}>
-              <ExitToApp sx={{ mr: 1 }} />
+              <Login sx={{ mr: 1 }} />
               {t({ ko: '로그인 페이지', en: 'Login Page' })}
             </MenuItem>
           </Menu>
