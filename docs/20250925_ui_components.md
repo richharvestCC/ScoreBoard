@@ -1,19 +1,19 @@
-# 🎨 Dashboard 디자인 구현 가이드
+# 🎨 Dashboard UI 개선 가이드
 
-**Dashboard.jsx를 Material 3 + Financial Dashboard 스타일로 변환하는 완전한 구현 가이드**
+**현재 진행 중인 Dashboard.jsx Material 3 + Glassmorphism 스타일 구현 가이드**
 
 **대상**: `/Users/victor9yun/Dev/ScoreBoard/frontend/src/pages/Dashboard.jsx`
 **참조**: `/Users/victor9yun/Dev/ScoreBoard/frontend/src/pages/CompetitionPage.jsx`
-**일정**: 2-3주 | **우선순위**: 최고
+**일정**: 2-3주 | **우선순위**: 최고 | **Phase**: 2
 
 ## 🎯 프로젝트 개요
 
-현재의 기본 Material-UI Dashboard를 고급 통계와 애니메이션을 통합하면서 CompetitionPage의 시각적 우수성과 일치하는 세련된 glassmorphism 기반 금융 대시보드로 변환합니다.
+**Phase 1 (시스템 개선)** 완료 후 진행할 Dashboard UI 현대화 작업입니다. 현재의 기본 Material-UI Dashboard를 CompetitionPage 수준의 고급 glassmorphism 스타일로 업그레이드합니다.
 
 ### 디자인 철학
 - **Glassmorphism 기반**: 백드롭 필터를 사용한 반투명 표면
 - **모노크롬 + 액센트**: 전략적 컬러풀 하이라이트가 있는 중성 베이스
-- **금융 대시보드 미학**: 전문적이고 데이터 중심의 시각적 계층 구조
+- **Financial Dashboard 미학**: 전문적이고 데이터 중심의 시각적 계층 구조
 - **프리미엄 상호작용**: 부드러운 애니메이션과 세련된 호버 효과
 
 ## 📋 구현 단계
@@ -434,10 +434,15 @@ const responsiveStyles = {
 
 ## 🔗 관련 문서
 
-- **[기술 부채 분석](./technical-debt-analysis.md)** - UI/UX 개선 우선순위
-- **[아키텍처 가이드](../ARCHITECTURE.md)** - 프론트엔드 구조 참조
-- **[프로젝트 README](../README.md)** - 전체 개발 계획
+**현재 단계 문서**:
+- [프로젝트 최적화 현황](./20250925_project_optimization.md) - Phase 진행 상황
+- [기술 개선 계획](./20250925_technical_improvements.md) - TypeScript/성능 최적화
+- [시스템 아키텍처](./20250925_system_architecture.md) - 전체 구조 참조
+
+**향후 계획 문서**:
+- [향후 기능 개발 계획](./20250925_future_features.md) - Phase 3+ 신규 기능들
 
 ---
 
-📝 **최종 업데이트**: 2025-09-24 | 🎨 **구현 가이드 버전**: v2.0
+📝 **최종 업데이트**: 2025-09-25 | 🎨 **구현 가이드 버전**: v2.1
+⚠️ **참고**: Phase 1 완료 후 본격 착수 예정
