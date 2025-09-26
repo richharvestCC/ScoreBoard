@@ -85,6 +85,7 @@ const MatchRecordHome: React.FC = () => {
   };
 
   const handleStartLiveRecord = () => {
+    let url = '';
     if (useCustomMatch) {
       // 커스텀 경기 정보로 실시간 기록 시작
       const queryParams = new URLSearchParams({
@@ -94,10 +95,15 @@ const MatchRecordHome: React.FC = () => {
         date: customMatch.date,
         time: customMatch.time
       }).toString();
-      navigate(`/admin/match-record/live?${queryParams}`);
+      url = `/admin/match-record/live?${queryParams}`;
     } else if (selectedMatch) {
       // 선택된 경기로 실시간 기록 시작
-      navigate(`/admin/match-record/live/${selectedMatch}`);
+      url = `/admin/match-record/live/${selectedMatch}`;
+    }
+
+    if (url) {
+      // 새창에서 실시간 기록 페이지 열기
+      window.open(url, 'liveRecord', 'width=1400,height=900,scrollbars=yes,resizable=yes');
     }
   };
 

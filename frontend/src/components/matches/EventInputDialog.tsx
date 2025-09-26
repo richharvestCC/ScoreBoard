@@ -369,9 +369,7 @@ export const EventInputDialog: React.FC<EventInputDialogProps> = ({
     return (
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-          <Typography variant="h6">
-            득점 기록 {goalWorkflowStep === 'assist' ? '- 어시스트' : goalWorkflowStep === 'keypass' ? '- 기점' : ''}
-          </Typography>
+          득점 기록 {goalWorkflowStep === 'assist' ? '- 어시스트' : goalWorkflowStep === 'keypass' ? '- 기점' : ''}
           <IconButton onClick={onClose} size="small">
             <CloseIcon />
           </IconButton>
@@ -577,7 +575,7 @@ export const EventInputDialog: React.FC<EventInputDialogProps> = ({
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
         <Box>
-          <Typography variant="h6">{eventType.name} 기록</Typography>
+          {eventType.name} 기록
           <Typography variant="body2" color="text.secondary">
             구역: {clickData.zone.name} ({clickData.x.toFixed(1)}, {clickData.y.toFixed(1)})
           </Typography>

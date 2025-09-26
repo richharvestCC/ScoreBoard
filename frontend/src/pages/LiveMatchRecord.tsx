@@ -26,7 +26,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import InteractiveField, { FieldClick } from '../components/matches/InteractiveField';
 import RadialEventMenu, { EventType } from '../components/matches/RadialEventMenu';
-import EventInputDialog from '../components/matches/EventInputDialog';
+import { EventInputDialog } from '../components/matches/EventInputDialog';
 import type { MatchEvent, Team } from '../types/match';
 import { createEvent, CreateEventPayload } from '../services/events';
 
@@ -48,6 +48,9 @@ const LiveMatchRecord: React.FC = () => {
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
+
+  // 새창에서는 사이드바와 헤더를 숨기기 위한 체크
+  const isPopupWindow = window.opener !== null;
 
   // URL에서 경기 정보 파싱
   const searchParams = new URLSearchParams(location.search);
@@ -129,8 +132,13 @@ const LiveMatchRecord: React.FC = () => {
   const [selectedEventType, setSelectedEventType] = useState<EventType | null>(null);
   const [fieldClick, setFieldClick] = useState<FieldClick | null>(null);
 
-  // 득점 워크플로우 상태
-  const [waitingForGoalWorkflow, setWaitingForGoalWorkflow] = useState<'assist' | 'keypass' | null>(null);
+  // Event input dialog state
+  const [eventDialogOpen, setEventDialogOpen] = useState(false);
+  const [eventDialogData, setEventDialogData] = useState<{
+    eventType: EventType;
+    clickData: FieldClick;
+  } | null>(null);
+
 
   const homeTeam = createDemoTeam('HOME', '#1976d2', homeTeamName);
   const awayTeam = createDemoTeam('AWAY', '#d32f2f', awayTeamName);
@@ -232,32 +240,10 @@ const LiveMatchRecord: React.FC = () => {
       return;
     }
 
-    // 워크플로우 모드인 경우 좌표만 업데이트
-    if (waitingForGoalWorkflow) {
-      setFieldClick(click);
-      return;
-    }
-
-    // 일반 모드
     setFieldClick(click);
     setMenuAnchor({ x: click.x, y: click.y });
     setSelectedEventType(null);
-  }, [isGameRunning, waitingForGoalWorkflow]);
-
-  const handleEventTypeSelect = useCallback((event: EventType) => {
-    setSelectedEventType(event);
-  }, []);
-
-  // 워크플로우 핸들러들
-  const handleRequestCoordinate = useCallback((type: 'assist' | 'keypass') => {
-    setWaitingForGoalWorkflow(type);
-    setMenuAnchor(null); // 메뉴 숨기기
-  }, []);
-
-  const handleCoordinateSelected = useCallback((coordinate: {x: number, y: number, zone: string}) => {
-    setWaitingForGoalWorkflow(null);
-    // 좌표 선택 완료는 EventInputDialog에서 처리됨
-  }, []);
+  }, [isGameRunning]);
 
   const handleEventSubmit = useCallback(async (event: MatchEvent) => {
     const updatedEvents = [event, ...events];
@@ -290,6 +276,43 @@ const LiveMatchRecord: React.FC = () => {
     setFieldClick(null);
   }, [events, mutation, STORAGE_KEYS]);
 
+  const handleEventTypeSelect = useCallback((selectedEvent: EventType) => {
+    console.log('🎯 handleEventTypeSelect called with:', selectedEvent);
+    console.log('🎯 fieldClick:', fieldClick);
+
+    if (!fieldClick) {
+      console.log('❌ No fieldClick data, returning');
+      return;
+    }
+
+    // 모달에 전달할 데이터 설정
+    setEventDialogData({
+      eventType: selectedEvent,
+      clickData: fieldClick
+    });
+
+    // 모달 열기
+    setEventDialogOpen(true);
+    console.log('✅ Modal should now be open');
+
+    // 메뉴 닫기
+    setMenuAnchor(null);
+    setSelectedEventType(null);
+  }, [fieldClick]);
+
+  const handleEventDialogClose = useCallback(() => {
+    setEventDialogOpen(false);
+    setEventDialogData(null);
+    setFieldClick(null);
+  }, []);
+
+  const handleEventDialogSubmit = useCallback(async (eventData: MatchEvent) => {
+    await handleEventSubmit(eventData);
+    setEventDialogOpen(false);
+    setEventDialogData(null);
+    setFieldClick(null);
+  }, [handleEventSubmit]);
+
   const formatTime = useCallback((minutes: number) => {
     const totalMinutes = Math.floor(minutes);
     const seconds = Math.floor((minutes % 1) * 60);
@@ -297,7 +320,16 @@ const LiveMatchRecord: React.FC = () => {
   }, []);
 
   return (
-    <Box sx={{
+    <Box sx={isPopupWindow ? {
+      // 새창 스타일 - 깔끔하고 심플
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: 'background.default',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    } : {
+      // 기존 스타일 - 메인 창용
       position: 'fixed',
       top: 0,
       left: 0,
@@ -311,20 +343,22 @@ const LiveMatchRecord: React.FC = () => {
     }}>
       {/* 헤더 바 */}
       <Box sx={{
-        backgroundColor: 'background.paper',
+        backgroundColor: isPopupWindow ? 'transparent' : 'background.paper',
         color: 'text.primary',
-        px: 3,
-        py: 2,
+        px: isPopupWindow ? 2 : 3,
+        py: isPopupWindow ? 1 : 2,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderBottom: 1,
+        borderBottom: isPopupWindow ? 0 : 1,
         borderColor: 'divider'
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton onClick={handleBack} color="inherit">
-            <ArrowBack />
-          </IconButton>
+          {!isPopupWindow && (
+            <IconButton onClick={handleBack} color="inherit">
+              <ArrowBack />
+            </IconButton>
+          )}
           <Box>
             <Typography variant="h6" fontWeight={600}>
               {homeTeamName} vs {awayTeamName}
@@ -417,9 +451,9 @@ const LiveMatchRecord: React.FC = () => {
             <Box sx={{
               width: `${containerDimensions.logPanelWidth}px`,
               height: `${containerDimensions.fieldHeight}px`,
-              backgroundColor: 'background.paper',
-              borderRadius: '8px',
-              border: 1,
+              backgroundColor: isPopupWindow ? 'transparent' : 'background.paper',
+              borderRadius: isPopupWindow ? 0 : '8px',
+              border: isPopupWindow ? 0 : 1,
               borderColor: 'divider',
               display: 'flex',
               flexDirection: 'column',
@@ -427,8 +461,8 @@ const LiveMatchRecord: React.FC = () => {
             }}>
               {/* 로그 헤더 */}
               <Box sx={{
-                p: 2,
-                borderBottom: 1,
+                p: isPopupWindow ? 1 : 2,
+                borderBottom: isPopupWindow ? 0 : 1,
                 borderColor: 'divider',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -534,24 +568,19 @@ const LiveMatchRecord: React.FC = () => {
         </Box>
       </Box>
 
+
       {/* 이벤트 입력 다이얼로그 */}
       <EventInputDialog
-        open={Boolean(selectedEventType && fieldClick && menuAnchor)}
-        eventType={selectedEventType}
-        clickData={fieldClick}
+        open={eventDialogOpen && Boolean(eventDialogData)}
+        eventType={eventDialogData?.eventType || { id: '', name: '', color: '' }}
+        clickData={eventDialogData?.clickData || { x: 0, y: 0, zone: { id: '', name: '' } }}
         homeTeam={homeTeam}
         awayTeam={awayTeam}
         currentPeriod={currentPeriod}
-        currentMinute={currentMinute}
+        currentMinute={Math.floor(currentMinute)}
         matchId={matchId}
-        onClose={() => {
-          setSelectedEventType(null);
-          setMenuAnchor(null);
-          setFieldClick(null);
-        }}
-        onSubmit={handleEventSubmit}
-        onRequestCoordinate={handleRequestCoordinate}
-        onCoordinateSelected={handleCoordinateSelected}
+        onClose={handleEventDialogClose}
+        onSubmit={handleEventDialogSubmit}
       />
 
       {/* 스낵바 */}

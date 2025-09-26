@@ -41,6 +41,7 @@ const ThemeVisualization = React.lazy(() => import('./pages/ThemeVisualization')
 const MatchRecord = React.lazy(() => import('./pages/MatchRecord'));
 const MatchRecordHome = React.lazy(() => import('./pages/MatchRecordHome'));
 const LiveMatchRecord = React.lazy(() => import('./pages/LiveMatchRecord'));
+const EventInputPage = React.lazy(() => import('./pages/EventInputPage'));
 
 // Style Guide
 const StyleDashRoutes = React.lazy(() => import('./style-dash'));
@@ -83,22 +84,25 @@ function AppContent() {
   const { isOpen, isCollapsed, sidebarWidth, collapsedWidth } = useSidebar();
   const isMobile = useMediaQuery('(max-width: 767px)');
 
+  // 새창 체크 (팝업 윈도우인지 확인)
+  const isPopupWindow = window.opener !== null;
+
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <Header />
+      {!isPopupWindow && <Sidebar />}
+      {!isPopupWindow && <Header />}
 
       {/* Main Content Area */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          marginTop: '64px', // Account for header height
-          minHeight: 'calc(100vh - 64px)',
+          marginTop: isPopupWindow ? 0 : '64px', // Account for header height
+          minHeight: isPopupWindow ? '100vh' : 'calc(100vh - 64px)',
           backgroundColor: theme.palette.background.default,
           transition: theme.transitions.create('margin-left', {
             easing: theme.transitions.easing.sharp,
@@ -106,7 +110,7 @@ function AppContent() {
           }),
 
           // Responsive padding
-          padding: {
+          padding: isPopupWindow ? 0 : {
             xs: theme.spacing(1, 2), // Mobile
             sm: theme.spacing(2, 3), // Small tablet
             lg: theme.spacing(3, 4), // Desktop
@@ -114,6 +118,7 @@ function AppContent() {
 
           // Responsive margin based on sidebar state and screen size
           marginLeft: (() => {
+            if (isPopupWindow) return 0; // Popup: no margin
             if (isMobile) return 0; // Mobile: no sidebar offset
             if (!isOpen) return 0; // Sidebar closed: no offset
 
@@ -150,6 +155,7 @@ function AppContent() {
           <Route path="/admin/match-record" element={<MatchRecordHome />} />
           <Route path="/admin/match-record/live/:matchId?" element={<LiveMatchRecord />} />
           <Route path="/admin/match-record/edit/:matchId?" element={<MatchRecord />} />
+          <Route path="/event-input" element={<EventInputPage />} />
           <Route path="/matches/:id/live" element={<LiveScoring />} />
           <Route path="/matches/:id" element={<MatchDetail />} />
           <Route path="/competitions" element={<CompetitionPage />} />
