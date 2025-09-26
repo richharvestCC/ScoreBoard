@@ -129,12 +129,12 @@ export const InteractiveField: React.FC<InteractiveFieldProps> = ({ onZoneClick,
         viewBox="0 0 190 120"
         width="100%"
         height="100%"
-        onClick={handleClick}
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
           zIndex: 1,
+          pointerEvents: 'none', // SVG 자체는 클릭 불가
         }}
       >
         {/* 격자 구역들 (grid.png 패턴) */}
@@ -155,10 +155,6 @@ export const InteractiveField: React.FC<InteractiveFieldProps> = ({ onZoneClick,
               stroke="rgba(255, 255, 255, 0.5)"
               strokeWidth="0.2"
               data-zone={zone.id}
-              style={{
-                cursor: 'crosshair',
-                transition: 'fill 0.2s ease',
-              }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.fill = 'rgba(255, 255, 0, 0.4)';
               }}
@@ -166,6 +162,28 @@ export const InteractiveField: React.FC<InteractiveFieldProps> = ({ onZoneClick,
                 const isLightSquare = (zone.gridY % 2 === 0 && zone.gridX % 2 === 0) ||
                                     (zone.gridY % 2 === 1 && zone.gridX % 2 === 1);
                 e.currentTarget.style.fill = isLightSquare ? 'rgba(200, 230, 200, 0.3)' : 'rgba(220, 200, 220, 0.3)';
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+
+                // 구역 중심점 계산
+                const centerX = (zone.bounds.x1 + zone.bounds.x2) / 2;
+                const centerY = (zone.bounds.y1 + zone.bounds.y2) / 2;
+
+                // 백분율로 변환
+                const percentX = (centerX / 190) * 100;
+                const percentY = (centerY / 120) * 100;
+
+                onZoneClick({
+                  x: Number(percentX.toFixed(2)),
+                  y: Number(percentY.toFixed(2)),
+                  zone,
+                });
+              }}
+              style={{
+                cursor: 'crosshair',
+                transition: 'fill 0.2s ease',
+                pointerEvents: 'auto', // 각 rect는 클릭 가능
               }}
             />
           );

@@ -26,7 +26,8 @@ import {
   AdminPanelSettings,
   Palette,
   ColorLens,
-  AccountCircle
+  AccountCircle,
+  SportsScore
 } from '@mui/icons-material';
 import { useNavigation } from '../../contexts/NavigationContext';
 import { useSidebar } from '../../contexts/SidebarContext';
@@ -289,6 +290,14 @@ const Sidebar: React.FC = React.memo(() => {
       icon: <AdminPanelSettings />,
       path: '/admin',
       badge: 4,
+      adminOnly: true
+    },
+    {
+      id: 'match-record',
+      text: '경기기록',
+      icon: <SportsScore />,
+      path: '/admin/match-record',
+      badge: null,
       adminOnly: true
     }
   ], []);

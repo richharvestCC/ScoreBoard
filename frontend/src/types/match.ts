@@ -31,5 +31,17 @@ export interface MatchEvent {
   period: number;
   minute: number;
   description?: string;
-  createdAt: string;
+  createdAt?: string;
+  metadata?: {
+    violationType?: string;
+    warning?: boolean;
+    ejection?: boolean;
+    homeTeamEvent?: boolean;
+    freeKickType?: 'direct' | 'indirect';
+    kicker?: string;
+    lastTouch?: string;
+    attacker?: string;
+    defender?: string;
+    timeCapture?: string;
+  };
 }
