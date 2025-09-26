@@ -54,6 +54,12 @@ import SheetsDemo from '../components/demos/SheetsDemo';
 import SegmentedButtonsDemo from '../components/demos/SegmentedButtonsDemo';
 import FABDemo from '../components/demos/FABDemo';
 import DataTableDemo from '../components/demos/DataTableDemo';
+import BannersAdvancedDemo from '../components/demos/BannersAdvancedDemo';
+import ProgressAdvancedDemo from '../components/demos/ProgressAdvancedDemo';
+import TabsIconsCenteredDemo from '../components/demos/TabsIconsCenteredDemo';
+import ChipsInputDemo from '../components/demos/ChipsInputDemo';
+import DateTimeInputsDemo from '../components/demos/DateTimeInputsDemo';
+import DetailsPanel from '../components/guide/DetailsPanel';
 import ChipsDemo from '../components/demos/ChipsDemo';
 import DialogVariantsDemo from '../components/demos/DialogVariantsDemo';
 
@@ -707,6 +713,24 @@ const ThemeVisualization: React.FC = React.memo(() => {
         tokens: ['Linear/Circular', 'determinate/indeterminate'],
       },
       {
+        title: t({ ko: '프로그레스 – 라벨/스텝', en: 'Progress – labels/steps' }),
+        description: t({
+          ko: '라벨 표시와 스텝 진행(Stepper)을 함께 보여줍니다.',
+          en: 'Linear progress with label plus a simple stepper.',
+        }),
+        content: (
+          <Stack>
+            <ProgressAdvancedDemo />
+            <DetailsPanel
+              code={`<LinearProgress variant=\"determinate\" value={value} />\n<Stepper activeStep={activeStep} alternativeLabel>...`}
+              tokens={`progress.color: primary | success | ...\nstepper.alternativeLabel: true`}
+              accessibility={`Provide text alternatives for progress state (e.g., aria-valuenow on custom).`}
+            />
+          </Stack>
+        ),
+        tokens: ['Linear label', 'Stepper'],
+      },
+      {
         title: t({ ko: '슬라이더', en: 'Slider' }),
         description: t({
           ko: '단일 값/범위 슬라이더 예시.',
@@ -752,6 +776,24 @@ const ThemeVisualization: React.FC = React.memo(() => {
         tokens: ['Snackbar', 'Alert'],
       },
       {
+        title: t({ ko: '배너 – 고급', en: 'Banners – advanced' }),
+        description: t({
+          ko: '접고 펼치는 배너와 큐(Queue) 처리 예시.',
+          en: 'Collapsible banner and a simple queue pattern.',
+        }),
+        content: (
+          <Stack>
+            <BannersAdvancedDemo />
+            <DetailsPanel
+              code={`<Collapse in={open}><Alert severity=\"warning\" action={<Button>자세히</Button>} /></Collapse>\nqueue: setQueued([...queued, msg])`}
+              tokens={`alert.severity: success|info|warning|error\ncollapse.timing: theme.transitions.duration`}
+              accessibility={`Use aria-live=\"polite\" for announcements critical to user tasks.`}
+            />
+          </Stack>
+        ),
+        tokens: ['Collapse', 'Queue'],
+      },
+      {
         title: t({ ko: '다이얼로그', en: 'Dialogs' }),
         description: t({
           ko: '표준/확인 다이얼로그 예시.',
@@ -777,6 +819,14 @@ const ThemeVisualization: React.FC = React.memo(() => {
         }),
         content: <InputsDemo />,
         fullWidth: true,
+      },
+      {
+        title: t({ ko: '날짜/시간 입력', en: 'Date/Time inputs' }),
+        description: t({
+          ko: '네이티브 date/time/datetime-local 예시(브라우저 지원).',
+          en: 'Native date/time/datetime-local inputs (browser support).',
+        }),
+        content: <DateTimeInputsDemo />,
       },
       {
         title: t({ ko: '아이콘 가이드', en: 'Icon usage' }),
