@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type Options = {
   root?: Element | null;
@@ -12,6 +12,8 @@ type Options = {
  */
 export function useScrollSpy(ids: string[], options?: Options) {
   const [activeId, setActiveId] = useState<string | null>(ids[0] ?? null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const observedRef = useRef<HTMLElement[]>([]);
 
   useEffect(() => {
     if (!ids || ids.length === 0) return;
@@ -20,7 +22,15 @@ export function useScrollSpy(ids: string[], options?: Options) {
       .filter((el): el is HTMLElement => Boolean(el));
     if (elements.length === 0) return;
 
-    const observer = new IntersectionObserver(
+    // Cleanup any previous observer and unobserve old elements
+    if (observerRef.current) {
+      observedRef.current.forEach((el) => observerRef.current?.unobserve(el));
+      observerRef.current.disconnect();
+      observerRef.current = null;
+      observedRef.current = [];
+    }
+
+    observerRef.current = new IntersectionObserver(
       (entries) => {
         const visible = entries
           .filter((e) => e.isIntersecting)
@@ -34,12 +44,20 @@ export function useScrollSpy(ids: string[], options?: Options) {
       }
     );
 
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    elements.forEach((el) => observerRef.current?.observe(el));
+    observedRef.current = elements;
+
+    return () => {
+      if (observerRef.current) {
+        observedRef.current.forEach((el) => observerRef.current?.unobserve(el));
+        observerRef.current.disconnect();
+        observerRef.current = null;
+        observedRef.current = [];
+      }
+    };
   }, [ids, options?.root, options?.rootMargin, options?.threshold]);
 
   return activeId;
 }
 
 export default useScrollSpy;
-

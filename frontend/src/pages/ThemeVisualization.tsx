@@ -1409,7 +1409,9 @@ const ThemeVisualization: React.FC = React.memo(() => {
   );
 
   const navItems = useMemo(() => sections.map((section) => ({ href: `#${section.id}`, id: section.id, label: section.title })), [sections]);
-  const activeId = useScrollSpy(sections.map((s) => s.id));
+  // stabilize ids array to avoid effect churn and potential loops
+  const sectionIds = useMemo(() => sections.map((s) => s.id), [sections]);
+  const activeId = useScrollSpy(sectionIds);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
