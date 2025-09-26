@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import {
   Box,
   Button,
@@ -1409,9 +1409,16 @@ const ThemeVisualization: React.FC = React.memo(() => {
   );
 
   const navItems = useMemo(() => sections.map((section) => ({ href: `#${section.id}`, id: section.id, label: section.title })), [sections]);
-  // stabilize ids array to avoid effect churn and potential loops
-  const sectionIds = useMemo(() => sections.map((s) => s.id), [sections]);
-  const activeId = useScrollSpy(sectionIds);
+  // useRef 캐싱: ids 배열을 깊은 비교 후에만 참조 갱신
+  const sectionIdsRef = useRef<string[]>([]);
+  const nextIds = sections.map((s) => s.id);
+  if (
+    sectionIdsRef.current.length !== nextIds.length ||
+    sectionIdsRef.current.some((v, i) => v !== nextIds[i])
+  ) {
+    sectionIdsRef.current = nextIds;
+  }
+  const activeId = useScrollSpy(sectionIdsRef.current);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
