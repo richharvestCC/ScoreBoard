@@ -25,14 +25,15 @@ export const ALL_EVENT_TYPES: EventTypeDefinition[] = [
   { id: 'goal', name: '득점', color: '#f44336', icon: '🥅', description: '득점 기록' },
   { id: 'assist', name: '도움', color: '#2196f3', icon: '🎯', description: '어시스트 (득점이 있어야 발생)' },
   { id: 'keypass', name: '기점', color: '#9c27b0', icon: '🔑', description: '키패스 (도움이 있어야 발생)' },
-  { id: 'offside', name: '오프사이드', color: '#ff9800', icon: '🚩', description: '오프사이드 반칙' },
   { id: 'foul', name: '파울', color: '#795548', icon: '🚫', description: '파울 반칙' },
   { id: 'violation', name: '반칙', color: '#607d8b', icon: '⚠️', description: '기타 반칙 (반칙창 드롭다운)' },
   { id: 'freekick', name: '프리킥', color: '#4caf50', icon: '⚽', description: '프리킥 (반칙이 있어야 발생)' },
   { id: 'goal_line_out', name: '골라인 아웃', color: '#ff5722', icon: '📐', description: '골라인을 벗어남' },
   { id: 'corner_kick', name: '코너킥', color: '#e91e63', icon: '📐', description: '코너킥' },
   { id: 'touch_line_out', name: '터치라인 아웃', color: '#00bcd4', icon: '📏', description: '터치라인을 벗어남' },
+  { id: 'throw_in', name: '스로인', color: '#009688', icon: '▶️', description: '스로인 (터치라인 아웃이 있어야 발생)' },
   { id: 'substitution', name: '선수교체', color: '#8bc34a', icon: '🔄', description: '선수 교체' },
+  { id: 'offside', name: '오프사이드', color: '#ff9800', icon: '🚩', description: '오프사이드 반칙' },
 ];
 
 // 구역별 규칙 정의
@@ -52,7 +53,7 @@ export const ZONE_RULES: ZoneRule[] = [
       'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8',
       'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8'
     ],
-    allowedEvents: ['goal', 'assist', 'keypass', 'offside', 'foul', 'violation', 'freekick'],
+    allowedEvents: ['goal', 'assist', 'keypass', 'foul', 'violation', 'freekick', 'offside'],
     specialRules: {
       assist: { requiresPrevious: ['goal'] },
       keypass: { requiresPrevious: ['assist'] },
@@ -68,80 +69,134 @@ export const ZONE_RULES: ZoneRule[] = [
     }
   },
 
-  // 2. A라인 (홈팀 골라인)
+  // 2. A라인 중간부분 (A4, A5, A6) - 골라인 아웃만
   {
-    zonePattern: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'],
-    allowedEvents: ['goal_line_out', 'corner_kick'],
+    zonePattern: ['A4', 'A5', 'A6'],
+    allowedEvents: ['goal_line_out'],
     specialRules: {
       goal_line_out: {
         requiresInput: ['attacker', 'lastTouch']
-      },
-      corner_kick: {
-        requiresInput: ['defender', 'lastTouch']
       }
     }
   },
 
-  // 3. M라인 (어웨이팀 골라인)
+  // 3. M라인 중간부분 (M4, M5, M6) - 골라인 아웃만
   {
-    zonePattern: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9'],
-    allowedEvents: ['goal_line_out', 'corner_kick'],
+    zonePattern: ['M4', 'M5', 'M6'],
+    allowedEvents: ['goal_line_out'],
     specialRules: {
       goal_line_out: {
         requiresInput: ['attacker', 'lastTouch']
-      },
-      corner_kick: {
-        requiresInput: ['defender', 'lastTouch']
       }
     }
   },
 
-  // 4. 터치라인 (1, 9 라인)
+  // 4. 터치라인 (1, 9 라인) - 터치라인 아웃 및 스로인
   {
     zonePattern: [
       'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1', 'L1',
       'B9', 'C9', 'D9', 'E9', 'F9', 'G9', 'H9', 'I9', 'J9', 'K9', 'L9'
     ],
-    allowedEvents: ['touch_line_out']
+    allowedEvents: ['touch_line_out', 'throw_in'],
+    specialRules: {
+      throw_in: {
+        requiresPrevious: ['touch_line_out'],
+        requiresInput: ['attackerThrower', 'timeCapture']
+      }
+    }
   },
 
-  // 5. 특수 코너킥 구역들
+  // 5. A라인 코너 구역들 - 골라인 아웃 또는 코너킥
   {
-    zonePattern: ['B2'], // A1,A2,A3 코너킥
-    allowedEvents: ['corner_kick'],
+    zonePattern: ['A1', 'A2', 'A3'],
+    allowedEvents: ['goal_line_out', 'corner_kick'],
     specialRules: {
+      goal_line_out: {
+        requiresInput: ['lastTouch'] // 공격자가 직접 차서 나간 경우
+      },
       corner_kick: {
-        requiresInput: ['kicker', 'timeCapture']
+        requiresInput: ['defenderHit', 'timeCapture'] // 수비자 몸에 맞고 나간 경우, 수비수 기록 + 타임체크
       }
     }
   },
 
   {
-    zonePattern: ['L2'], // M1,M2,M3 코너킥
-    allowedEvents: ['corner_kick'],
+    zonePattern: ['A7', 'A8', 'A9'],
+    allowedEvents: ['goal_line_out', 'corner_kick'],
     specialRules: {
+      goal_line_out: {
+        requiresInput: ['lastTouch'] // 공격자가 직접 차서 나간 경우
+      },
       corner_kick: {
-        requiresInput: ['kicker', 'timeCapture']
+        requiresInput: ['defenderHit', 'timeCapture'] // 수비자 몸에 맞고 나간 경우, 수비수 기록 + 타임체크
+      }
+    }
+  },
+
+  // 6. M라인 코너 구역들 - 골라인 아웃 또는 코너킥
+  {
+    zonePattern: ['M1', 'M2', 'M3'],
+    allowedEvents: ['goal_line_out', 'corner_kick'],
+    specialRules: {
+      goal_line_out: {
+        requiresInput: ['lastTouch'] // 공격자가 직접 차서 나간 경우
+      },
+      corner_kick: {
+        requiresInput: ['defenderHit', 'timeCapture'] // 수비자 몸에 맞고 나간 경우, 수비수 기록 + 타임체크
       }
     }
   },
 
   {
-    zonePattern: ['B8'], // A5,A6,A7 코너킥
+    zonePattern: ['M7', 'M8', 'M9'],
+    allowedEvents: ['goal_line_out', 'corner_kick'],
+    specialRules: {
+      goal_line_out: {
+        requiresInput: ['lastTouch'] // 공격자가 직접 차서 나간 경우
+      },
+      corner_kick: {
+        requiresInput: ['defenderHit', 'timeCapture'] // 수비자 몸에 맞고 나간 경우, 수비수 기록 + 타임체크
+      }
+    }
+  },
+
+  // 7. 코너킥 실행 구역들
+  {
+    zonePattern: ['B2'], // A1,A2,A3 코너킥 실행
     allowedEvents: ['corner_kick'],
     specialRules: {
       corner_kick: {
-        requiresInput: ['kicker', 'timeCapture']
+        requiresInput: ['attackerKicker', 'timeCapture'] // 공격팀 키커 선택 + 타임체크
       }
     }
   },
 
   {
-    zonePattern: ['L8'], // M5,M6,M7 코너킥
+    zonePattern: ['L2'], // M1,M2,M3 코너킥 실행
     allowedEvents: ['corner_kick'],
     specialRules: {
       corner_kick: {
-        requiresInput: ['kicker', 'timeCapture']
+        requiresInput: ['attackerKicker', 'timeCapture'] // 공격팀 키커 선택 + 타임체크
+      }
+    }
+  },
+
+  {
+    zonePattern: ['B8'], // A7,A8,A9 코너킥 실행
+    allowedEvents: ['corner_kick'],
+    specialRules: {
+      corner_kick: {
+        requiresInput: ['attackerKicker', 'timeCapture'] // 공격팀 키커 선택 + 타임체크
+      }
+    }
+  },
+
+  {
+    zonePattern: ['L8'], // M7,M8,M9 코너킥 실행
+    allowedEvents: ['corner_kick'],
+    specialRules: {
+      corner_kick: {
+        requiresInput: ['attackerKicker', 'timeCapture'] // 공격팀 키커 선택 + 타임체크
       }
     }
   },
@@ -227,7 +282,9 @@ const EVENT_DEFINITIONS: EventDefinition[] = [
     case 'freekick':
       return { ...event, requiresPrevious: ['violation', 'foul'] }; // 반칙이나 파울이 있어야 프리킥
     case 'corner_kick':
-      return { ...event, requiresPrevious: ['goal_line_out'] }; // 골라인 아웃이 있어야 코너킥
+      return { ...event }; // 코너킥은 골라인 구역에서 직접 선택 가능 (수비수가 마지막으로 공을 터치한 경우)
+    case 'throw_in':
+      return { ...event, requiresPrevious: ['touch_line_out'] }; // 터치라인 아웃이 있어야 스로인
     default:
       return event;
   }

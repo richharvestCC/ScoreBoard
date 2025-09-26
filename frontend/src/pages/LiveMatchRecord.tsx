@@ -1,20 +1,15 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   Button,
   IconButton,
   Alert,
   Chip,
-  Stack,
   List,
   ListItem,
   ListItemText,
   Divider,
-  AppBar,
-  Toolbar,
   Snackbar
 } from '@mui/material';
 import {
@@ -22,9 +17,10 @@ import {
   FullscreenExit,
   PlayArrow,
   Pause,
-  Stop,
   Timer,
-  ArrowBack
+  ArrowBack,
+  ChevronLeft,
+  ChevronRight
 } from '@mui/icons-material';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
@@ -33,16 +29,6 @@ import RadialEventMenu, { EventType } from '../components/matches/RadialEventMen
 import EventInputDialog from '../components/matches/EventInputDialog';
 import type { MatchEvent, Team } from '../types/match';
 import { createEvent, CreateEventPayload } from '../services/events';
-
-const EVENT_TYPES: EventType[] = [
-  { id: 'goal', name: '득점', color: '#f44336', icon: '🥅' },
-  { id: 'shot', name: '슈팅', color: '#1976d2', icon: '⚽' },
-  { id: 'yellow', name: '경고', color: '#ffb300', icon: '🟨' },
-  { id: 'red', name: '퇴장', color: '#d32f2f', icon: '🟥' },
-  { id: 'foul', name: '파울', color: '#8d6e63', icon: '🚫' },
-  { id: 'injury', name: '부상', color: '#ab47bc', icon: '✚' },
-  { id: 'substitution', name: '교체', color: '#26a69a', icon: '🔄' },
-];
 
 const createDemoTeam = (prefix: 'HOME' | 'AWAY', color: string, name: string): Team => ({
   id: prefix.toLowerCase(),
@@ -65,6 +51,67 @@ const LiveMatchRecord: React.FC = () => {
 
   // URL에서 경기 정보 파싱
   const searchParams = new URLSearchParams(location.search);
+
+  // 브라우저 크기 상태 관리
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+
+  // 로그 패널 접기/펼치기 상태
+  const [isLogCollapsed, setIsLogCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // 컨테이너와 경기장 크기 계산
+  const containerDimensions = useMemo(() => {
+    // 컨테이너 최대/최소 폭 제한
+    const containerWidth = Math.max(1024, Math.min(1600, windowSize.width * 0.95));
+    const availableHeight = windowSize.height - 140; // 헤더 + 패딩 제외
+
+    // 로그 패널 크기
+    const logPanelWidth = isLogCollapsed ? 40 : 350; // 접혔을 때는 버튼만
+    const gap = 20; // 경기장과 로그 패널 사이 간격
+
+    // 경기장 영역 폭 계산
+    const fieldAreaWidth = containerWidth - logPanelWidth - gap;
+
+    const aspectRatio = 19 / 12; // 축구장 비율
+
+    let fieldWidth, fieldHeight;
+
+    // 사용 가능한 높이를 기준으로 경기장 크기 결정
+    const maxFieldHeight = availableHeight;
+    const fieldHeightByContainer = maxFieldHeight;
+    const fieldWidthByHeight = fieldHeightByContainer * aspectRatio;
+
+    // 폭 제한에 맞는지 확인
+    if (fieldWidthByHeight <= fieldAreaWidth) {
+      fieldHeight = fieldHeightByContainer;
+      fieldWidth = fieldWidthByHeight;
+    } else {
+      // 폭에 맞춰서 높이 조정
+      fieldWidth = fieldAreaWidth;
+      fieldHeight = fieldWidth / aspectRatio;
+    }
+
+    return {
+      containerWidth,
+      fieldWidth: Math.round(fieldWidth),
+      fieldHeight: Math.round(fieldHeight),
+      logPanelWidth
+    };
+  }, [windowSize, isLogCollapsed]);
   const homeTeamName = searchParams.get('homeTeam') || '서울 FC';
   const awayTeamName = searchParams.get('awayTeam') || '부산 아이파크';
   const venue = searchParams.get('venue') || '서울월드컵경기장';
@@ -82,17 +129,20 @@ const LiveMatchRecord: React.FC = () => {
   const [selectedEventType, setSelectedEventType] = useState<EventType | null>(null);
   const [fieldClick, setFieldClick] = useState<FieldClick | null>(null);
 
+  // 득점 워크플로우 상태
+  const [waitingForGoalWorkflow, setWaitingForGoalWorkflow] = useState<'assist' | 'keypass' | null>(null);
+
   const homeTeam = createDemoTeam('HOME', '#1976d2', homeTeamName);
   const awayTeam = createDemoTeam('AWAY', '#d32f2f', awayTeamName);
   const matchId = params.matchId || 'live-match-001';
 
-  // localStorage 키들
-  const STORAGE_KEYS = {
+  // localStorage 키들 (useMemo로 최적화)
+  const STORAGE_KEYS = useMemo(() => ({
     isGameRunning: `match-${matchId}-running`,
     gameStartTime: `match-${matchId}-start-time`,
     currentPeriod: `match-${matchId}-period`,
     events: `match-${matchId}-events`,
-  };
+  }), [matchId]);
 
   // 컴포넌트 초기화 시 localStorage에서 상태 복원
   useEffect(() => {
@@ -123,7 +173,7 @@ const LiveMatchRecord: React.FC = () => {
         console.error('Failed to parse saved events:', error);
       }
     }
-  }, [matchId]);
+  }, [matchId, STORAGE_KEYS]);
 
   // Timer effect - 1초마다 업데이트 (실제 시간 기준)
   useEffect(() => {
@@ -181,13 +231,32 @@ const LiveMatchRecord: React.FC = () => {
       setSnackbar('경기가 시작되지 않았습니다. 경기를 시작해주세요.');
       return;
     }
+
+    // 워크플로우 모드인 경우 좌표만 업데이트
+    if (waitingForGoalWorkflow) {
+      setFieldClick(click);
+      return;
+    }
+
+    // 일반 모드
     setFieldClick(click);
     setMenuAnchor({ x: click.x, y: click.y });
     setSelectedEventType(null);
-  }, [isGameRunning]);
+  }, [isGameRunning, waitingForGoalWorkflow]);
 
   const handleEventTypeSelect = useCallback((event: EventType) => {
     setSelectedEventType(event);
+  }, []);
+
+  // 워크플로우 핸들러들
+  const handleRequestCoordinate = useCallback((type: 'assist' | 'keypass') => {
+    setWaitingForGoalWorkflow(type);
+    setMenuAnchor(null); // 메뉴 숨기기
+  }, []);
+
+  const handleCoordinateSelected = useCallback((coordinate: {x: number, y: number, zone: string}) => {
+    setWaitingForGoalWorkflow(null);
+    // 좌표 선택 완료는 EventInputDialog에서 처리됨
   }, []);
 
   const handleEventSubmit = useCallback(async (event: MatchEvent) => {
@@ -228,76 +297,101 @@ const LiveMatchRecord: React.FC = () => {
   }, []);
 
   return (
-    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <Box sx={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      zIndex: 9999,
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    }}>
       {/* 헤더 바 */}
-      <AppBar position="static" elevation={1} sx={{ backgroundColor: 'background.paper', color: 'text.primary' }}>
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={handleBack} color="inherit">
-              <ArrowBack />
-            </IconButton>
-            <Box>
-              <Typography variant="h6" fontWeight={600}>
-                {homeTeamName} vs {awayTeamName}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                📍 {venue}
-              </Typography>
-            </Box>
+      <Box sx={{
+        backgroundColor: 'background.paper',
+        color: 'text.primary',
+        px: 3,
+        py: 2,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottom: 1,
+        borderColor: 'divider'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton onClick={handleBack} color="inherit">
+            <ArrowBack />
+          </IconButton>
+          <Box>
+            <Typography variant="h6" fontWeight={600}>
+              {homeTeamName} vs {awayTeamName}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              📍 {venue}
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {/* 경기 시간 표시 */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Timer color="action" />
+            <Typography variant="h6" fontWeight={600}>
+              {currentPeriod}P {formatTime(currentMinute)}'
+            </Typography>
+            <Chip
+              label={isGameRunning ? '진행중' : '일시정지'}
+              color={isGameRunning ? 'success' : 'warning'}
+              size="small"
+            />
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {/* 경기 시간 표시 */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Timer color="action" />
-              <Typography variant="h6" fontWeight={600}>
-                {currentPeriod}P {formatTime(currentMinute)}'
-              </Typography>
-              <Chip
-                label={isGameRunning ? '진행중' : '일시정지'}
-                color={isGameRunning ? 'success' : 'warning'}
-                size="small"
-              />
-            </Box>
+          {/* 경기 컨트롤 */}
+          <Button
+            variant={isGameRunning ? 'outlined' : 'contained'}
+            startIcon={isGameRunning ? <Pause /> : <PlayArrow />}
+            onClick={handleGameControl}
+            sx={{ minWidth: 120 }}
+          >
+            {isGameRunning ? '일시정지' : '시작'}
+          </Button>
 
-            {/* 경기 컨트롤 */}
-            <Button
-              variant={isGameRunning ? 'outlined' : 'contained'}
-              startIcon={isGameRunning ? <Pause /> : <PlayArrow />}
-              onClick={handleGameControl}
-              sx={{ minWidth: 120 }}
-            >
-              {isGameRunning ? '일시정지' : '시작'}
-            </Button>
+          {/* 전체화면 토글 */}
+          <IconButton onClick={handleFullscreen} color="inherit">
+            {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
+          </IconButton>
+        </Box>
+      </Box>
 
-            {/* 전체화면 토글 */}
-            <IconButton onClick={handleFullscreen} color="inherit">
-              {isFullscreen ? <FullscreenExit /> : <Fullscreen />}
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* 메인 컨텐츠 영역 */}
-      <Box sx={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* 경기장 영역 */}
+      {/* 메인 컨테이너 */}
+      <Box sx={{
+        flex: 1,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        padding: '20px',
+        overflow: 'hidden'
+      }}>
         <Box sx={{
-          flex: 1,
+          width: '100%',
+          maxWidth: '1600px',
+          minWidth: '1024px',
+          height: `${containerDimensions.fieldHeight}px`,
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 2,
-          position: 'relative',
-          minWidth: 0 // flex item이 줄어들 수 있도록
+          flexDirection: 'row',
+          gap: '20px'
         }}>
+          {/* 경기장 영역 */}
           <Box sx={{
-            width: '100%',
-            height: '100%',
-            maxHeight: 'calc(100vh - 100px)', // 헤더 높이 고려
+            width: `${containerDimensions.fieldWidth}px`,
+            height: `${containerDimensions.fieldHeight}px`,
+            position: 'relative',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            position: 'relative' // 메뉴 컨테이너용
           }}>
             <InteractiveField
               onZoneClick={handleFieldClick}
@@ -317,78 +411,126 @@ const LiveMatchRecord: React.FC = () => {
               />
             )}
           </Box>
-        </Box>
 
-        {/* 이벤트 로그 영역 - 고정폭 400px */}
-        <Box sx={{
-          width: 400,
-          backgroundColor: 'background.paper',
-          borderLeft: 1,
-          borderColor: 'divider',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="h6" fontWeight={600}>
-              경기 이벤트 로그
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              총 {events.length}개 이벤트
-            </Typography>
-          </Box>
-
-          <Box sx={{ flex: 1, overflow: 'auto' }}>
-            {events.length === 0 ? (
-              <Box sx={{ p: 3, textAlign: 'center' }}>
-                <Alert severity="info" variant="outlined">
-                  아직 기록된 이벤트가 없습니다.
-                  <br />경기장을 클릭해 첫 이벤트를 기록해보세요.
-                </Alert>
+          {/* 로그 패널 (접을 수 있음) */}
+          {!isLogCollapsed && (
+            <Box sx={{
+              width: `${containerDimensions.logPanelWidth}px`,
+              height: `${containerDimensions.fieldHeight}px`,
+              backgroundColor: 'background.paper',
+              borderRadius: '8px',
+              border: 1,
+              borderColor: 'divider',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}>
+              {/* 로그 헤더 */}
+              <Box sx={{
+                p: 2,
+                borderBottom: 1,
+                borderColor: 'divider',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <Box>
+                  <Typography variant="h6" fontWeight={600}>
+                    경기 이벤트 로그
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    총 {events.length}개 이벤트
+                  </Typography>
+                </Box>
+                <IconButton
+                  size="small"
+                  onClick={() => setIsLogCollapsed(true)}
+                  sx={{ color: 'text.secondary' }}
+                >
+                  <ChevronRight />
+                </IconButton>
               </Box>
-            ) : (
-              <List sx={{ p: 0 }}>
-                {events.map((event, index) => (
-                  <React.Fragment key={event.id}>
-                    <ListItem
-                      alignItems="flex-start"
-                      sx={{
-                        py: 1.5,
-                        px: 2,
-                        backgroundColor: index === 0 ? 'action.hover' : 'transparent'
-                      }}
-                    >
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                            <Chip
-                              label={`${event.minute}'`}
-                              size="small"
-                              color="primary"
-                              variant="filled"
-                            />
-                            <Typography variant="subtitle2" fontWeight={600}>
-                              {event.eventType}
-                            </Typography>
-                          </Box>
-                        }
-                        secondary={
-                          <Box>
-                            <Typography variant="body2" color="text.secondary">
-                              팀: {event.teamId} • 선수: {event.playerId}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              구역: {event.coordinates.zone} • 좌표: ({event.coordinates.x.toFixed(1)}%, {event.coordinates.y.toFixed(1)}%)
-                            </Typography>
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-                    {index < events.length - 1 && <Divider component="li" />}
-                  </React.Fragment>
-                ))}
-              </List>
-            )}
-          </Box>
+
+              {/* 로그 콘텐츠 */}
+              <Box sx={{ flex: 1, overflow: 'auto' }}>
+                {events.length === 0 ? (
+                  <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Alert severity="info" variant="outlined">
+                      아직 기록된 이벤트가 없습니다.
+                      <br />경기장을 클릭해 첫 이벤트를 기록해보세요.
+                    </Alert>
+                  </Box>
+                ) : (
+                  <List sx={{ p: 0 }}>
+                    {events.map((event, index) => (
+                      <React.Fragment key={event.id}>
+                        <ListItem
+                          alignItems="flex-start"
+                          sx={{
+                            py: 1.5,
+                            px: 2,
+                            backgroundColor: index === 0 ? 'action.hover' : 'transparent'
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                <Chip
+                                  label={`${event.minute}'`}
+                                  size="small"
+                                  color="primary"
+                                  variant="filled"
+                                />
+                                <Typography variant="subtitle2" fontWeight={600}>
+                                  {event.eventType}
+                                </Typography>
+                              </Box>
+                            }
+                            secondary={
+                              <Box>
+                                <Typography variant="body2" color="text.secondary">
+                                  팀: {event.teamId} • 선수: {event.playerId}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  구역: {event.coordinates.zone} • 좌표: ({event.coordinates.x.toFixed(1)}%, {event.coordinates.y.toFixed(1)}%)
+                                </Typography>
+                              </Box>
+                            }
+                          />
+                        </ListItem>
+                        {index < events.length - 1 && <Divider component="li" />}
+                      </React.Fragment>
+                    ))}
+                  </List>
+                )}
+              </Box>
+            </Box>
+          )}
+
+          {/* 로그 패널 접혔을 때 펼치기 버튼 */}
+          {isLogCollapsed && (
+            <Box sx={{
+              width: '40px',
+              height: `${containerDimensions.fieldHeight}px`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <IconButton
+                onClick={() => setIsLogCollapsed(false)}
+                sx={{
+                  backgroundColor: 'background.paper',
+                  border: 1,
+                  borderColor: 'divider',
+                  '&:hover': {
+                    backgroundColor: 'action.hover'
+                  }
+                }}
+              >
+                <ChevronLeft />
+              </IconButton>
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -408,6 +550,8 @@ const LiveMatchRecord: React.FC = () => {
           setFieldClick(null);
         }}
         onSubmit={handleEventSubmit}
+        onRequestCoordinate={handleRequestCoordinate}
+        onCoordinateSelected={handleCoordinateSelected}
       />
 
       {/* 스낵바 */}

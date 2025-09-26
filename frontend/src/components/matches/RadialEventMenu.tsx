@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Paper } from '@mui/material';
+import { Box, Button, IconButton } from '@mui/material';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -11,7 +11,9 @@ import FlagIcon from '@mui/icons-material/Flag';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import CallMadeIcon from '@mui/icons-material/CallMade';
 import StraightenIcon from '@mui/icons-material/Straighten';
-import { getAllowedEventsForZone, EventTypeDefinition, getEventDefinition, EventDefinition } from './FieldZoneRules';
+import CloseIcon from '@mui/icons-material/Close';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import { getAllowedEventsForZone, EventTypeDefinition, getEventDefinition } from './FieldZoneRules';
 
 export interface EventType {
   id: string;
@@ -34,16 +36,17 @@ export interface RadialEventMenuProps {
 // 이벤트 ID를 Material-UI 아이콘으로 매핑
 const getIconForEventType = (eventId: string): React.ReactNode => {
   const iconMap: { [key: string]: React.ReactNode } = {
-    goal: <EmojiEventsIcon fontSize="small" />,
+    goal: <SportsSoccerIcon fontSize="small" />,
     assist: <SportsSoccerIcon fontSize="small" />,
     keypass: <DirectionsRunIcon fontSize="small" />,
     offside: <FlagIcon fontSize="small" />,
-    foul: <AssistWalkerIcon fontSize="small" />,
+    foul: <WarningAmberIcon fontSize="small" />,
     violation: <WarningAmberIcon fontSize="small" />,
     freekick: <SportsSoccerIcon fontSize="small" />,
     goal_line_out: <StraightenIcon fontSize="small" />,
     corner_kick: <CallMadeIcon fontSize="small" />,
     touch_line_out: <StraightenIcon fontSize="small" />,
+    throw_in: <PlayArrowIcon fontSize="small" />,
     substitution: <SyncIcon fontSize="small" />
   };
   return iconMap[eventId] || <SportsSoccerIcon fontSize="small" />;
@@ -137,83 +140,178 @@ export const RadialEventMenu: React.FC<RadialEventMenuProps> = ({
   }
 
   console.log('🎪 Final buttons after all filters:', buttons.map(b => `${b.id}(${b.name})`)); // 디버깅용
-  const angleStep = buttons.length ? (Math.PI * 2) / buttons.length : 0;
+
+  // 그리드 기반 팝업 위치 계산 (컨테이너 경계 내 유지)
+  const calculateGridPosition = (clickX: number, clickY: number, zoneId?: string) => {
+    if (!zoneId) return { x: clickX, y: clickY, transform: 'translate(-50%, -50%)' };
+
+    // 구역 ID에서 열과 행 정보 추출 (예: A1 -> col=0, row=0)
+    const col = zoneId.charCodeAt(0) - 65; // A=0, B=1, ..., M=12
+    const row = parseInt(zoneId.slice(1)) - 1; // 1=0, 2=1, ..., 9=8
+
+    // 13x9 그리드에서 각 격자의 크기 (백분율)
+    const gridWidth = 100 / 13; // 약 7.69%
+    const gridHeight = 100 / 9; // 약 11.11%
+
+    // 각 격자의 시작점 계산
+    const gridStartX = col * gridWidth;
+    const gridStartY = row * gridHeight;
+
+    // 팝업 예상 크기 (백분율 기준) - 컨테이너 대비
+    const popupWidthPercent = 12; // 팝업 너비
+    const popupHeightPercent = 20; // 팝업 높이
+
+    // 컨테이너 경계 마진 (백분율)
+    const margin = 2;
+
+    let finalX, finalY, finalTransform;
+
+    // M열(12번째 열)은 오른쪽 정렬
+    if (col === 12) {
+      const gridEndX = (col + 1) * gridWidth;
+      finalX = gridEndX - margin;
+      finalY = gridStartY;
+      finalTransform = 'translate(-100%, 0%)';
+
+      // 왼쪽 경계 체크
+      if (finalX - popupWidthPercent < margin) {
+        finalX = popupWidthPercent + margin;
+        finalTransform = 'translate(-100%, 0%)';
+      }
+    } else {
+      // 나머지 열들은 왼쪽 정렬
+      finalX = Math.max(margin, gridStartX);
+      finalY = gridStartY;
+      finalTransform = 'translate(0%, 0%)';
+
+      // 오른쪽 경계 체크 (컨테이너 내부 유지)
+      if (finalX + popupWidthPercent > 100 - margin) {
+        finalX = 100 - popupWidthPercent - margin;
+      }
+    }
+
+    // 아래쪽 경계 체크 (컨테이너 내부 유지)
+    if (gridStartY + popupHeightPercent > 100 - margin) {
+      finalY = 100 - popupHeightPercent - margin;
+    } else {
+      finalY = Math.max(margin, gridStartY);
+    }
+
+    // 최종 경계 확인 (컨테이너 완전 내부 유지)
+    return {
+      x: Math.max(margin, Math.min(100 - margin, finalX)),
+      y: Math.max(margin, Math.min(100 - margin, finalY)),
+      transform: finalTransform
+    };
+  };
+
+  const gridPosition = calculateGridPosition(anchor.x, anchor.y, zoneId);
+
+  console.log('📍 Grid-based position:', {
+    zoneId,
+    original: { x: anchor.x, y: anchor.y },
+    gridPosition
+  });
 
   return (
     <Box
       sx={{
         position: 'absolute',
-        // InteractiveField는 aspectRatio 19:12로 중앙 정렬됨
-        // 컨테이너 내에서 실제 경기장 영역의 좌표로 변환
-        left: `calc(50% + ${(anchor.x - 50) * 0.8}%)`, // 경기장 영역 내 좌표 조정
-        top: `calc(50% + ${(anchor.y - 50) * 0.8}%)`,  // 경기장 영역 내 좌표 조정
-        transform: 'translate(-50%, -50%)',
+        left: `${gridPosition.x}%`,
+        top: `${gridPosition.y}%`,
+        transform: gridPosition.transform || 'translate(0%, 0%)',
         pointerEvents: 'auto',
         zIndex: 10,
       }}
       onClick={(event) => event.stopPropagation()}
     >
-      <Paper
-        elevation={6}
+      <Box
         sx={{
           position: 'relative',
-          width: 160,
-          height: 160,
-          borderRadius: '50%',
+          backgroundColor: '#ffffff',
+          borderColor: 'primary.200',
+          border: '1px solid',
+          borderRadius: 2,
+          padding: '6px',
+          boxShadow: 1,
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'visible',
+          flexDirection: 'row',
+          gap: '8px',
+          alignItems: 'flex-start',
+          minWidth: 'fit-content',
         }}
       >
-        <Button
-          size="small"
-          sx={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 48,
-            height: 48,
-            borderRadius: '50%',
-            backgroundColor: (theme) => theme.palette.grey[100],
-            color: 'text.secondary',
-          }}
-          onClick={onClose}
-        >
-          닫기
-        </Button>
-        {buttons.map((eventType, index) => {
-          const angle = index * angleStep - Math.PI / 2;
-          const radius = 60;
-          const x = Math.cos(angle) * radius;
-          const y = Math.sin(angle) * radius;
+        <Box>
+          {buttons.map((eventType, index) => {
+            const positiveEvents = ['goal', 'assist', 'keypass', 'freekick', 'corner_kick'];
+            const isPositive = positiveEvents.includes(eventType.id);
+            const nextEventType = buttons[index + 1];
+            const nextIsPositive = nextEventType ? positiveEvents.includes(nextEventType.id) : false;
+            const showDivider = isPositive && nextEventType && !nextIsPositive;
 
-          return (
-            <Button
-              key={eventType.id}
-              size="small"
-              variant="contained"
-              onClick={() => onSelect(eventType)}
-              sx={{
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-                borderRadius: 999,
-                backgroundColor: eventType.color,
-                '&:hover': {
-                  backgroundColor: eventType.color,
-                  opacity: 0.85,
-                },
-                boxShadow: 2,
-              }}
-            >
-              {eventType.name}
-            </Button>
-          );
-        })}
-      </Paper>
+            return (
+              <Box key={eventType.id}>
+                <Button
+                  variant="text"
+                  onClick={() => onSelect(eventType)}
+                  sx={{
+                    backgroundColor: 'transparent',
+                    color: '#333',
+                    cursor: 'pointer',
+                    transition: 'none',
+                    padding: '6px 12px',
+                    width: '100%',
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    gap: '8px',
+                    whiteSpace: 'nowrap',
+                    textTransform: 'none',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0,0,0,0.04)',
+                    },
+                  }}
+                >
+                  {eventType.icon}
+                  {eventType.name}
+                </Button>
+                {showDivider && (
+                  <Box
+                    sx={{
+                      height: '1px',
+                      backgroundColor: 'primary.200',
+                      margin: '4px 0',
+                    }}
+                  />
+                )}
+              </Box>
+            );
+          })}
+        </Box>
+
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start'
+        }}>
+          <IconButton
+            size="small"
+            sx={{
+              width: 32,
+              height: 32,
+              color: '#666666',
+              cursor: 'pointer',
+              '&:hover': {
+                color: '#333333',
+              },
+            }}
+            onClick={onClose}
+          >
+            <CloseIcon fontSize="medium" />
+          </IconButton>
+        </Box>
+      </Box>
     </Box>
   );
 };
