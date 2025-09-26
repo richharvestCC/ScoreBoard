@@ -20,7 +20,8 @@ const ColorSwatch: React.FC<ColorSwatchProps> = React.memo(({
   const theme = useTheme();
 
   const getTextColor = (toneValue: string): string => {
-    return parseInt(toneValue) >= 500 ? '#fff' : (theme.palette.primary[800] || '#212121');
+    const primaryPalette = theme.palette.primary as unknown as Record<string, string>;
+    return parseInt(toneValue, 10) >= 500 ? '#fff' : primaryPalette['800'] || '#212121';
   };
 
   const textColor = getTextColor(tone);
@@ -47,7 +48,7 @@ const ColorSwatch: React.FC<ColorSwatchProps> = React.memo(({
       <Box
         sx={{
           width: '100%',
-          aspectRatio: '1/1',
+          aspectRatio: '2 / 1',
           bgcolor: color,
           borderRadius: 1,
           display: 'flex',
