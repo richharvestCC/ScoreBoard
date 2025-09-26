@@ -45,6 +45,9 @@ import ColorSwatch from '../components/common/ColorSwatch';
 import MotionDemo from '../components/demos/MotionDemo';
 import StateTokensDemo from '../components/demos/StateTokensDemo';
 import InputsDemo from '../components/demos/InputsDemo';
+import DialogsDemo from '../components/demos/DialogsDemo';
+import ProgressDemo from '../components/demos/ProgressDemo';
+import TabsDemo from '../components/demos/TabsDemo';
 
 type PaletteColorKey = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
 
@@ -673,6 +676,33 @@ const ThemeVisualization: React.FC = React.memo(() => {
           </Stack>
         ),
         tokens: ['height: 40px', 'icon gap: 8px'],
+      },
+      {
+        title: t({ ko: '탭', en: 'Tabs' }),
+        description: t({
+          ko: '스크롤 가능한 탭과 탭 패널의 기본 패턴.',
+          en: 'Scrollable tabs with a simple tab panel.',
+        }),
+        content: <TabsDemo />,
+        tokens: ['variant: scrollable', 'tabpanel: aria-labelledby'],
+      },
+      {
+        title: t({ ko: '프로그레스', en: 'Progress' }),
+        description: t({
+          ko: 'Linear/Circular · determinate/indeterminate 상태.',
+          en: 'Linear/Circular in determinate and indeterminate states.',
+        }),
+        content: <ProgressDemo />,
+        tokens: ['Linear/Circular', 'determinate/indeterminate'],
+      },
+      {
+        title: t({ ko: '다이얼로그', en: 'Dialogs' }),
+        description: t({
+          ko: '표준/확인 다이얼로그 예시.',
+          en: 'Standard and confirm dialogs.',
+        }),
+        content: <DialogsDemo />,
+        tokens: ['DialogTitle/Content/Actions', 'aria-labelledby'],
       },
       {
         title: t({ ko: '폼 컨트롤 묶음', en: 'Form controls (bundle)' }),
