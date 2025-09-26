@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -1488,10 +1488,30 @@ const ThemeVisualization: React.FC = React.memo(() => {
     [overview, identity, colorSection, typographySection, layoutSection, componentSection, patternSection, dataVizSection, interactionSection, accessibilitySection, utilitiesSection]
   );
 
-  const navItems = useMemo(
-    () => sections.map((section) => ({ href: `#${section.id}`, label: section.title })),
-    [sections]
-  );
+  const navItems = useMemo(() => sections.map((section) => ({ href: `#${section.id}`, id: section.id, label: section.title })), [sections]);
+
+  const [activeId, setActiveId] = useState<string | null>(sections[0]?.id ?? null);
+
+  useEffect(() => {
+    const ids = sections.map((s) => s.id);
+    const elements = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => (a.boundingClientRect.top > b.boundingClientRect.top ? 1 : -1));
+        if (visible[0]?.target?.id) setActiveId(visible[0].target.id);
+      },
+      { root: null, rootMargin: '-16% 0px -70% 0px', threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [sections]);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -1504,30 +1524,52 @@ const ThemeVisualization: React.FC = React.memo(() => {
           en: 'Material Design inspired catalogue of tokens, layouts, components and patterns used across MatchCard.',
         })}
       </Typography>
-      <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 4 }}>
+
+      {/* xs~sm: 상단 퀵 링크 버튼 */}
+      <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 3, display: { xs: 'flex', md: 'none' } }}>
         {navItems.map((item) => (
-          <Button key={item.href} size="small" variant="outlined" component="a" href={item.href}>
+          <Button key={item.href} size="small" variant={activeId === item.id ? 'contained' : 'outlined'} component="a" href={item.href}>
             {item.label}
           </Button>
         ))}
-        <Button
-          size="small"
-          variant="contained"
-          endIcon={<ArrowForwardIcon fontSize="small" />}
-          component="a"
-          href="/tournament-builder"
-        >
+        <Button size="small" variant="contained" endIcon={<ArrowForwardIcon fontSize="small" />} component="a" href="/tournament-builder">
           {t({ ko: '토너먼트 빌더 열기', en: 'Open tournament builder' })}
         </Button>
       </Stack>
-      <Divider sx={{ mb: 4 }} />
 
-      {sections.map((section, index) => (
-        <React.Fragment key={section.id}>
-          <SectionBlock {...section} />
-          {index < sections.length - 1 && <Divider sx={{ mb: 4 }} />}
-        </React.Fragment>
-      ))}
+      <Divider sx={{ mb: 3 }} />
+
+      {/* md+: 좌측 로컬 앵커 + 본문 */}
+      <Box sx={{ display: { xs: 'block', md: 'grid' }, gridTemplateColumns: { md: '240px 1fr' }, gap: 3 }}>
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', position: 'sticky', top: 88 }}>
+            <Stack spacing={1}>
+              {navItems.map((item) => (
+                <Button
+                  key={item.href}
+                  component="a"
+                  href={item.href}
+                  color={activeId === item.id ? 'primary' : 'inherit'}
+                  variant={activeId === item.id ? 'contained' : 'text'}
+                  size="small"
+                  sx={{ justifyContent: 'flex-start' }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Stack>
+          </Paper>
+        </Box>
+
+        <Box>
+          {sections.map((section, index) => (
+            <React.Fragment key={section.id}>
+              <SectionBlock {...section} />
+              {index < sections.length - 1 && <Divider sx={{ mb: 4 }} />}
+            </React.Fragment>
+          ))}
+        </Box>
+      </Box>
     </Container>
   );
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Paper, Stack, Typography } from '@mui/material';
+import { Box, Paper, Stack, Typography, Chip } from '@mui/material';
 
 type Pattern = {
   title: string;
@@ -58,6 +58,13 @@ const SectionBlock: React.FC<SectionProps> = ({ id, icon, title, summary, patter
               </Typography>
             </Box>
             <Box sx={{ borderRadius: 1, border: '1px dashed', borderColor: 'divider', bgcolor: 'background.default', p: 2 }}>{p.content}</Box>
+            {p.tokens && p.tokens.length > 0 && (
+              <Stack direction="row" spacing={1} flexWrap="wrap">
+                {p.tokens.map((token) => (
+                  <Chip key={token} label={token} size="small" variant="outlined" />
+                ))}
+              </Stack>
+            )}
           </Paper>
         </Box>
       ))}
@@ -66,4 +73,3 @@ const SectionBlock: React.FC<SectionProps> = ({ id, icon, title, summary, patter
 );
 
 export default SectionBlock;
-
