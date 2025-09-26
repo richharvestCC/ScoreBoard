@@ -1,4 +1,6 @@
 .gemini/
+forCedex/
+docs/forCodex/
 
 # Dependencies
 node_modules/
@@ -39,3 +41,4 @@ data/
 .claude/
 frontend/claude.md
 backend/claude.md
+docs/forCodex
