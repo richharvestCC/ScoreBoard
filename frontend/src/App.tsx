@@ -38,6 +38,7 @@ const LiveMatchesPage = React.lazy(() => import('./pages/LiveMatchesPage'));
 const LeagueDashboard = React.lazy(() => import('./pages/LeagueDashboard'));
 const CompetitionPage = React.lazy(() => import('./pages/CompetitionPage'));
 const ThemeVisualization = React.lazy(() => import('./pages/ThemeVisualization'));
+const MatchRecord = React.lazy(() => import('./pages/MatchRecord'));
 
 // Style Guide
 const StyleDashRoutes = React.lazy(() => import('./style-dash'));
@@ -142,8 +143,9 @@ function AppContent() {
           <Route path="/clubs" element={<ClubList />} />
           <Route path="/clubs/:id" element={<ClubDetail />} />
           <Route path="/matches" element={<MatchList />} />
-          <Route path="/matches/:id" element={<MatchDetail />} />
+          <Route path="/matches/:id/record" element={<MatchRecord />} />
           <Route path="/matches/:id/live" element={<LiveScoring />} />
+          <Route path="/matches/:id" element={<MatchDetail />} />
           <Route path="/competitions" element={<CompetitionPage />} />
           <Route path="/competitions" element={<CompetitionList />} />
           <Route path="/tournaments" element={<CompetitionList />} />
