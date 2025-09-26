@@ -1,4 +1,7 @@
-# 🏆 ScoreBoard
+# 🏆 MatchCard
+
+프로젝트 내의 모든 claude.md 파일은 삭제하지 않는다.
+
 
 **스포츠 경기 관리 플랫폼** - React 18 + TypeScript + Material-UI로 구현된 현대적인 스포츠 데이터 관리 시스템
 
