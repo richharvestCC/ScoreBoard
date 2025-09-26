@@ -27,7 +27,10 @@ import {
   Palette,
   ColorLens,
   AccountCircle,
-  SportsScore
+  SportsScore,
+  Lan,
+  AutoAwesome,
+  AccountTree
 } from '@mui/icons-material';
 import { useNavigation } from '../../contexts/NavigationContext';
 import { useSidebar } from '../../contexts/SidebarContext';
@@ -46,6 +49,7 @@ interface MenuItemData {
   badge: number | null;
   adminOnly?: boolean;
   requiredRoles?: string[];
+  children?: MenuItemData[];
 }
 
 interface MenuItemProps {
@@ -193,12 +197,22 @@ const MenuSection: React.FC<MenuSectionProps> = React.memo(({ title, items }) =>
       )}
       <List sx={listSx}>
         {items.map((item) => (
-          <MenuItem
-            key={item.id}
-            item={item}
-            isActive={isActive(item.path)}
-            onClick={handleItemClick}
-          />
+          <React.Fragment key={item.id}>
+            <MenuItem
+              item={item}
+              isActive={isActive(item.path)}
+              onClick={handleItemClick}
+            />
+            {item.children?.map((child) => (
+              <MenuItem
+                key={child.id}
+                item={child}
+                isSubmenu
+                isActive={isActive(child.path)}
+                onClick={handleItemClick}
+              />
+            ))}
+          </React.Fragment>
         ))}
       </List>
     </Box>
@@ -271,7 +285,33 @@ const Sidebar: React.FC = React.memo(() => {
       icon: <ColorLens />,
       path: '/theme',
       badge: null,
-      adminOnly: true
+      adminOnly: true,
+      children: [
+        {
+          id: 'theme-design-tokens',
+          text: '디자인 토큰',
+          icon: <AutoAwesome fontSize="small" />,
+          path: '/theme',
+          badge: null,
+          adminOnly: true
+        },
+        {
+          id: 'theme-tournament-guide',
+          text: '토너먼트 가이드',
+          icon: <AccountTree fontSize="small" />,
+          path: '/theme#tournament-builder',
+          badge: null,
+          adminOnly: true
+        },
+        {
+          id: 'theme-tournament-builder',
+          text: '토너먼트 빌더',
+          icon: <Lan fontSize="small" />,
+          path: '/tournament-builder',
+          badge: null,
+          adminOnly: true
+        }
+      ]
     },
     {
       id: 'style-guide',
@@ -303,29 +343,22 @@ const Sidebar: React.FC = React.memo(() => {
   ], []);
 
   // Role-based menu filtering
-  const visibleMenuItems = useMemo(() => {
-    return menuItems.filter(item => {
-      if (item.adminOnly && !['admin', 'moderator'].includes(user?.role)) return false;
-      if (item.requiredRoles && !item.requiredRoles.includes(user?.role)) return false;
-      return true;
-    });
-  }, [menuItems, user?.role]);
+  const filterItemsByRole = useCallback((items: MenuItemData[]): MenuItemData[] => {
+    return items
+      .filter(item => {
+        if (item.adminOnly && !['admin', 'moderator'].includes(user?.role)) return false;
+        if (item.requiredRoles && !item.requiredRoles.includes(user?.role)) return false;
+        return true;
+      })
+      .map(item => ({
+        ...item,
+        children: item.children ? filterItemsByRole(item.children) : undefined
+      }));
+  }, [user?.role]);
 
-  const visibleDevelopmentItems = useMemo(() => {
-    return developmentItems.filter(item => {
-      if (item.adminOnly && !['admin', 'moderator'].includes(user?.role)) return false;
-      if (item.requiredRoles && !item.requiredRoles.includes(user?.role)) return false;
-      return true;
-    });
-  }, [developmentItems, user?.role]);
-
-  const visibleAdminItems = useMemo(() => {
-    return adminItems.filter(item => {
-      if (item.adminOnly && !['admin', 'moderator'].includes(user?.role)) return false;
-      if (item.requiredRoles && !item.requiredRoles.includes(user?.role)) return false;
-      return true;
-    });
-  }, [adminItems, user?.role]);
+  const visibleMenuItems = useMemo(() => filterItemsByRole(menuItems), [filterItemsByRole, menuItems]);
+  const visibleDevelopmentItems = useMemo(() => filterItemsByRole(developmentItems), [filterItemsByRole, developmentItems]);
+  const visibleAdminItems = useMemo(() => filterItemsByRole(adminItems), [filterItemsByRole, adminItems]);
 
   // Memoized sx objects for main container elements
   const sidebarContainerSx = useMemo<SxProps<Theme>>(() => ({

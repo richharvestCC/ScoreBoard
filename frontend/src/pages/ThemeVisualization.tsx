@@ -6,7 +6,20 @@ import {
   Paper,
   Divider,
   Chip,
+  Stack,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
+  Button,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 import { useTheme } from '@mui/material/styles';
 import { useLanguage } from '../contexts/LanguageContext';
 import ColorSwatch from '../components/common/ColorSwatch';
@@ -114,7 +127,7 @@ const ThemeVisualization: React.FC = React.memo(() => {
       </Box>
 
       {/* Design Tokens Overview */}
-      <Box sx={{ mb: 8 }}>
+      <Box id="tournament-builder" sx={{ mb: 8 }}>
         <Typography
           variant="h3"
           component="h2"
@@ -412,6 +425,280 @@ const ThemeVisualization: React.FC = React.memo(() => {
               </Typography>
             </Paper>
           </Box>
+        </Box>
+      </Box>
+
+      {/* Tournament Builder UI Guide */}
+      <Box sx={{ mb: 8 }}>
+        <Typography
+          variant="h3"
+          component="h2"
+          gutterBottom
+          sx={{
+            color: 'primary.700',
+            fontWeight: 700,
+            mb: 2,
+            textAlign: 'left'
+          }}
+        >
+          {t({ ko: '토너먼트 빌더 UI 가이드', en: 'Tournament Builder UI Guide' })}
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ maxWidth: 720, mb: 4 }}
+        >
+          {t({
+            ko: '토너먼트 생성기에서 사용한 핵심 패턴을 정리했습니다. 컴포넌트 재사용 시 테마 토큰과 패딩, 라운드 수치를 유지해 일관성을 확보하세요.',
+            en: 'Key patterns used in the tournament builder. Keep theme tokens, padding, and corner radii for a consistent experience.'
+          })}
+        </Typography>
+
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, 1fr)' }, gap: 3 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2
+            }}
+          >
+            <Typography variant="h6" color="primary.600">
+              {t({ ko: '컨테이너', en: 'Container' })}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t({
+                ko: 'borderRadius 1과 divider 보더를 사용해 카드형 그리드를 구성합니다. 배경은 background.paper, 내부 패딩은 theme.spacing(3)입니다.',
+                en: 'Use borderRadius 1, divider border, background.paper, and spacing(3) padding to build card-like containers.'
+              })}
+            </Typography>
+            <Box
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                backgroundColor: 'background.paper',
+                p: 3,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+              }}
+            >
+              <Typography variant="subtitle2" color="text.secondary">
+                {t({ ko: '예시 컨테이너', en: 'Example container' })}
+              </Typography>
+              <Typography variant="body2">
+                {t({ ko: '라운드·팔레트 래퍼가 공유하는 기본 스타일', en: 'Base style shared by rounds and palette sections.' })}
+              </Typography>
+            </Box>
+          </Paper>
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2
+            }}
+          >
+            <Typography variant="h6" color="primary.600">
+              {t({ ko: '설정 패널', en: 'Settings Panel' })}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t({
+                ko: 'TextField는 borderRadius 0.5, 내부 패딩 12×10px을 유지합니다. Select와 Switch도 동일 라운드를 사용합니다.',
+                en: 'Text fields use borderRadius 0.5 with 12×10px padding; selects and switches share the same radius.'
+              })}
+            </Typography>
+            <Stack
+              spacing={2}
+              sx={{
+                border: '1px dashed',
+                borderColor: 'divider',
+                borderRadius: 1,
+                p: 2
+              }}
+            >
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
+                <TextField
+                  label={t({ ko: '토너먼트 이름', en: 'Tournament name' })}
+                  defaultValue="MatchCard Cup"
+                  size="small"
+                  sx={{ flex: 1 }}
+                />
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {t({ ko: '조별 예선', en: 'Group stage' })}
+                  </Typography>
+                  <Switch defaultChecked inputProps={{ 'aria-label': 'group stage example' }} />
+                </Stack>
+              </Stack>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <TextField
+                  type="number"
+                  label={t({ ko: '참가 팀', en: 'Participants' })}
+                  defaultValue={16}
+                  size="small"
+                  sx={{ width: { xs: '100%', sm: '33.33%' } }}
+                />
+                <FormControl size="small" sx={{ width: { xs: '100%', sm: '33.33%' } }}>
+                  <InputLabel id="guide-group-count">{t({ ko: '그룹 수', en: 'Groups' })}</InputLabel>
+                  <Select labelId="guide-group-count" label={t({ ko: '그룹 수', en: 'Groups' })} defaultValue="4">
+                    <MenuItem value="4">4</MenuItem>
+                    <MenuItem value="8">8</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ width: { xs: '100%', sm: '33.33%' } }}>
+                  <InputLabel id="guide-promotion">{t({ ko: '승격 팀', en: 'Promotion' })}</InputLabel>
+                  <Select labelId="guide-promotion" label={t({ ko: '승격 팀', en: 'Promotion' })} defaultValue="2">
+                    <MenuItem value="1">1</MenuItem>
+                    <MenuItem value="2">2</MenuItem>
+                  </Select>
+                </FormControl>
+              </Stack>
+              <Stack direction="row" spacing={1} justifyContent="flex-end">
+                <Button variant="outlined" size="small">
+                  {t({ ko: '임시 저장', en: 'Save draft' })}
+                </Button>
+                <Button variant="contained" size="small">
+                  {t({ ko: '시드 생성', en: 'Generate seeds' })}
+                </Button>
+              </Stack>
+            </Stack>
+          </Paper>
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2
+            }}
+          >
+            <Typography variant="h6" color="primary.600">
+              {t({ ko: '브래킷 카드', en: 'Bracket Card' })}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t({
+                ko: '경기 카드는 borderRadius 1, 배경 background.default, hover 시 action.hover 컬러를 사용합니다.',
+                en: 'Match cards use borderRadius 1 with background.default and action.hover on hover.'
+              })}
+            </Typography>
+            <Paper
+              elevation={0}
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                p: 2,
+                backgroundColor: 'background.default'
+              }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  R1-M1
+                </Typography>
+                <Chip label="단판 경기" color="secondary" size="small" variant="outlined" />
+              </Stack>
+              <Divider sx={{ mb: 1 }} />
+              <Stack spacing={1}>
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 1,
+                    borderRadius: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  <Chip label="A1" size="small" color="primary" variant="outlined" />
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    Team Alpha
+                  </Typography>
+                </Paper>
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 1,
+                    borderRadius: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  <Chip label="B2" size="small" color="primary" variant="outlined" />
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    Team Beta
+                  </Typography>
+                </Paper>
+              </Stack>
+            </Paper>
+          </Paper>
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2
+            }}
+          >
+            <Typography variant="h6" color="primary.600">
+              {t({ ko: '줌 컨트롤', en: 'Zoom Controls' })}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {t({
+                ko: 'IconButton은 primary 색상을 사용하고, 컨트롤 래퍼는 borderRadius 999와 container 색상을 적용합니다.',
+                en: 'Icon buttons use the primary color; the control pill uses borderRadius 999 with container styling.'
+              })}
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                borderRadius: 999,
+                border: '1px solid',
+                borderColor: 'divider',
+                backgroundColor: 'background.paper',
+                p: 1.5,
+                justifyContent: 'center'
+              }}
+            >
+              <Tooltip title={t({ ko: '축소', en: 'Zoom out' })}>
+                <IconButton color="primary" size="small">
+                  <ZoomOutIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title={t({ ko: '초기화', en: 'Reset' })}>
+                <IconButton color="primary" size="small">
+                  <CenterFocusStrongIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title={t({ ko: '확대', en: 'Zoom in' })}>
+                <IconButton color="primary" size="small">
+                  <ZoomInIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Paper>
         </Box>
       </Box>
     </Container>
