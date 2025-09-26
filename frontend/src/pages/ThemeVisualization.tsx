@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -62,6 +62,9 @@ import DateTimeInputsDemo from '../components/demos/DateTimeInputsDemo';
 import DetailsPanel from '../components/guide/DetailsPanel';
 import ChipsDemo from '../components/demos/ChipsDemo';
 import DialogVariantsDemo from '../components/demos/DialogVariantsDemo';
+import SectionBlock from '../components/guide/SectionBlock';
+import AnchorNav from '../components/guide/AnchorNav';
+import useScrollSpy from '../hooks/useScrollSpy';
 
 type PaletteColorKey = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
 
@@ -80,89 +83,6 @@ type Section = {
   summary: string;
   patterns: Pattern[];
 };
-
-const SectionBlock: React.FC<Section> = ({ id, icon, title, summary, patterns }) => (
-  <Box id={id} sx={{ mb: 8 }}>
-    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
-      <Box
-        sx={{
-          width: 44,
-          height: 44,
-          borderRadius: 1.5,
-          bgcolor: 'primary.50',
-          border: '1px solid',
-          borderColor: 'primary.100',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'primary.600',
-        }}
-      >
-        {icon}
-      </Box>
-      <Box>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          {title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {summary}
-        </Typography>
-      </Box>
-    </Stack>
-    <Box
-      sx={{
-        display: 'grid',
-        gap: 3,
-        gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-      }}
-    >
-      {patterns.map((pattern, index) => (
-        <Box key={`${id}-${index}`} sx={{ gridColumn: pattern.fullWidth ? '1 / -1' : 'auto' }}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              borderRadius: 2,
-              border: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'background.paper',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-            }}
-          >
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {pattern.title}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {pattern.description}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                borderRadius: 1,
-                border: '1px dashed',
-                borderColor: 'divider',
-                bgcolor: 'background.default',
-                p: 2,
-              }}
-            >
-              {pattern.content}
-            </Box>
-            {pattern.tokens && pattern.tokens.length > 0 && (
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {pattern.tokens.map((token) => (
-                  <Chip key={token} label={token} size="small" variant="outlined" />
-                ))}
-              </Stack>
-            )}
-          </Paper>
-        </Box>
-      ))}
-    </Box>
-  </Box>
-);
 
 // Motion demo moved to components/demos/MotionDemo
 
@@ -1489,29 +1409,7 @@ const ThemeVisualization: React.FC = React.memo(() => {
   );
 
   const navItems = useMemo(() => sections.map((section) => ({ href: `#${section.id}`, id: section.id, label: section.title })), [sections]);
-
-  const [activeId, setActiveId] = useState<string | null>(sections[0]?.id ?? null);
-
-  useEffect(() => {
-    const ids = sections.map((s) => s.id);
-    const elements = ids
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => Boolean(el));
-    if (elements.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => (a.boundingClientRect.top > b.boundingClientRect.top ? 1 : -1));
-        if (visible[0]?.target?.id) setActiveId(visible[0].target.id);
-      },
-      { root: null, rootMargin: '-16% 0px -70% 0px', threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] }
-    );
-
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [sections]);
+  const activeId = useScrollSpy(sections.map((s) => s.id));
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -1526,40 +1424,19 @@ const ThemeVisualization: React.FC = React.memo(() => {
       </Typography>
 
       {/* xs~sm: 상단 퀵 링크 버튼 */}
-      <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 3, display: { xs: 'flex', md: 'none' } }}>
-        {navItems.map((item) => (
-          <Button key={item.href} size="small" variant={activeId === item.id ? 'contained' : 'outlined'} component="a" href={item.href}>
-            {item.label}
-          </Button>
-        ))}
-        <Button size="small" variant="contained" endIcon={<ArrowForwardIcon fontSize="small" />} component="a" href="/tournament-builder">
-          {t({ ko: '토너먼트 빌더 열기', en: 'Open tournament builder' })}
-        </Button>
-      </Stack>
+      <AnchorNav
+        items={navItems}
+        activeId={activeId}
+        variant="quick"
+        cta={{ label: t({ ko: '토너먼트 빌더 열기', en: 'Open tournament builder' }), href: '/tournament-builder', endIcon: <ArrowForwardIcon fontSize="small" /> }}
+        sx={{ mb: 3, display: { xs: 'flex', md: 'none' } }}
+      />
 
       <Divider sx={{ mb: 3 }} />
 
       {/* md+: 좌측 로컬 앵커 + 본문 */}
       <Box sx={{ display: { xs: 'block', md: 'grid' }, gridTemplateColumns: { md: '240px 1fr' }, gap: 3 }}>
-        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-          <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', position: 'sticky', top: 88 }}>
-            <Stack spacing={1}>
-              {navItems.map((item) => (
-                <Button
-                  key={item.href}
-                  component="a"
-                  href={item.href}
-                  color={activeId === item.id ? 'primary' : 'inherit'}
-                  variant={activeId === item.id ? 'contained' : 'text'}
-                  size="small"
-                  sx={{ justifyContent: 'flex-start' }}
-                >
-                  {item.label}
-                </Button>
-              ))}
-            </Stack>
-          </Paper>
-        </Box>
+        <AnchorNav items={navItems} activeId={activeId} variant="sidebar" sx={{ display: { xs: 'none', md: 'block' } }} />
 
         <Box>
           {sections.map((section, index) => (
