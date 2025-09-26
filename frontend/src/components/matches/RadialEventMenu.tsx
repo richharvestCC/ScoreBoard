@@ -7,6 +7,11 @@ import DangerousIcon from '@mui/icons-material/Dangerous';
 import HealingIcon from '@mui/icons-material/Healing';
 import SyncIcon from '@mui/icons-material/Sync';
 import AssistWalkerIcon from '@mui/icons-material/AssistWalker';
+import FlagIcon from '@mui/icons-material/Flag';
+import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import CallMadeIcon from '@mui/icons-material/CallMade';
+import StraightenIcon from '@mui/icons-material/Straighten';
+import { getAllowedEventsForZone, EventTypeDefinition, getEventDefinition, EventDefinition } from './FieldZoneRules';
 
 export interface EventType {
   id: string;
@@ -21,7 +26,36 @@ export interface RadialEventMenuProps {
   onSelect: (event: EventType) => void;
   onClose: () => void;
   events?: EventType[];
+  zoneId?: string; // 현재 클릭된 구역 ID
+  currentHalf?: number; // 현재 하프 (1 또는 2)
+  matchEvents?: Array<{ eventType: string; [key: string]: any }>; // 현재 경기의 모든 이벤트
 }
+
+// 이벤트 ID를 Material-UI 아이콘으로 매핑
+const getIconForEventType = (eventId: string): React.ReactNode => {
+  const iconMap: { [key: string]: React.ReactNode } = {
+    goal: <EmojiEventsIcon fontSize="small" />,
+    assist: <SportsSoccerIcon fontSize="small" />,
+    keypass: <DirectionsRunIcon fontSize="small" />,
+    offside: <FlagIcon fontSize="small" />,
+    foul: <AssistWalkerIcon fontSize="small" />,
+    violation: <WarningAmberIcon fontSize="small" />,
+    freekick: <SportsSoccerIcon fontSize="small" />,
+    goal_line_out: <StraightenIcon fontSize="small" />,
+    corner_kick: <CallMadeIcon fontSize="small" />,
+    touch_line_out: <StraightenIcon fontSize="small" />,
+    substitution: <SyncIcon fontSize="small" />
+  };
+  return iconMap[eventId] || <SportsSoccerIcon fontSize="small" />;
+};
+
+// EventTypeDefinition을 EventType으로 변환
+const convertToEventType = (eventDef: EventTypeDefinition): EventType => ({
+  id: eventDef.id,
+  name: eventDef.name,
+  color: eventDef.color,
+  icon: getIconForEventType(eventDef.id)
+});
 
 const DEFAULT_EVENTS: EventType[] = [
   { id: 'goal', name: '득점', color: '#f44336', icon: <EmojiEventsIcon fontSize="small" /> },
@@ -33,24 +67,86 @@ const DEFAULT_EVENTS: EventType[] = [
   { id: 'substitution', name: '교체', color: '#26a69a', icon: <SyncIcon fontSize="small" /> },
 ];
 
+// 이벤트 전제조건 확인 함수
+const checkEventPrerequisites = (eventId: string, matchEvents: Array<{ eventType: string; [key: string]: any }> = []): boolean => {
+  const eventDef = getEventDefinition(eventId);
+  if (!eventDef || !eventDef.requiresPrevious) {
+    return true; // 전제조건이 없으면 허용
+  }
+
+  const requiredEvents = eventDef.requiresPrevious;
+  const recordedEventTypes = matchEvents.map(event => event.eventType);
+
+  // 모든 전제조건 이벤트가 기록되었는지 확인
+  const hasAllPrerequisites = requiredEvents.every((required: string) =>
+    recordedEventTypes.includes(required)
+  );
+
+  console.log(`📋 Event ${eventId} prerequisites check:`, {
+    required: requiredEvents,
+    recorded: recordedEventTypes,
+    hasAll: hasAllPrerequisites
+  });
+
+  return hasAllPrerequisites;
+};
+
 export const RadialEventMenu: React.FC<RadialEventMenuProps> = ({
   open,
   anchor,
   onSelect,
   onClose,
   events = DEFAULT_EVENTS,
+  zoneId,
+  currentHalf = 1,
+  matchEvents = [],
 }) => {
   if (!open || !anchor) return null;
 
-  const buttons = events;
+  // 구역별 허용 이벤트 계산
+  let buttons: EventType[] = [];
+
+  console.log('📍 RadialEventMenu - zoneId:', zoneId); // 디버깅용
+
+  if (zoneId) {
+    // 구역별 규칙에 따른 허용 이벤트 가져오기
+    const allowedEvents = getAllowedEventsForZone(zoneId);
+    console.log(`🎯 Zone ${zoneId} allowed events:`, allowedEvents.map(e => `${e.id}(${e.name})`)); // 디버깅용
+
+    // 전제조건 확인하여 이벤트 필터링
+    const filteredEvents = allowedEvents.filter(event =>
+      checkEventPrerequisites(event.id, matchEvents)
+    );
+    console.log(`✅ Events after prerequisite check:`, filteredEvents.map(e => `${e.id}(${e.name})`)); // 디버깅용
+
+    buttons = filteredEvents.map(convertToEventType);
+
+    if (buttons.length === 0) {
+      console.log('⚠️ No events found for zone after filtering, using defaults'); // 디버깅용
+    }
+  }
+
+  // 구역이 없거나 이벤트가 없으면 기본 이벤트 사용 (전제조건 필터링 적용)
+  if (!zoneId || buttons.length === 0) {
+    console.log('🔄 Using default events for zone:', zoneId); // 디버깅용
+    const defaultEvents = events || DEFAULT_EVENTS;
+    const filteredDefaults = defaultEvents.filter(event =>
+      checkEventPrerequisites(event.id, matchEvents)
+    );
+    buttons = filteredDefaults;
+  }
+
+  console.log('🎪 Final buttons after all filters:', buttons.map(b => `${b.id}(${b.name})`)); // 디버깅용
   const angleStep = buttons.length ? (Math.PI * 2) / buttons.length : 0;
 
   return (
     <Box
       sx={{
         position: 'absolute',
-        left: `${anchor.x}%`,
-        top: `${anchor.y}%`,
+        // InteractiveField는 aspectRatio 19:12로 중앙 정렬됨
+        // 컨테이너 내에서 실제 경기장 영역의 좌표로 변환
+        left: `calc(50% + ${(anchor.x - 50) * 0.8}%)`, // 경기장 영역 내 좌표 조정
+        top: `calc(50% + ${(anchor.y - 50) * 0.8}%)`,  // 경기장 영역 내 좌표 조정
         transform: 'translate(-50%, -50%)',
         pointerEvents: 'auto',
         zIndex: 10,
