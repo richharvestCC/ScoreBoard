@@ -16,6 +16,10 @@ import {
   FormControl,
   InputLabel,
   Select,
+  CircularProgress,
+  Checkbox,
+  Radio,
+  FormControlLabel,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
@@ -38,6 +42,9 @@ import ErrorIcon from '@mui/icons-material/Error';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useLanguage } from '../contexts/LanguageContext';
 import ColorSwatch from '../components/common/ColorSwatch';
+import MotionDemo from '../components/demos/MotionDemo';
+import StateTokensDemo from '../components/demos/StateTokensDemo';
+import InputsDemo from '../components/demos/InputsDemo';
 
 type PaletteColorKey = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
 
@@ -140,98 +147,7 @@ const SectionBlock: React.FC<Section> = ({ id, icon, title, summary, patterns })
   </Box>
 );
 
-const MotionDemo: React.FC = () => {
-  const theme = useTheme();
-  const { t } = useLanguage();
-  const [mode, setMode] = useState<'fast' | 'standard' | 'large'>('fast');
-  const [active, setActive] = useState(false);
-  const primaryPalette = theme.palette.primary as unknown as Record<string, string>;
-
-  const durations: Record<typeof mode, number> = useMemo(
-    () => ({ fast: 120, standard: 200, large: 240 }),
-    []
-  );
-
-  const handleToggle = useCallback(() => {
-    setActive((prev) => !prev);
-  }, []);
-
-  const currentDuration = durations[mode];
-
-  return (
-    <Stack spacing={2}>
-      <Stack direction="row" spacing={1} flexWrap="wrap">
-        {(['fast', 'standard', 'large'] as const).map((key) => (
-          <Chip
-            key={key}
-            label={
-              key === 'fast'
-                ? t({ ko: 'Fast UI · 120ms', en: 'Fast UI · 120ms' })
-                : key === 'standard'
-                ? t({ ko: 'Standard · 200ms', en: 'Standard · 200ms' })
-                : t({ ko: 'Large · 240ms', en: 'Large · 240ms' })
-            }
-            color={mode === key ? 'primary' : 'default'}
-            variant={mode === key ? 'filled' : 'outlined'}
-            onClick={() => setMode(key)}
-            sx={{ cursor: 'pointer' }}
-          />
-        ))}
-      </Stack>
-      <Stack direction="row" spacing={1} alignItems="center">
-        <Button variant="contained" size="small" onClick={handleToggle}>
-          {active
-            ? t({ ko: '애니메이션 재생 (뒤로)', en: 'Animate (reverse)' })
-            : t({ ko: '애니메이션 재생', en: 'Animate' })}
-        </Button>
-        <Typography variant="body2" color="text.secondary">
-          {t({ ko: '현재 지속시간', en: 'Current duration' })}: {currentDuration}ms · {t({ ko: 'easing', en: 'easing' })}: ease-out
-        </Typography>
-      </Stack>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          minHeight: 120,
-          px: 1,
-        }}
-      >
-        <Box
-          sx={{
-            width: 160,
-            height: 80,
-            borderRadius: 2,
-            bgcolor: active ? 'primary.300' : 'primary.100',
-            transform: active ? 'translateX(140px)' : 'translateX(0)',
-            transition: theme.transitions.create(['transform', 'background-color', 'box-shadow'], {
-              duration: currentDuration,
-              easing: theme.transitions.easing.easeOut,
-            }),
-            boxShadow: active ? 4 : 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: primaryPalette['900'] || theme.palette.getContrastText(theme.palette.primary.main),
-            fontWeight: 600,
-          }}
-        >
-          {t({ ko: 'Card', en: 'Card' })}
-          <Typography variant="caption" color="text.secondary">
-            {currentDuration}ms
-          </Typography>
-        </Box>
-      </Box>
-      <Typography variant="caption" color="text.secondary">
-        {t({
-          ko: '버튼/토글은 Fast, 카드/패널은 Standard, 브래킷 줌 같은 대형 모션은 Large를 사용합니다.',
-          en: 'Use Fast for buttons/toggles, Standard for cards/panels and Large for bracket zoom transitions.',
-        })}
-      </Typography>
-    </Stack>
-  );
-};
+// Motion demo moved to components/demos/MotionDemo
 
 const ThemeVisualization: React.FC = React.memo(() => {
   const theme = useTheme();
@@ -759,6 +675,15 @@ const ThemeVisualization: React.FC = React.memo(() => {
         tokens: ['height: 40px', 'icon gap: 8px'],
       },
       {
+        title: t({ ko: '폼 컨트롤 묶음', en: 'Form controls (bundle)' }),
+        description: t({
+          ko: '텍스트필드/셀렉트/토글/체크박스/라디오/텍스트영역/버튼 상태 데모를 한 곳에서.',
+          en: 'Text fields, select, toggles, checkboxes, radios, textarea and button states together.',
+        }),
+        content: <InputsDemo />,
+        fullWidth: true,
+      },
+      {
         title: t({ ko: '아이콘 가이드', en: 'Icon usage' }),
         description: t({
           ko: '기본 크기 24px, 라인 아이콘 위주. 사용 목적에 맞는 ARIA 라벨 필수.',
@@ -776,6 +701,119 @@ const ThemeVisualization: React.FC = React.memo(() => {
           </Stack>
         ),
         tokens: ['size: 24px', 'stroke icons'],
+      },
+      {
+        title: t({ ko: '입력 필드', en: 'Input fields' }),
+        description: t({
+          ko: '기본, 에러, 비활성 텍스트 입력 예시.',
+          en: 'Default, error and disabled text field examples.',
+        }),
+        content: (
+          <Stack spacing={1.5}>
+            <TextField size="small" label={t({ ko: '대회 이름', en: 'Competition name' })} placeholder="MatchCard Cup" fullWidth />
+            <TextField
+              size="small"
+              label={t({ ko: '대회 이름', en: 'Competition name' })}
+              error
+              helperText={t({ ko: '이름을 입력하세요.', en: 'Please enter a name.' })}
+              fullWidth
+            />
+            <TextField size="small" label={t({ ko: '대회 이름', en: 'Competition name' })} disabled placeholder="Disabled" fullWidth />
+          </Stack>
+        ),
+        tokens: ['Label: subtitle2', 'HelperText: caption'],
+      },
+      {
+        title: t({ ko: '토글 (Switch)', en: 'Toggle (Switch)' }),
+        description: t({
+          ko: '활성/비활성/비활성화 스위치 상태.',
+          en: 'Switch states: on, off, disabled.',
+        }),
+        content: (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Stack spacing={0.5} alignItems="center">
+              <Switch defaultChecked />
+              <Typography variant="caption" color="text.secondary">
+                {t({ ko: '활성', en: 'Active' })}
+              </Typography>
+            </Stack>
+            <Stack spacing={0.5} alignItems="center">
+              <Switch />
+              <Typography variant="caption" color="text.secondary">
+                {t({ ko: '비활성', en: 'Inactive' })}
+              </Typography>
+            </Stack>
+            <Stack spacing={0.5} alignItems="center">
+              <Switch disabled defaultChecked />
+              <Typography variant="caption" color="text.secondary">
+                Disabled
+              </Typography>
+            </Stack>
+          </Stack>
+        ),
+        tokens: ['Thumb travel: 20px', 'Track radius: 24px'],
+      },
+      {
+        title: t({ ko: '체크박스 & 라디오', en: 'Checkbox & radio' }),
+        description: t({
+          ko: 'FormControlLabel 로 구성된 체크박스/라디오 패턴.',
+          en: 'Checkbox and radio patterns using FormControlLabel.',
+        }),
+        content: (
+          <Stack direction="row" spacing={3} flexWrap="wrap">
+            <Stack spacing={0.5}>
+              <FormControlLabel control={<Checkbox defaultChecked />} label={t({ ko: '승인', en: 'Approved' })} />
+              <FormControlLabel control={<Checkbox />} label={t({ ko: '보류', en: 'Pending' })} />
+              <FormControlLabel control={<Checkbox disabled />} label={t({ ko: 'Disabled', en: 'Disabled' })} />
+            </Stack>
+            <Stack spacing={0.5}>
+              <FormControlLabel control={<Radio defaultChecked />} label={t({ ko: '옵션 A', en: 'Option A' })} />
+              <FormControlLabel control={<Radio />} label={t({ ko: '옵션 B', en: 'Option B' })} />
+              <FormControlLabel control={<Radio disabled />} label={t({ ko: 'Disabled', en: 'Disabled' })} />
+            </Stack>
+          </Stack>
+        ),
+        tokens: ['Hit area: 40px', 'Label spacing: 8px'],
+      },
+      {
+        title: t({ ko: '텍스트 영역', en: 'Text area' }),
+        description: t({
+          ko: '멀티라인 입력과 자동 높이 조절.',
+          en: 'Multiline text area with auto height adjustments.',
+        }),
+        content: (
+          <TextField
+            label={t({ ko: '경기 요약', en: 'Match summary' })}
+            multiline
+            minRows={3}
+            placeholder={t({ ko: '경기 핵심 내용을 입력하세요.', en: 'Describe the match highlights.' })}
+            fullWidth
+          />
+        ),
+        tokens: ['multiline', 'minRows: 3'],
+      },
+      {
+        title: t({ ko: '버튼 상태', en: 'Button states' }),
+        description: t({
+          ko: '활성/비활성/로딩 버튼.',
+          en: 'Active, disabled and loading button states.',
+        }),
+        content: (
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            <Button variant="contained">{t({ ko: '활성', en: 'Active' })}</Button>
+            <Button variant="contained" disabled>
+              {t({ ko: '비활성', en: 'Disabled' })}
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<CircularProgress size={16} color="inherit" />}
+            >
+              {t({ ko: '로딩', en: 'Loading' })}
+            </Button>
+          </Stack>
+        ),
+        tokens: ['Disabled opacity: 0.38', 'Loading icon: 16px'],
       },
       {
         title: t({ ko: '사용자 카드', en: 'User card' }),
@@ -1173,52 +1211,11 @@ const ThemeVisualization: React.FC = React.memo(() => {
       {
         title: t({ ko: '상태 토큰', en: 'State tokens' }),
         description: t({
-          ko: 'Hover: action.hover, Pressed: action.selected, Focus: focusVisible + 컬러 대비.',
-          en: 'Hover uses action.hover; pressed uses action.selected; focus uses focusVisible colour.',
+          ko: 'Hover/Pressed/Focus를 실제 UI와 함께 시각화.',
+          en: 'Visualized Hover/Pressed/Focus with real UI.',
         }),
-        content: (
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-            <Box sx={{ flex: 1, borderRadius: 1, border: '1px solid', borderColor: 'divider', p: 2, bgcolor: 'action.hover' }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                {t({ ko: 'Hover 상태', en: 'Hover state' })}
-              </Typography>
-              <Button fullWidth>{t({ ko: 'Hover 예시', en: 'Hover example' })}</Button>
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                {t({ ko: '배경: rgba(0,0,0,0.04)', en: 'Background: rgba(0,0,0,0.04)' })}
-              </Typography>
-            </Box>
-            <Box sx={{ flex: 1, borderRadius: 1, border: '1px solid', borderColor: 'divider', p: 2, bgcolor: 'action.selected' }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                {t({ ko: 'Pressed 상태', en: 'Pressed state' })}
-              </Typography>
-              <Button fullWidth>{t({ ko: 'Pressed 예시', en: 'Pressed example' })}</Button>
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                {t({ ko: '배경: rgba(0,0,0,0.08)', en: 'Background: rgba(0,0,0,0.08)' })}
-              </Typography>
-            </Box>
-            <Box sx={{ flex: 1, borderRadius: 1, border: '1px solid', borderColor: 'divider', p: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                {t({ ko: 'Focus 상태', en: 'Focus state' })}
-              </Typography>
-              <Box
-                sx={{
-                  borderRadius: 1,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  outline: '2px solid',
-                  outlineColor: 'primary.main',
-                  outlineOffset: '2px',
-                  p: 1,
-                }}
-              >
-                <Button fullWidth>{t({ ko: 'Focus 예시', en: 'Focus example' })}</Button>
-              </Box>
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                {t({ ko: 'Outline: 2px primary.main', en: 'Outline: 2px primary.main' })}
-              </Typography>
-            </Box>
-          </Stack>
-        ),
+        content: <StateTokensDemo />,
+        tokens: ['Hover: action.hover', 'Pressed: action.selected', 'Focus: 2px outline'],
       },
       {
         title: t({ ko: '모션 & 지속시간', en: 'Motion & duration' }),
