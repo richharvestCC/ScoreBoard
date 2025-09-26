@@ -11,7 +11,7 @@ dotenv.config();
 
 // Import modules
 const { testConnection, syncDatabase } = require('./models');
-const routes = require('./routes');
+const routes = require('./routes/index');
 const { logger, log, correlationMiddleware } = require('./config/logger');
 const xssProtection = require('./middleware/xss-protection');
 

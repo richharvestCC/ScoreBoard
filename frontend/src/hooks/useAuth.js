@@ -4,6 +4,11 @@ import { authAPI } from '../services/api';
 import useAuthStore from '../stores/authStore';
 
 export const useAuth = () => {
+  // UI DEVELOPMENT MODE - BYPASS AUTHENTICATION
+  // Set to false when authentication is needed again
+  const UI_DEV_MODE = true;
+
+  // Always call hooks first (React Hooks rule compliance)
   const { setAuth, logout, setLoading, setError, clearError, getters } = useAuthStore();
   const queryClient = useQueryClient();
 
@@ -65,38 +70,52 @@ export const useAuth = () => {
     },
   });
 
-  // Get profile query
+  // Get auth store values (call hooks at top level)
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const error = useAuthStore((state) => state.error);
   const isLoggedIn = useAuthStore((state) => state.isAuthenticated && !!state.accessToken);
+
+  // Get profile query
   const profileQuery = useQuery({
     queryKey: ['profile'],
     queryFn: authAPI.getProfile,
-    enabled: isLoggedIn,
+    enabled: isLoggedIn && !UI_DEV_MODE,
     retry: false,
   });
 
   // Handle profile query success/error with useEffect (React Query v5 pattern)
   useEffect(() => {
-    if (profileQuery.isSuccess && profileQuery.data) {
+    if (!UI_DEV_MODE && profileQuery.isSuccess && profileQuery.data) {
       const user = profileQuery.data?.data?.data?.user;
       if (user) {
         useAuthStore.getState().setUser(user);
       }
     }
-  }, [profileQuery.isSuccess, profileQuery.data]);
+  }, [UI_DEV_MODE, profileQuery.isSuccess, profileQuery.data]);
 
   useEffect(() => {
-    if (profileQuery.isError && isLoggedIn) {
+    if (!UI_DEV_MODE && profileQuery.isError && isLoggedIn) {
       // Use store's logout directly to avoid stale closure issues
       useAuthStore.getState().logout();
     }
-  }, [profileQuery.isError, isLoggedIn]);
+  }, [UI_DEV_MODE, profileQuery.isError, isLoggedIn]);
 
+  // UI DEVELOPMENT MODE - Use shared mock implementation
+  if (UI_DEV_MODE) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const mockAuth = require('./useAuthMock.js').useAuth;
+    return mockAuth();
+  }
+
+  // ORIGINAL AUTHENTICATION CODE
   return {
     // State
-    user: useAuthStore((state) => state.user),
-    isAuthenticated: useAuthStore((state) => state.isAuthenticated),
-    isLoading: useAuthStore((state) => state.isLoading),
-    error: useAuthStore((state) => state.error),
+    user,
+    isAuthenticated,
+    isLoading,
+    error,
 
     // Actions
     login: loginMutation.mutate,

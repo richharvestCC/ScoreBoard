@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -28,9 +28,9 @@ import {
   Timer as TimerIcon,
   EmojiEvents as TrophyIcon
 } from '@mui/icons-material';
-import { Pagination } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { debounce } from 'lodash';
 import { matchAPI } from '../services/api';
 import CreateMatchDialog from '../components/matches/CreateMatchDialog';
 import {
@@ -40,81 +40,142 @@ import {
   getStatusColor,
   getStageLabel
 } from '../utils/matchUtils';
+import LoadingSkeleton from '../components/common/LoadingSkeleton';
+import EmptyState from '../components/common/EmptyState';
 
-const MatchList = () => {
+const MatchList = React.memo(() => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
-  const [page, setPage] = useState(1);
+  const loadMoreRef = useRef(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const {
-    data: matchesData,
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading,
     isError,
     refetch
-  } = useQuery({
-    queryKey: ['matches', { search, statusFilter, typeFilter, page }],
-    queryFn: () => matchAPI.getAll({
-      search,
+  } = useInfiniteQuery({
+    queryKey: ['matches', { search: debouncedSearch, statusFilter, typeFilter }],
+    queryFn: ({ pageParam = 1 }) => matchAPI.getAll({
+      search: debouncedSearch,
       status: statusFilter,
       match_type: typeFilter,
-      page,
+      page: pageParam,
       limit: 12
     }),
-    keepPreviousData: true
+    getNextPageParam: (lastPage, pages) => {
+      const hasMore = lastPage?.data?.data?.length === 12;
+      return hasMore ? pages.length + 1 : undefined;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    placeholderData: (previousData) => previousData
   });
 
-  const handleSearchChange = (event) => {
-    setSearch(event.target.value);
-    setPage(1);
-  };
+  // Debounced search handler
+  const debouncedSetSearch = useCallback(
+    debounce((value) => {
+      setDebouncedSearch(value);
+    }, 300),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  const handleStatusFilterChange = (event) => {
+  const handleSearchChange = useCallback((event) => {
+    const value = event.target.value;
+    setSearch(value);
+    debouncedSetSearch(value);
+  }, [debouncedSetSearch]);
+
+  const handleStatusFilterChange = useCallback((event) => {
     setStatusFilter(event.target.value);
-    setPage(1);
-  };
+  }, []);
 
-  const handleTypeFilterChange = (event) => {
+  const handleTypeFilterChange = useCallback((event) => {
     setTypeFilter(event.target.value);
-    setPage(1);
-  };
+  }, []);
 
-  const handleMatchClick = (matchId) => {
+  const handleMatchClick = useCallback((matchId) => {
     navigate(`/matches/${matchId}`);
-  };
+  }, [navigate]);
 
-  const handleCreateSuccess = () => {
+  const handleCreateSuccess = useCallback(() => {
     setCreateDialogOpen(false);
     refetch();
-  };
+  }, [refetch]);
 
-  const handlePageChange = (event, newPage) => {
-    setPage(newPage);
-  };
+  const handleFilterReset = useCallback(() => {
+    setSearch('');
+    setStatusFilter('');
+    setTypeFilter('');
+    setDebouncedSearch('');
+  }, []);
 
+  // Flatten paginated data
+  const matches = useMemo(() => {
+    return data?.pages.flatMap(page => page?.data?.data || []) || [];
+  }, [data]);
+
+  // Check if any filters are active
+  const hasFilters = useMemo(() => {
+    return search || statusFilter || typeFilter;
+  }, [search, statusFilter, typeFilter]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-        <CircularProgress />
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <LoadingSkeleton variant="page" container />
+      </Container>
     );
   }
 
   if (isError) {
     return (
-      <Container>
-        <Typography variant="h6" color="error" align="center">
-          경기 목록을 불러오는데 실패했습니다.
-        </Typography>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <EmptyState
+          variant="error"
+          title="경기 목록을 불러올 수 없습니다"
+          description="네트워크 연결을 확인하고 다시 시도해주세요."
+          actions={[
+            {
+              label: '다시 시도',
+              onClick: () => window.location.reload(),
+              variant: 'contained'
+            }
+          ]}
+        />
       </Container>
     );
   }
-
-  const matches = matchesData?.data?.data || [];
-  const pagination = matchesData?.data?.pagination || { page: 1, totalPages: 1 };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -178,156 +239,171 @@ const MatchList = () => {
       </Box>
 
       {matches.length === 0 ? (
-        <Box textAlign="center" py={8}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            {search || statusFilter || typeFilter ? '검색 결과가 없습니다.' : '등록된 경기가 없습니다.'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" mb={3}>
-            새로운 경기를 만들어보세요!
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setCreateDialogOpen(true)}
-          >
-            경기 만들기
-          </Button>
-        </Box>
+        <EmptyState
+          variant={hasFilters ? 'search' : 'create'}
+          title={hasFilters ? '검색 결과가 없습니다' : '등록된 경기가 없습니다'}
+          description={hasFilters ?
+            '다른 검색어를 사용하거나 필터를 조정해보세요.' :
+            '새로운 경기를 만들어 팀들과 함께 스포츠를 즐겨보세요!'
+          }
+          actions={hasFilters ? [
+            {
+              label: '필터 초기화',
+              onClick: handleFilterReset,
+              variant: 'outlined'
+            }
+          ] : [
+            {
+              label: '경기 만들기',
+              onClick: () => setCreateDialogOpen(true),
+              variant: 'contained',
+              startIcon: <AddIcon />
+            }
+          ]}
+        />
       ) : (
-        <Grid container spacing={3}>
-          {matches.map((match) => (
-            <Grid item xs={12} sm={6} md={4} key={match.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 4
-                  }
-                }}
-                onClick={() => handleMatchClick(match.id)}
-              >
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Box display="flex" alignItems="center" mb={2}>
-                    <Avatar
-                      sx={{
-                        width: 48,
-                        height: 48,
-                        mr: 2,
-                        bgcolor: 'primary.main'
-                      }}
-                    >
-                      <SoccerIcon />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" component="h2" noWrap>
-                        {match.home_club?.name} vs {match.away_club?.name}
-                      </Typography>
-                      {match.match_number && (
-                        <Typography variant="body2" color="text.secondary">
-                          경기번호: {match.match_number}
+        <>
+          <Grid container spacing={3}>
+            {matches.map((match, index) => (
+              <Grid item xs={12} sm={6} md={4} key={`${match.id}-${index}`}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: 4
+                    }
+                  }}
+                  onClick={() => handleMatchClick(match.id)}
+                >
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Avatar
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          mr: 2,
+                          bgcolor: 'primary.main'
+                        }}
+                      >
+                        <SoccerIcon />
+                      </Avatar>
+                      <Box>
+                        <Typography variant="h6" component="h2" noWrap>
+                          {match.home_club?.name} vs {match.away_club?.name}
                         </Typography>
-                      )}
+                        {match.match_number && (
+                          <Typography variant="body2" color="text.secondary">
+                            경기번호: {match.match_number}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
-                  </Box>
 
-                  <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
-                    <Chip
-                      label={getMatchTypeLabel(match.match_type)}
-                      size="small"
-                      color={getMatchTypeColor(match.match_type)}
-                    />
-                    <Chip
-                      label={getStatusLabel(match.status)}
-                      size="small"
-                      color={getStatusColor(match.status)}
-                      variant="outlined"
-                    />
-                    {match.stage && (
+                    <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
                       <Chip
-                        label={getStageLabel(match.stage)}
+                        label={getMatchTypeLabel(match.match_type)}
                         size="small"
+                        color={getMatchTypeColor(match.match_type)}
+                      />
+                      <Chip
+                        label={getStatusLabel(match.status)}
+                        size="small"
+                        color={getStatusColor(match.status)}
                         variant="outlined"
                       />
+                      {match.stage && (
+                        <Chip
+                          label={getStageLabel(match.stage)}
+                          size="small"
+                          variant="outlined"
+                        />
+                      )}
+                    </Box>
+
+                    {match.tournament && (
+                      <Box display="flex" alignItems="center" mb={1}>
+                        <TrophyIcon fontSize="small" color="action" />
+                        <Typography variant="body2" color="text.secondary" ml={0.5}>
+                          {match.tournament.name}
+                        </Typography>
+                      </Box>
                     )}
-                  </Box>
 
-                  {match.tournament && (
-                    <Box display="flex" alignItems="center" mb={1}>
-                      <TrophyIcon fontSize="small" color="action" />
-                      <Typography variant="body2" color="text.secondary" ml={0.5}>
-                        {match.tournament.name}
-                      </Typography>
-                    </Box>
-                  )}
+                    {match.match_date && (
+                      <Box display="flex" alignItems="center" mb={1}>
+                        <CalendarIcon fontSize="small" color="action" />
+                        <Typography variant="body2" color="text.secondary" ml={0.5}>
+                          {new Date(match.match_date).toLocaleString()}
+                        </Typography>
+                      </Box>
+                    )}
 
-                  {match.match_date && (
-                    <Box display="flex" alignItems="center" mb={1}>
-                      <CalendarIcon fontSize="small" color="action" />
-                      <Typography variant="body2" color="text.secondary" ml={0.5}>
-                        {new Date(match.match_date).toLocaleString()}
-                      </Typography>
-                    </Box>
-                  )}
+                    {match.venue && (
+                      <Box display="flex" alignItems="center" mb={1}>
+                        <LocationIcon fontSize="small" color="action" />
+                        <Typography variant="body2" color="text.secondary" ml={0.5}>
+                          {match.venue}
+                        </Typography>
+                      </Box>
+                    )}
 
-                  {match.venue && (
-                    <Box display="flex" alignItems="center" mb={1}>
-                      <LocationIcon fontSize="small" color="action" />
-                      <Typography variant="body2" color="text.secondary" ml={0.5}>
-                        {match.venue}
-                      </Typography>
-                    </Box>
-                  )}
+                    {match.duration_minutes && (
+                      <Box display="flex" alignItems="center">
+                        <TimerIcon fontSize="small" color="action" />
+                        <Typography variant="body2" color="text.secondary" ml={0.5}>
+                          {match.duration_minutes}분
+                        </Typography>
+                      </Box>
+                    )}
 
-                  {match.duration_minutes && (
-                    <Box display="flex" alignItems="center">
-                      <TimerIcon fontSize="small" color="action" />
-                      <Typography variant="body2" color="text.secondary" ml={0.5}>
-                        {match.duration_minutes}분
-                      </Typography>
-                    </Box>
-                  )}
+                    {match.status === 'completed' && (match.home_score !== null || match.away_score !== null) && (
+                      <Box mt={2} p={1} bgcolor="action.hover" borderRadius={1}>
+                        <Typography variant="h6" align="center">
+                          {match.home_score || 0} - {match.away_score || 0}
+                        </Typography>
+                      </Box>
+                    )}
+                  </CardContent>
 
-                  {match.status === 'completed' && (match.home_score !== null || match.away_score !== null) && (
-                    <Box mt={2} p={1} bgcolor="action.hover" borderRadius={1}>
-                      <Typography variant="h6" align="center">
-                        {match.home_score || 0} - {match.away_score || 0}
-                      </Typography>
-                    </Box>
-                  )}
-                </CardContent>
+                  <CardActions>
+                    <Button size="small" onClick={(e) => {
+                      e.stopPropagation();
+                      handleMatchClick(match.id);
+                    }}>
+                      자세히 보기
+                    </Button>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
 
-                <CardActions>
-                  <Button size="small" onClick={(e) => {
-                    e.stopPropagation();
-                    handleMatchClick(match.id);
-                  }}>
-                    자세히 보기
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      )}
-
-      {/* Pagination */}
-      {matches.length > 0 && pagination.totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={4}>
-          <Pagination
-            count={pagination.totalPages}
-            page={pagination.page}
-            onChange={handlePageChange}
-            color="primary"
-            size="large"
-            showFirstButton
-            showLastButton
-          />
-        </Box>
+          {/* Infinite scroll trigger */}
+          {hasNextPage && (
+            <Box
+              ref={loadMoreRef}
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                mt: 4,
+                py: 2
+              }}
+            >
+              {isFetchingNextPage ? (
+                <LoadingSkeleton variant="card" count={3} />
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  더 많은 경기를 불러오는 중...
+                </Typography>
+              )}
+            </Box>
+          )}
+        </>
       )}
 
       {/* Floating Action Button */}
@@ -348,6 +424,8 @@ const MatchList = () => {
       />
     </Container>
   );
-};
+});
+
+MatchList.displayName = 'MatchList';
 
 export default MatchList;

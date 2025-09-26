@@ -18,7 +18,7 @@ import {
   Typography
 } from '@mui/material';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { matchAPI, clubAPI, tournamentAPI } from '../../services/api';
+import { matchAPI, clubAPI, competitionAPI } from '../../services/api';
 import { removeEmptyFields } from '../../utils/formHelpers';
 
 const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
@@ -52,14 +52,14 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
   // Fetch tournaments for selection
   const { data: tournamentsData } = useQuery({
     queryKey: ['tournaments-list'],
-    queryFn: () => tournamentAPI.getAll({ limit: 100 }),
+    queryFn: () => competitionAPI.getAll({ limit: 100 }),
     select: (response) => response.data.data
   });
 
   const createMutation = useMutation({
     mutationFn: matchAPI.create,
     onSuccess: () => {
-      queryClient.invalidateQueries(['matches']);
+      queryClient.invalidateQueries({ queryKey: ['matches'] });
       onSuccess();
       handleReset();
     },
@@ -136,7 +136,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
   };
 
   const handleClose = () => {
-    if (!createMutation.isLoading) {
+    if (!createMutation.isPending) {
       handleReset();
       onClose();
     }
@@ -184,7 +184,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                     required
                     error={!!errors.home_club_id}
                     helperText={errors.home_club_id}
-                    disabled={createMutation.isLoading}
+                    disabled={createMutation.isPending}
                   />
                 )}
               />
@@ -205,7 +205,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                     required
                     error={!!errors.away_club_id}
                     helperText={errors.away_club_id}
-                    disabled={createMutation.isLoading}
+                    disabled={createMutation.isPending}
                   />
                 )}
               />
@@ -220,7 +220,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('match_date')}
                 error={!!errors.match_date}
                 helperText={errors.match_date}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: today }}
               />
@@ -234,13 +234,13 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('venue')}
                 error={!!errors.venue}
                 helperText={errors.venue}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="예: 서울월드컵경기장"
               />
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required disabled={createMutation.isLoading}>
+              <FormControl fullWidth required disabled={createMutation.isPending}>
                 <InputLabel>경기 유형</InputLabel>
                 <Select
                   value={formData.match_type}
@@ -266,7 +266,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('duration_minutes')}
                 error={!!errors.duration_minutes}
                 helperText={errors.duration_minutes}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 inputProps={{ min: 1, max: 200 }}
               />
             </Grid>
@@ -287,14 +287,14 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                         label="토너먼트"
                         error={!!errors.tournament_id}
                         helperText={errors.tournament_id}
-                        disabled={createMutation.isLoading}
+                        disabled={createMutation.isPending}
                       />
                     )}
                   />
                 </Grid>
 
                 <Grid item xs={12} sm={4}>
-                  <FormControl fullWidth disabled={createMutation.isLoading}>
+                  <FormControl fullWidth disabled={createMutation.isPending}>
                     <InputLabel>단계</InputLabel>
                     <Select
                       value={formData.stage}
@@ -322,7 +322,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                     onChange={handleChange('round_number')}
                     error={!!errors.round_number}
                     helperText={errors.round_number}
-                    disabled={createMutation.isLoading}
+                    disabled={createMutation.isPending}
                     inputProps={{ min: 1 }}
                   />
                 </Grid>
@@ -336,7 +336,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                       onChange={handleChange('group_name')}
                       error={!!errors.group_name}
                       helperText={errors.group_name}
-                      disabled={createMutation.isLoading}
+                      disabled={createMutation.isPending}
                       placeholder="A, B, C..."
                       inputProps={{ maxLength: 1 }}
                     />
@@ -353,7 +353,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('referee_name')}
                 error={!!errors.referee_name}
                 helperText={errors.referee_name}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
               />
             </Grid>
 
@@ -365,7 +365,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('weather')}
                 error={!!errors.weather}
                 helperText={errors.weather}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="맑음, 흐림, 비..."
               />
             </Grid>
@@ -380,7 +380,7 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('notes')}
                 error={!!errors.notes}
                 helperText={errors.notes}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="특이사항, 경기 관련 메모..."
               />
             </Grid>
@@ -390,17 +390,17 @@ const CreateMatchDialog = ({ open, onClose, onSuccess }) => {
         <DialogActions>
           <Button
             onClick={handleClose}
-            disabled={createMutation.isLoading}
+            disabled={createMutation.isPending}
           >
             취소
           </Button>
           <Button
             type="submit"
             variant="contained"
-            disabled={createMutation.isLoading || !formData.home_club_id || !formData.away_club_id}
-            startIcon={createMutation.isLoading ? <CircularProgress size={16} /> : null}
+            disabled={createMutation.isPending || !formData.home_club_id || !formData.away_club_id}
+            startIcon={createMutation.isPending ? <CircularProgress size={16} /> : null}
           >
-            {createMutation.isLoading ? '생성 중...' : '경기 만들기'}
+            {createMutation.isPending ? '생성 중...' : '경기 만들기'}
           </Button>
         </DialogActions>
       </form>

@@ -1,4 +1,4 @@
-# ScoreBoard Style Guide Dashboard
+# MatchCard Style Guide Dashboard
 
 스포츠 플랫폼을 위한 Material Design 3 기반 스타일 가이드 대시보드입니다.
 
@@ -151,4 +151,4 @@ const MyComponent = styled('button')({
 
 ---
 
-**Made with ❤️ for ScoreBoard Platform**
+**Made with ❤️ for MatchCard Platform**

@@ -90,7 +90,7 @@ const TokenSystemPage: React.FC = () => {
           color="textSecondary"
           sx={{ mb: 3, maxWidth: 600 }}
         >
-          Material Design 3을 기반으로 한 ScoreBoard 플랫폼의 디자인 토큰 시스템입니다.
+          Material Design 3을 기반으로 한 MatchCard 플랫폼의 디자인 토큰 시스템입니다.
           일관된 디자인 언어를 구축하기 위한 핵심 요소들을 정의합니다.
         </Typography>
       </Box>

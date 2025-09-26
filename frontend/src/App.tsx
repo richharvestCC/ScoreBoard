@@ -1,40 +1,49 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline, Box, useMediaQuery, useTheme } from '@mui/material';
+import { CssBaseline, Box, useMediaQuery, useTheme, CircularProgress } from '@mui/material';
 import material3Theme from './theme/material3Theme';
-
-// Components
-import Header from './components/layout/Header';
-import ProtectedRoute from './components/ProtectedRoute';
-
-// Pages
-import AuthPage from './pages/AuthPage';
-import Dashboard from './pages/Dashboard';
-import ClubList from './pages/ClubList';
-import ClubDetail from './pages/ClubDetail';
-import MatchList from './pages/MatchList';
-import MatchDetail from './pages/MatchDetail';
-import LiveScoring from './pages/LiveScoring';
-import TournamentList from './pages/TournamentList';
-import TournamentDetail from './pages/TournamentDetail';
-import TemplateManagement from './pages/TemplateManagement';
-import AdminDashboard from './pages/AdminDashboard';
-import MatchScheduling from './pages/MatchScheduling';
-import LiveMatchView from './pages/LiveMatchView';
-import LiveMatchesPage from './pages/LiveMatchesPage';
-import LeagueDashboard from './pages/LeagueDashboard';
-import CompetitionPage from './pages/CompetitionPage';
-
-// Style Guide
-import StyleDashRoutes from './style-dash';
 
 // Hooks
 import useAuthStore from './stores/authStore';
 
 // Contexts
 import { NavigationProvider, useNavigation, setGlobalNavigationCallbacks } from './contexts/NavigationContext';
+import { SidebarProvider, useSidebar } from './contexts/SidebarContext';
+import { LanguageProvider } from './contexts/LanguageContext';
+import ErrorBoundary from './components/common/ErrorBoundary';
+
+// Components
+import Header from './components/layout/Header';
+import Sidebar from './components/layout/Sidebar';
+import DocumentTitle from './components/layout/DocumentTitle';
+// import ProtectedRoute from './components/ProtectedRoute'; // BYPASSED FOR UI DEVELOPMENT
+
+// Pages - Lazy Loading for Code Splitting
+const AuthPage = React.lazy(() => import('./pages/AuthPage'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const ClubList = React.lazy(() => import('./pages/ClubList'));
+const ClubDetail = React.lazy(() => import('./pages/ClubDetail'));
+const MatchList = React.lazy(() => import('./pages/MatchList'));
+const MatchDetail = React.lazy(() => import('./pages/MatchDetail'));
+const LiveScoring = React.lazy(() => import('./pages/LiveScoring'));
+const CompetitionList = React.lazy(() => import('./pages/CompetitionList'));
+const TournamentDetail = React.lazy(() => import('./pages/TournamentDetail'));
+const TemplateManagement = React.lazy(() => import('./pages/TemplateManagement'));
+const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
+const MatchScheduling = React.lazy(() => import('./pages/MatchScheduling'));
+// const LiveMatchView = React.lazy(() => import('./pages/LiveMatchView'));
+const LiveMatchesPage = React.lazy(() => import('./pages/LiveMatchesPage'));
+const LeagueDashboard = React.lazy(() => import('./pages/LeagueDashboard'));
+const CompetitionPage = React.lazy(() => import('./pages/CompetitionPage'));
+const ThemeVisualization = React.lazy(() => import('./pages/ThemeVisualization'));
+const MatchRecord = React.lazy(() => import('./pages/MatchRecord'));
+const MatchRecordHome = React.lazy(() => import('./pages/MatchRecordHome'));
+const LiveMatchRecord = React.lazy(() => import('./pages/LiveMatchRecord'));
+
+// Style Guide
+const StyleDashRoutes = React.lazy(() => import('./style-dash'));
 
 // Navigation setup component to initialize global navigation callbacks
 function NavigationSetup() {
@@ -69,214 +78,106 @@ const queryClient = new QueryClient({
 
 // Main App Component with Responsive Layout
 function AppContent() {
-  const { initializeAuth, isAuthenticated } = useAuthStore();
+  const { initializeAuth } = useAuthStore();
   const theme = useTheme();
-
-  // Material Design Breakpoints
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // < 600px
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md')); // 600px - 900px
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md')); // >= 900px
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg')); // >= 1200px
+  const { isOpen, isCollapsed, sidebarWidth, collapsedWidth } = useSidebar();
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
 
-  // Responsive container max width based on Material Design guidelines
-  const getContainerMaxWidth = () => {
-    if (isMobile) return '100%';
-    if (isTablet) return 'md';
-    if (isLargeScreen) return 'xl';
-    return 'lg';
-  };
-
-  // Responsive padding based on screen size
-  const getResponsivePadding = () => {
-    if (isMobile) return theme.spacing(1, 2); // 8px vertical, 16px horizontal
-    if (isTablet) return theme.spacing(2, 3); // 16px vertical, 24px horizontal
-    return theme.spacing(3); // 24px all around
-  };
-
   return (
-    <Router>
-      <NavigationProvider>
-        <NavigationSetup />
-        <Box
-          sx={{
-            flexGrow: 1,
-            minHeight: '100vh',
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Sidebar />
+      <Header />
+
+      {/* Main Content Area */}
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          marginTop: '64px', // Account for header height
+          minHeight: 'calc(100vh - 64px)',
+          backgroundColor: theme.palette.background.default,
+          transition: theme.transitions.create('margin-left', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+
+          // Responsive padding
+          padding: {
+            xs: theme.spacing(1, 2), // Mobile
+            sm: theme.spacing(2, 3), // Small tablet
+            lg: theme.spacing(3, 4), // Desktop
+          },
+
+          // Responsive margin based on sidebar state and screen size
+          marginLeft: (() => {
+            if (isMobile) return 0; // Mobile: no sidebar offset
+            if (!isOpen) return 0; // Sidebar closed: no offset
+
+            // Sidebar is open on tablet/desktop
+            if (isCollapsed) return `${collapsedWidth}px`;  // Collapsed mode
+            return `${sidebarWidth}px`; // Expanded mode
+          })(),
+        }}
+      >
+        <Suspense fallback={
+          <Box sx={{
             display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '300px',
             flexDirection: 'column',
-            // Material Design responsive spacing
-            padding: getResponsivePadding(),
-            // Responsive max width
-            maxWidth: getContainerMaxWidth(),
-            margin: '0 auto',
-            // Responsive layout adjustments
-            [theme.breakpoints.down('sm')]: {
-              padding: theme.spacing(1),
-            },
-            [theme.breakpoints.up('sm')]: {
-              padding: theme.spacing(2),
-            },
-            [theme.breakpoints.up('md')]: {
-              padding: theme.spacing(3),
-            },
-          }}
-        >
-          <Header />
-
-          {/* Main Content Area with responsive spacing */}
-          <Box
-            component="main"
-            sx={{
-              flex: 1,
-              mt: theme.spacing(2),
-              // Responsive margin top
-              [theme.breakpoints.down('sm')]: {
-                mt: theme.spacing(1),
-              },
-              [theme.breakpoints.up('md')]: {
-                mt: theme.spacing(3),
-              },
-            }}
-          >
-              <Routes>
-                {/* Public routes */}
-                <Route
-                  path="/auth"
-                  element={
-                    isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />
-                  }
-                />
-
-                {/* Protected routes */}
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/clubs"
-                  element={
-                    <ProtectedRoute>
-                      <ClubList />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/clubs/:id"
-                  element={
-                    <ProtectedRoute>
-                      <ClubDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/matches"
-                  element={
-                    <ProtectedRoute>
-                      <MatchList />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/matches/:id"
-                  element={
-                    <ProtectedRoute>
-                      <MatchDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/matches/:id/live"
-                  element={
-                    <ProtectedRoute>
-                      <LiveScoring />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/competitions"
-                  element={
-                    <ProtectedRoute>
-                      <CompetitionPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/tournaments"
-                  element={
-                    <ProtectedRoute>
-                      <TournamentList />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/tournaments/:id"
-                  element={
-                    <ProtectedRoute>
-                      <TournamentDetail />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/templates"
-                  element={
-                    <ProtectedRoute>
-                      <TemplateManagement />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/competitions/:competitionId/scheduling"
-                  element={
-                    <ProtectedRoute>
-                      <MatchScheduling />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/live"
-                  element={
-                    <ProtectedRoute>
-                      <LiveMatchesPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/leagues/:competitionId/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <LeagueDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Style Guide Dashboard */}
-                <Route
-                  path="/style-dash/*"
-                  element={<StyleDashRoutes />}
-                />
-
-                {/* Catch-all redirect */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Box>
+            gap: 2
+          }}>
+            <CircularProgress size={40} />
+            <Box sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>Loading page...</Box>
           </Box>
-        </NavigationProvider>
-      </Router>
+        }>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/auth" element={<AuthPage />} />
+
+          {/* Protected routes - AUTHENTICATION BYPASSED FOR UI DEVELOPMENT */}
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/clubs" element={<ClubList />} />
+          <Route path="/clubs/:id" element={<ClubDetail />} />
+          <Route path="/matches" element={<MatchList />} />
+          <Route path="/matches/:id/record" element={<MatchRecord />} />
+          <Route path="/record-test" element={<MatchRecord />} />
+          <Route path="/admin/match-record" element={<MatchRecordHome />} />
+          <Route path="/admin/match-record/live/:matchId?" element={<LiveMatchRecord />} />
+          <Route path="/admin/match-record/edit/:matchId?" element={<MatchRecord />} />
+          <Route path="/matches/:id/live" element={<LiveScoring />} />
+          <Route path="/matches/:id" element={<MatchDetail />} />
+          <Route path="/competitions" element={<CompetitionPage />} />
+          <Route path="/competitions" element={<CompetitionList />} />
+          <Route path="/tournaments" element={<CompetitionList />} />
+          <Route path="/tournaments/:id" element={<TournamentDetail />} />
+          <Route path="/competitions/:id" element={<TournamentDetail />} />
+          <Route path="/templates" element={<TemplateManagement />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/competitions/:competitionId/scheduling" element={<MatchScheduling />} />
+          <Route path="/live" element={<LiveMatchesPage />} />
+          <Route path="/leagues/:competitionId/dashboard" element={<LeagueDashboard />} />
+
+          {/* Theme Visualization */}
+          <Route path="/theme" element={<ThemeVisualization />} />
+
+          {/* Style Guide Dashboard */}
+          <Route
+            path="/style-dash/*"
+            element={<StyleDashRoutes />}
+          />
+
+          {/* Catch-all redirect */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </Box>
+    </Box>
   );
 }
 
@@ -286,7 +187,25 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={material3Theme}>
         <CssBaseline />
-        <AppContent />
+        <ErrorBoundary
+          showDetails={process.env.NODE_ENV === 'development'}
+          onError={(error, errorInfo) => {
+            // In production, send to error reporting service
+            console.error('Global Error Boundary:', error, errorInfo);
+          }}
+        >
+          <Router>
+            <NavigationProvider>
+              <SidebarProvider>
+                <LanguageProvider>
+                  <DocumentTitle />
+                  <NavigationSetup />
+                  <AppContent />
+                </LanguageProvider>
+              </SidebarProvider>
+            </NavigationProvider>
+          </Router>
+        </ErrorBoundary>
       </ThemeProvider>
     </QueryClientProvider>
   );

@@ -8,7 +8,7 @@ export const useLeagueStandings = (competitionId, options = {}) => {
     queryFn: () => leagueAPI.getLeagueStandings(competitionId),
     enabled: !!competitionId,
     staleTime: 5 * 60 * 1000, // 5분
-    cacheTime: 10 * 60 * 1000, // 10분
+    gcTime: 10 * 60 * 1000, // 10분
     ...options
   });
 };
@@ -20,7 +20,7 @@ export const useLeagueStatistics = (competitionId, options = {}) => {
     queryFn: () => leagueAPI.getLeagueStatistics(competitionId),
     enabled: !!competitionId,
     staleTime: 10 * 60 * 1000, // 10분
-    cacheTime: 15 * 60 * 1000, // 15분
+    gcTime: 15 * 60 * 1000, // 15분
     ...options
   });
 };
@@ -32,7 +32,7 @@ export const useRecentMatches = (competitionId, limit = 10, options = {}) => {
     queryFn: () => leagueAPI.getRecentMatches(competitionId, limit),
     enabled: !!competitionId,
     staleTime: 2 * 60 * 1000, // 2분
-    cacheTime: 5 * 60 * 1000, // 5분
+    gcTime: 5 * 60 * 1000, // 5분
     ...options
   });
 };
@@ -44,7 +44,7 @@ export const useUpcomingMatches = (competitionId, limit = 10, options = {}) => {
     queryFn: () => leagueAPI.getUpcomingMatches(competitionId, limit),
     enabled: !!competitionId,
     staleTime: 5 * 60 * 1000, // 5분
-    cacheTime: 10 * 60 * 1000, // 10분
+    gcTime: 10 * 60 * 1000, // 10분
     ...options
   });
 };
@@ -56,7 +56,7 @@ export const useSeasonComparison = (currentSeasonId, previousSeasonId, options =
     queryFn: () => leagueAPI.compareSeasons(currentSeasonId, previousSeasonId),
     enabled: !!(currentSeasonId && previousSeasonId && currentSeasonId !== previousSeasonId),
     staleTime: 15 * 60 * 1000, // 15분
-    cacheTime: 30 * 60 * 1000, // 30분
+    gcTime: 30 * 60 * 1000, // 30분
     ...options
   });
 };
@@ -68,7 +68,7 @@ export const useLeagueDashboard = (competitionId, options = {}) => {
     queryFn: () => leagueAPI.getLeagueDashboard(competitionId),
     enabled: !!competitionId,
     staleTime: 3 * 60 * 1000, // 3분
-    cacheTime: 5 * 60 * 1000, // 5분
+    gcTime: 5 * 60 * 1000, // 5분
     refetchInterval: 5 * 60 * 1000, // 5분마다 자동 새로고침
     ...options
   });

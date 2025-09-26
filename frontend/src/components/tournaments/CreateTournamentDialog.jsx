@@ -18,7 +18,7 @@ import {
   Checkbox
 } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { tournamentAPI } from '../../services/api';
+import { competitionAPI } from '../../services/api';
 import { removeEmptyFields } from '../../utils/formHelpers';
 
 const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
@@ -41,9 +41,9 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
   const [errors, setErrors] = useState({});
 
   const createMutation = useMutation({
-    mutationFn: tournamentAPI.create,
+    mutationFn: competitionAPI.create,
     onSuccess: () => {
-      queryClient.invalidateQueries(['tournaments']);
+      queryClient.invalidateQueries({ queryKey: ['tournaments'] });
       onSuccess();
       handleReset();
     },
@@ -107,7 +107,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
   };
 
   const handleClose = () => {
-    if (!createMutation.isLoading) {
+    if (!createMutation.isPending) {
       handleReset();
       onClose();
     }
@@ -138,12 +138,12 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('name')}
                 error={!!errors.name}
                 helperText={errors.name}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
               />
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required disabled={createMutation.isLoading}>
+              <FormControl fullWidth required disabled={createMutation.isPending}>
                 <InputLabel>토너먼트 유형</InputLabel>
                 <Select
                   value={formData.tournament_type}
@@ -157,7 +157,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required disabled={createMutation.isLoading}>
+              <FormControl fullWidth required disabled={createMutation.isPending}>
                 <InputLabel>대회 형식</InputLabel>
                 <Select
                   value={formData.format}
@@ -172,7 +172,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth disabled={createMutation.isLoading}>
+              <FormControl fullWidth disabled={createMutation.isPending}>
                 <InputLabel>대회 규모</InputLabel>
                 <Select
                   value={formData.level}
@@ -195,7 +195,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('max_participants')}
                 error={!!errors.max_participants}
                 helperText={errors.max_participants}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 inputProps={{ min: 2, max: 128 }}
               />
             </Grid>
@@ -210,7 +210,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('description')}
                 error={!!errors.description}
                 helperText={errors.description}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
               />
             </Grid>
 
@@ -223,7 +223,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('start_date')}
                 error={!!errors.start_date}
                 helperText={errors.start_date}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: today }}
               />
@@ -238,7 +238,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('end_date')}
                 error={!!errors.end_date}
                 helperText={errors.end_date}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: formData.start_date || today }}
               />
@@ -253,7 +253,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('entry_fee')}
                 error={!!errors.entry_fee}
                 helperText={errors.entry_fee}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 inputProps={{ min: 0, step: 1000 }}
               />
             </Grid>
@@ -265,7 +265,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
                     <Checkbox
                       checked={formData.has_group_stage}
                       onChange={handleChange('has_group_stage')}
-                      disabled={createMutation.isLoading}
+                  disabled={createMutation.isPending}
                     />
                   }
                   label="조별 예선 진행"
@@ -283,7 +283,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('prize_description')}
                 error={!!errors.prize_description}
                 helperText={errors.prize_description}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="우승팀: 100만원, 준우승팀: 50만원..."
               />
             </Grid>
@@ -298,7 +298,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('rules')}
                 error={!!errors.rules}
                 helperText={errors.rules}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="경기 시간, 선수 교체 규정, 반칙 규정 등..."
               />
             </Grid>
@@ -309,7 +309,7 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
                   <Checkbox
                     checked={formData.is_public}
                     onChange={handleChange('is_public')}
-                    disabled={createMutation.isLoading}
+                    disabled={createMutation.isPending}
                   />
                 }
                 label="공개 토너먼트 (누구나 참가 신청 가능)"
@@ -321,17 +321,17 @@ const CreateTournamentDialog = ({ open, onClose, onSuccess }) => {
         <DialogActions>
           <Button
             onClick={handleClose}
-            disabled={createMutation.isLoading}
+            disabled={createMutation.isPending}
           >
             취소
           </Button>
           <Button
             type="submit"
             variant="contained"
-            disabled={createMutation.isLoading || !formData.name.trim()}
-            startIcon={createMutation.isLoading ? <CircularProgress size={16} /> : null}
+            disabled={createMutation.isPending || !formData.name.trim()}
+            startIcon={createMutation.isPending ? <CircularProgress size={16} /> : null}
           >
-            {createMutation.isLoading ? '생성 중...' : '토너먼트 만들기'}
+            {createMutation.isPending ? '생성 중...' : '토너먼트 만들기'}
           </Button>
         </DialogActions>
       </form>

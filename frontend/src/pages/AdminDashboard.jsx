@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Container,
   Tabs,
   Tab,
   Typography,
   Alert,
-  Paper
+  Paper,
+  Container
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
   People as PeopleIcon,
   SettingsSystemDaydream as SystemIcon
 } from '@mui/icons-material';
+import { designTokens } from '../theme/designTokens';
 import { useAuth } from '../hooks/useAuth';
 import DashboardStats from '../components/admin/DashboardStats';
 import UserManagement from '../components/admin/UserManagement';

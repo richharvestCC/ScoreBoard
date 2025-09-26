@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Container,
   Box,
   Typography,
   Tabs,
@@ -16,6 +15,7 @@ import {
   Assessment as StatsIcon,
   AdminPanelSettings as AdminIcon
 } from '@mui/icons-material';
+import PageContainer from '../components/layout/PageContainer';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { liveScoringAPI } from '../services/api';
@@ -72,7 +72,7 @@ const LiveMatchesPage = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <PageContainer>
       {/* 헤더 */}
       <Box mb={4}>
         <Typography variant="h4" component="h1" gutterBottom>
@@ -217,7 +217,7 @@ const LiveMatchesPage = () => {
           </Grid>
         </TabPanel>
       )}
-    </Container>
+    </PageContainer>
   );
 };
 

@@ -6,7 +6,6 @@ import {
   DialogActions,
   Button,
   TextField,
-  Box,
   Grid,
   FormControl,
   InputLabel,
@@ -36,7 +35,7 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
   const createMutation = useMutation({
     mutationFn: clubAPI.create,
     onSuccess: () => {
-      queryClient.invalidateQueries(['clubs']);
+      queryClient.invalidateQueries({ queryKey: ['clubs'] });
       onSuccess();
       handleReset();
     },
@@ -85,7 +84,7 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
   };
 
   const handleClose = () => {
-    if (!createMutation.isLoading) {
+    if (!createMutation.isPending) {
       handleReset();
       onClose();
     }
@@ -115,12 +114,12 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('name')}
                 error={!!errors.name}
                 helperText={errors.name}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
               />
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required disabled={createMutation.isLoading}>
+              <FormControl fullWidth required disabled={createMutation.isPending}>
                 <InputLabel>클럽 유형</InputLabel>
                 <Select
                   value={formData.club_type}
@@ -145,7 +144,7 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('description')}
                 error={!!errors.description}
                 helperText={errors.description}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
               />
             </Grid>
 
@@ -157,7 +156,7 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('location')}
                 error={!!errors.location}
                 helperText={errors.location}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
               />
             </Grid>
 
@@ -170,7 +169,7 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('founded_year')}
                 error={!!errors.founded_year}
                 helperText={errors.founded_year}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 inputProps={{
                   min: 1800,
                   max: currentYear
@@ -186,7 +185,7 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('logo_url')}
                 error={!!errors.logo_url}
                 helperText={errors.logo_url}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="https://example.com/logo.png"
               />
             </Grid>
@@ -200,7 +199,7 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('contact_email')}
                 error={!!errors.contact_email}
                 helperText={errors.contact_email}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
               />
             </Grid>
 
@@ -212,7 +211,7 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
                 onChange={handleChange('contact_phone')}
                 error={!!errors.contact_phone}
                 helperText={errors.contact_phone}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="010-1234-5678"
               />
             </Grid>
@@ -222,17 +221,17 @@ const CreateClubDialog = ({ open, onClose, onSuccess }) => {
         <DialogActions>
           <Button
             onClick={handleClose}
-            disabled={createMutation.isLoading}
+            disabled={createMutation.isPending}
           >
             취소
           </Button>
           <Button
             type="submit"
             variant="contained"
-            disabled={createMutation.isLoading || !formData.name.trim()}
-            startIcon={createMutation.isLoading ? <CircularProgress size={16} /> : null}
+            disabled={createMutation.isPending || !formData.name.trim()}
+            startIcon={createMutation.isPending ? <CircularProgress size={16} /> : null}
           >
-            {createMutation.isLoading ? '생성 중...' : '클럽 만들기'}
+            {createMutation.isPending ? '생성 중...' : '클럽 만들기'}
           </Button>
         </DialogActions>
       </form>

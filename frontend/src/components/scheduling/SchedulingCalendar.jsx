@@ -56,7 +56,7 @@ const SchedulingCalendar = ({ competitionId, onMatchSelect }) => {
     mutationFn: ({ matchId, scheduleData }) =>
       schedulingAPI.scheduleMatch(matchId, scheduleData),
     onSuccess: () => {
-      queryClient.invalidateQueries(['competitionSchedule']);
+      queryClient.invalidateQueries({ queryKey: ['competitionSchedule'] });
       setEditDialog(false);
       setSelectedMatch(null);
     }
@@ -309,9 +309,9 @@ const SchedulingCalendar = ({ competitionId, onMatchSelect }) => {
           <Button
             onClick={handleSaveMatch}
             variant="contained"
-            disabled={scheduleMatchMutation.isLoading || !editData.match_date}
+            disabled={scheduleMatchMutation.isPending || !editData.match_date}
           >
-            {scheduleMatchMutation.isLoading ? '저장 중...' : '저장'}
+            {scheduleMatchMutation.isPending ? '저장 중...' : '저장'}
           </Button>
         </DialogActions>
       </Dialog>

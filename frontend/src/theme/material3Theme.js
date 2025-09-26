@@ -10,42 +10,102 @@ const material3Theme = createTheme({
     light: {
       palette: {
         mode: 'light',
+        // Complete Material Design 3 Color Palette
         primary: {
-          main: '#282828', // Dark gray for light mode
-          light: '#424242',
-          dark: '#1a1a1a',
-          contrastText: '#fefefe',
+          main: '#424242',
+          light: '#616161',
+          dark: '#303030',
+          contrastText: '#ffffff',
+          50: '#f5f5f5',
+          100: '#e0e0e0',
+          200: '#bdbdbd',
+          300: '#9e9e9e',
+          400: '#757575',
+          500: '#616161',
+          600: '#424242',
+          700: '#303030',
+          800: '#212121',
+          900: '#282828',
         },
         secondary: {
-          main: '#666666',
-          light: '#858585',
-          dark: '#4a4a4a',
-          contrastText: '#fefefe',
-        },
-        // Vivid colors for badges/icons only
-        success: {
-          main: '#4CAF50', // Green for goals/wins
-          light: '#66BB6A',
-          dark: '#388E3C',
+          main: '#fd7521',
+          light: '#ff9551',
+          dark: '#e6690f',
           contrastText: '#ffffff',
+          50: '#fff9f5',
+          100: '#ffede0',
+          200: '#ffd9bf',
+          300: '#ffc199',
+          400: '#ffa366',
+          500: '#ff8533',
+          600: '#fd7521', // 기준색
+          700: '#e6690f',
+          800: '#cc5d0d',
+          900: '#b8520a',
+        },
+        success: {
+          main: '#75cf49',
+          light: '#8bd355',
+          dark: '#5db134',
+          contrastText: '#ffffff',
+          50: '#f0f9ec',
+          100: '#dcf2d1',
+          200: '#c2e8a8',
+          300: '#a3dc79',
+          400: '#8bd355',
+          500: '#7dd44a',
+          600: '#75cf49', // 기준색 Green for goals/wins
+          700: '#5db134',
+          800: '#519f2b',
+          900: '#458d22',
         },
         warning: {
-          main: '#FFC107', // Amber for cautions
-          light: '#FFCD38',
-          dark: '#FFA000',
+          main: '#ffbe4c',
+          light: '#ffc966',
+          dark: '#ff9800',
           contrastText: '#000000',
+          50: '#fffbf0',
+          100: '#fff4d9',
+          200: '#ffe8b3',
+          300: '#ffd980',
+          400: '#ffc966',
+          500: '#ffc452',
+          600: '#ffbe4c', // 기준색 Amber for cautions
+          700: '#ff9800',
+          800: '#f57c00',
+          900: '#e65100',
         },
         error: {
-          main: '#F44336', // Red for defeats/errors
-          light: '#E57373',
-          dark: '#D32F2F',
+          main: '#d72446',
+          light: '#ea7890',
+          dark: '#b71c3c',
           contrastText: '#ffffff',
+          50: '#fdf2f4',
+          100: '#fce4e8',
+          200: '#f8c9d1',
+          300: '#f2a3b3',
+          400: '#ea7890',
+          500: '#e0336b',
+          600: '#d72446', // 기준색 Red for defeats/errors
+          700: '#b71c3c',
+          800: '#a01936',
+          900: '#8e162e',
         },
         info: {
-          main: '#2196F3', // Blue for information
-          light: '#42A5F5',
-          dark: '#1976D2',
+          main: '#308ae1',
+          light: '#5ba4f5',
+          dark: '#2470c7',
           contrastText: '#ffffff',
+          50: '#f0f7ff',
+          100: '#dceeff',
+          200: '#b9ddff',
+          300: '#8cc7ff',
+          400: '#5ba4f5',
+          500: '#3d96ea',
+          600: '#308ae1', // 기준색 Blue for information
+          700: '#2470c7',
+          800: '#1e63ba',
+          900: '#1856ad',
         },
         background: {
           default: '#fafafa',
@@ -72,34 +132,34 @@ const material3Theme = createTheme({
           contrastText: '#282828',
         },
         secondary: {
-          main: '#b0b0b0',
-          light: '#cccccc',
-          dark: '#999999',
-          contrastText: '#282828',
+          main: '#fd7521',
+          light: '#ff9551',
+          dark: '#e6690f',
+          contrastText: '#ffffff',
         },
         // Same vivid colors for badges/icons
         success: {
-          main: '#4CAF50',
-          light: '#66BB6A',
-          dark: '#388E3C',
+          main: '#75cf49',
+          light: '#8bd355',
+          dark: '#5db134',
           contrastText: '#ffffff',
         },
         warning: {
-          main: '#FFC107',
-          light: '#FFCD38',
-          dark: '#FFA000',
+          main: '#ffbe4c',
+          light: '#ffc966',
+          dark: '#ff9800',
           contrastText: '#000000',
         },
         error: {
-          main: '#F44336',
-          light: '#E57373',
-          dark: '#D32F2F',
+          main: '#d72446',
+          light: '#ea7890',
+          dark: '#b71c3c',
           contrastText: '#ffffff',
         },
         info: {
-          main: '#2196F3',
-          light: '#42A5F5',
-          dark: '#1976D2',
+          main: '#308ae1',
+          light: '#5ba4f5',
+          dark: '#2470c7',
           contrastText: '#ffffff',
         },
         background: {
@@ -121,7 +181,7 @@ const material3Theme = createTheme({
 
   // Modern typography
   typography: {
-    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
+    fontFamily: '"Apple SD Gothic Neo", "Pretendard", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
     h1: {
       fontSize: '2.5rem',
       fontWeight: 700,
@@ -133,6 +193,7 @@ const material3Theme = createTheme({
       fontWeight: 600,
       letterSpacing: '-0.025em',
       lineHeight: 1.25,
+      textAlign: 'left',
     },
     h3: {
       fontSize: '1.5rem',
@@ -167,6 +228,7 @@ const material3Theme = createTheme({
       fontSize: '0.875rem',
       fontWeight: 400,
       lineHeight: 1.5,
+      textAlign: 'left',
     },
     caption: {
       fontSize: '0.75rem',
@@ -177,7 +239,7 @@ const material3Theme = createTheme({
 
   // Material 3 shape system
   shape: {
-    borderRadius: 12,
+    borderRadius: 8,
   },
 
   spacing: 8,
@@ -187,10 +249,11 @@ const material3Theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
+          fontFamily: '"Apple SD Gothic Neo", "Pretendard", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
         },
       },
     },
+
 
     // AppBar - Clean minimal header
     MuiAppBar: {
@@ -246,7 +309,7 @@ const material3Theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
+          borderRadius: 8,
           border: '1px solid rgba(0, 0, 0, 0.08)',
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
           transition: 'all 0.2s ease-in-out',
@@ -269,7 +332,7 @@ const material3Theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 8,
           border: '1px solid rgba(0, 0, 0, 0.05)',
           '@media (prefers-color-scheme: dark)': {
             border: '1px solid rgba(255, 255, 255, 0.05)',
@@ -283,7 +346,7 @@ const material3Theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: 12,
+            borderRadius: 8,
             '& fieldset': {
               borderWidth: 1.5,
               borderColor: 'rgba(0, 0, 0, 0.15)',
@@ -315,34 +378,34 @@ const material3Theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
+          borderRadius: 8,
           fontWeight: 500,
           fontSize: '0.8125rem',
           height: 28,
         },
         // Success state (goals, wins)
         colorSuccess: {
-          backgroundColor: 'rgba(76, 175, 80, 0.1)',
-          color: '#4CAF50',
-          border: '1px solid rgba(76, 175, 80, 0.2)',
+          backgroundColor: 'rgba(117, 207, 73, 0.1)',
+          color: '#75cf49',
+          border: '1px solid rgba(117, 207, 73, 0.2)',
         },
         // Warning state (cautions)
         colorWarning: {
-          backgroundColor: 'rgba(255, 193, 7, 0.1)',
-          color: '#FFC107',
-          border: '1px solid rgba(255, 193, 7, 0.2)',
+          backgroundColor: 'rgba(255, 190, 76, 0.1)',
+          color: '#FFBE4C',
+          border: '1px solid rgba(255, 190, 76, 0.2)',
         },
         // Error state (defeats, red cards)
         colorError: {
-          backgroundColor: 'rgba(244, 67, 54, 0.1)',
-          color: '#F44336',
-          border: '1px solid rgba(244, 67, 54, 0.2)',
+          backgroundColor: 'rgba(215, 36, 70, 0.1)',
+          color: '#D72446',
+          border: '1px solid rgba(215, 36, 70, 0.2)',
         },
         // Info state (general information)
         colorInfo: {
-          backgroundColor: 'rgba(33, 150, 243, 0.1)',
-          color: '#2196F3',
-          border: '1px solid rgba(33, 150, 243, 0.2)',
+          backgroundColor: 'rgba(48, 138, 225, 0.1)',
+          color: '#308AE1',
+          border: '1px solid rgba(48, 138, 225, 0.2)',
         },
         // Default minimal style
         filled: {
@@ -373,7 +436,7 @@ const material3Theme = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: {
-          borderRadius: 12,
+          borderRadius: 8,
           border: '1px solid rgba(0, 0, 0, 0.08)',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
           '@media (prefers-color-scheme: dark)': {

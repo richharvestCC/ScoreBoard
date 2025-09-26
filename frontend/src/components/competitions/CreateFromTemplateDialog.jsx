@@ -40,7 +40,7 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
   const createMutation = useMutation({
     mutationFn: (data) => competitionAPI.createFromTemplate(template.id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['competitions']);
+      queryClient.invalidateQueries({ queryKey: ['competitions'] });
       onSuccess();
       handleReset();
     },
@@ -91,7 +91,7 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
   };
 
   const handleClose = () => {
-    if (!createMutation.isLoading) {
+    if (!createMutation.isPending) {
       handleReset();
       onClose();
     }
@@ -182,7 +182,7 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
                 onChange={handleChange('name')}
                 error={!!errors.name}
                 helperText={errors.name}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder={`${template.name} ${currentYear}`}
               />
             </Grid>
@@ -195,7 +195,7 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
                 onChange={handleChange('season')}
                 error={!!errors.season}
                 helperText={errors.season}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder={`${currentYear}, ${currentYear}-Spring 등`}
               />
             </Grid>
@@ -216,7 +216,7 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
                 onChange={handleChange('start_date')}
                 error={!!errors.start_date}
                 helperText={errors.start_date}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: today }}
               />
@@ -231,7 +231,7 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
                 onChange={handleChange('end_date')}
                 error={!!errors.end_date}
                 helperText={errors.end_date}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: formData.start_date || today }}
               />
@@ -246,7 +246,7 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
                 onChange={handleChange('registration_start')}
                 error={!!errors.registration_start}
                 helperText={errors.registration_start}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: today, max: formData.start_date }}
               />
@@ -261,7 +261,7 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
                 onChange={handleChange('registration_end')}
                 error={!!errors.registration_end}
                 helperText={errors.registration_end}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 InputLabelProps={{ shrink: true }}
                 inputProps={{
                   min: formData.registration_start || today,
@@ -287,7 +287,7 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
                 onChange={handleChange('description')}
                 error={!!errors.description}
                 helperText={errors.description || "템플릿 설명을 기본값으로 사용하거나 수정할 수 있습니다"}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="이번 대회만의 특별한 정보를 추가해주세요"
               />
             </Grid>
@@ -302,7 +302,7 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
                 onChange={handleChange('venue_info')}
                 error={!!errors.venue_info}
                 helperText={errors.venue_info}
-                disabled={createMutation.isLoading}
+                disabled={createMutation.isPending}
                 placeholder="구체적인 경기장 위치, 주차 정보, 교통편 등"
               />
             </Grid>
@@ -317,17 +317,17 @@ const CreateFromTemplateDialog = ({ open, onClose, onSuccess, template = null })
         <DialogActions>
           <Button
             onClick={handleClose}
-            disabled={createMutation.isLoading}
+            disabled={createMutation.isPending}
           >
             취소
           </Button>
           <Button
             type="submit"
             variant="contained"
-            disabled={createMutation.isLoading || !formData.name.trim()}
-            startIcon={createMutation.isLoading ? <CircularProgress size={16} /> : null}
+            disabled={createMutation.isPending || !formData.name.trim()}
+            startIcon={createMutation.isPending ? <CircularProgress size={16} /> : null}
           >
-            {createMutation.isLoading ? '대회 생성 중...' : '대회 만들기'}
+            {createMutation.isPending ? '대회 생성 중...' : '대회 만들기'}
           </Button>
         </DialogActions>
       </form>

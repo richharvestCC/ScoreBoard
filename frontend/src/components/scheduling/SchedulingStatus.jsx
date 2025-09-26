@@ -84,8 +84,8 @@ const SchedulingStatus = ({ competitionId }) => {
     mutationFn: ({ matchId, scheduleData }) =>
       schedulingAPI.rescheduleMatch(matchId, scheduleData),
     onSuccess: () => {
-      queryClient.invalidateQueries(['matchesByStatus']);
-      queryClient.invalidateQueries(['schedulingStats']);
+      queryClient.invalidateQueries({ queryKey: ['matchesByStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['schedulingStats'] });
       setRescheduleDialog(false);
       setSelectedMatch(null);
     }
@@ -392,9 +392,9 @@ const SchedulingStatus = ({ competitionId }) => {
           <Button
             onClick={handleReschedule}
             variant="contained"
-            disabled={rescheduleMutation.isLoading || !rescheduleData.match_date || !rescheduleData.reason}
+            disabled={rescheduleMutation.isPending || !rescheduleData.match_date || !rescheduleData.reason}
           >
-            {rescheduleMutation.isLoading ? '처리 중...' : '재스케줄링'}
+            {rescheduleMutation.isPending ? '처리 중...' : '재스케줄링'}
           </Button>
         </DialogActions>
       </Dialog>
