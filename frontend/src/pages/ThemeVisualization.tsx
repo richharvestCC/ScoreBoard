@@ -48,6 +48,12 @@ import InputsDemo from '../components/demos/InputsDemo';
 import DialogsDemo from '../components/demos/DialogsDemo';
 import ProgressDemo from '../components/demos/ProgressDemo';
 import TabsDemo from '../components/demos/TabsDemo';
+import SlidersDemo from '../components/demos/SlidersDemo';
+import SnackbarsDemo from '../components/demos/SnackbarsDemo';
+import SheetsDemo from '../components/demos/SheetsDemo';
+import SegmentedButtonsDemo from '../components/demos/SegmentedButtonsDemo';
+import FABDemo from '../components/demos/FABDemo';
+import DataTableDemo from '../components/demos/DataTableDemo';
 
 type PaletteColorKey = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
 
@@ -687,6 +693,15 @@ const ThemeVisualization: React.FC = React.memo(() => {
         tokens: ['variant: scrollable', 'tabpanel: aria-labelledby'],
       },
       {
+        title: t({ ko: '세그먼티드 버튼', en: 'Segmented buttons' }),
+        description: t({
+          ko: '범주 전환에 사용하는 세그먼티드 버튼 패턴.',
+          en: 'Segmented buttons used for categorical toggles.',
+        }),
+        content: <SegmentedButtonsDemo />,
+        tokens: ['ToggleButtonGroup', 'exclusive'],
+      },
+      {
         title: t({ ko: '프로그레스', en: 'Progress' }),
         description: t({
           ko: 'Linear/Circular · determinate/indeterminate 상태.',
@@ -694,6 +709,51 @@ const ThemeVisualization: React.FC = React.memo(() => {
         }),
         content: <ProgressDemo />,
         tokens: ['Linear/Circular', 'determinate/indeterminate'],
+      },
+      {
+        title: t({ ko: '슬라이더', en: 'Slider' }),
+        description: t({
+          ko: '단일 값/범위 슬라이더 예시.',
+          en: 'Single value and range slider examples.',
+        }),
+        content: <SlidersDemo />,
+        tokens: ['value / range', 'aria-label'],
+      },
+      {
+        title: t({ ko: 'FAB & Speed dial', en: 'FAB & Speed dial' }),
+        description: t({
+          ko: '주요 플로팅 액션과 보조 액션 모음.',
+          en: 'Primary floating action and secondary actions.',
+        }),
+        content: <FABDemo />,
+        tokens: ['SpeedDial', 'tooltipTitle'],
+      },
+      {
+        title: t({ ko: '데이터 테이블', en: 'Data table' }),
+        description: t({
+          ko: '정렬/지브라 패턴/작은 행 높이.',
+          en: 'Sorting, zebra striping, compact rows.',
+        }),
+        content: <DataTableDemo />,
+        tokens: ['TableSortLabel', 'zebra striping'],
+      },
+      {
+        title: t({ ko: '시트', en: 'Sheets' }),
+        description: t({
+          ko: 'Bottom/Side Sheet 예시.',
+          en: 'Bottom/Side sheet samples.',
+        }),
+        content: <SheetsDemo />,
+        tokens: ['Drawer anchor=bottom/right'],
+      },
+      {
+        title: t({ ko: '스낵바 & 배너', en: 'Snackbars & banners' }),
+        description: t({
+          ko: '스낵바와 배너(알림) 예시.',
+          en: 'Snackbar and banner notifications.',
+        }),
+        content: <SnackbarsDemo />,
+        tokens: ['Snackbar', 'Alert'],
       },
       {
         title: t({ ko: '다이얼로그', en: 'Dialogs' }),
