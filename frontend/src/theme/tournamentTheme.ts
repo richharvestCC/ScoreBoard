@@ -559,8 +559,8 @@ const getComponentOverrides = (theme: Theme) => ({
 lightTheme.components = getComponentOverrides(lightTheme);
 darkTheme.components = getComponentOverrides(darkTheme);
 
-// Default export (dark theme for tournament dashboard)
-export default darkTheme;
+// Default export (light theme for tournament builder)
+export default lightTheme;
 
 // Theme utilities
 export const getTheme = (mode: 'light' | 'dark'): Theme => {
