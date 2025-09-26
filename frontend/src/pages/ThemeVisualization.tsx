@@ -54,6 +54,8 @@ import SheetsDemo from '../components/demos/SheetsDemo';
 import SegmentedButtonsDemo from '../components/demos/SegmentedButtonsDemo';
 import FABDemo from '../components/demos/FABDemo';
 import DataTableDemo from '../components/demos/DataTableDemo';
+import ChipsDemo from '../components/demos/ChipsDemo';
+import DialogVariantsDemo from '../components/demos/DialogVariantsDemo';
 
 type PaletteColorKey = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
 
@@ -657,13 +659,7 @@ const ThemeVisualization: React.FC = React.memo(() => {
           ko: 'Filter, Assist, Status 칩 구성. 높이 28px, 라운드 16px.',
           en: 'Filter, assist and status chips at 28px height with 16px radius.',
         }),
-        content: (
-          <Stack direction="row" spacing={1} flexWrap="wrap">
-            <Chip label={t({ ko: '전체', en: 'All' })} color="primary" />
-            <Chip label={t({ ko: '진행중', en: 'Live' })} color="success" variant="outlined" />
-            <Chip label={t({ ko: '완료', en: 'Completed' })} color="info" size="small" />
-          </Stack>
-        ),
+        content: <ChipsDemo />,
         tokens: ['height: 28px', 'radius: 16px'],
       },
       {
@@ -763,6 +759,15 @@ const ThemeVisualization: React.FC = React.memo(() => {
         }),
         content: <DialogsDemo />,
         tokens: ['DialogTitle/Content/Actions', 'aria-labelledby'],
+      },
+      {
+        title: t({ ko: '다이얼로그 변형', en: 'Dialog variants' }),
+        description: t({
+          ko: '폼/스크롤/전환 다이얼로그.',
+          en: 'Form, scrollable and transition dialogs.',
+        }),
+        content: <DialogVariantsDemo />,
+        tokens: ['scroll=paper', 'Slide transition'],
       },
       {
         title: t({ ko: '폼 컨트롤 묶음', en: 'Form controls (bundle)' }),
